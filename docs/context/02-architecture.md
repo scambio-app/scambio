@@ -34,7 +34,7 @@ src/scambio/
     players.py         MPRIS: pausa/ripresa
     session.py         lock/unlock, sospensione
     policy.py          macchina a stati: decide presa e rilascio
-    service.py         API D-Bus pubblica del demone (org.scambio.Daemon, nome da confermare)
+    service.py         API D-Bus pubblica del demone (`app.scambio.Scambio`, decisione 17)
     shortcuts.py       portal GlobalShortcuts
     profiles/          profilo generico + profilo occhiali Meta
     extensions.py      punto di estensione per moduli premium
@@ -94,3 +94,4 @@ Le decisioni stanno in `docs/decisions.md`; questa sezione riporta solo le date 
 stato aggiornato.
 
 - 2026-10-04 — prima stesura (Claude).
+- 2026-10-04 — nome D-Bus e app-id `app.scambio.Scambio` (decisione 17).

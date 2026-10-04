@@ -23,14 +23,14 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 
 ## 3. Decisioni di prodotto prese (non ridiscutere)
 
-Vedi `docs/decisions.md`, voci 1–16.
+Vedi `docs/decisions.md`, voci 1–17.
 
 ## 4. Domande aperte
 
 | # | Domanda | Per chi | Quando serve |
 |---|---|---|---|
 | Q1 | Licenza del core (es. GPL-3.0 vs MIT/Apache-2.0) | GM | prima della prima release |
-| Q2 | Comprare il dominio `scambio.app` (serve anche per l'app-id Flatpak `app.scambio.Scambio`) | GM | prima del packaging |
+| ~~Q2~~ | ~~Dominio `scambio.app`~~ — **chiusa 2026-10-04**: acquistato da GM (decisione 17) | — | — |
 | Q3 | Il dispositivo si ricollega da solo al PC all'accensione / uscita dalla custodia? | misura | prima della spec 01 |
 | Q4 | Conferma del comportamento con una chiamata GSM (finora solo WhatsApp) | misura | prima della spec 02 |
 | Q5 | Supporto reale del portal GlobalShortcuts su Plasma 5.27 | misura | prima della spec 04 |

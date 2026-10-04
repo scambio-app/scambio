@@ -34,3 +34,10 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     PyGObject/GTK4/libadwaita.
 16. Claude — Scorciatoia via XDG Desktop Portal GlobalShortcuts con riserva CLI (`scambio switch`);
     la vecchia scorciatoia khotkeys di GM (Ctrl+Shift+O) va disattivata all'installazione.
+
+## 2026-10-04 — Dominio e identificativi
+
+17. GM — Dominio **scambio.app** acquistato (account Cloudflare personale di GM). Ne derivano
+    l'app-id `app.scambio.Scambio` (Flatpak, file .desktop, icone) e il nome D-Bus del demone
+    `app.scambio.Scambio` (oggetto `/app/scambio/Scambio`): Flatpak consente di possedere solo nomi
+    D-Bus sotto il proprio app-id.
