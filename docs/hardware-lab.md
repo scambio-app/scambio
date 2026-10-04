@@ -132,3 +132,5 @@ Conseguenza: con la coalescenza a 50 ms un cambio di profilo di norma non produc
 - Latenza della prima uscita audio in HFP (apertura del link SCO).
 - Passaggio automatico a HFP quando un'app apre il microfono (autoswitch di WirePlumber).
 - Firefox: stream in pausa (M5 copre solo Chrome).
+- Annuncio vocale degli occhiali alla connessione al PC («connessione stabilita su …», osservato
+  da GM il 2026-10-04): durata, e se si può disattivare dall'app Meta AI. Serve alla spec 02.

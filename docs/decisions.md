@@ -149,3 +149,11 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     di stop/disable (unit assente o inattiva), elimina il file se presente e conserva
     il controllo d'errore su daemon-reload. Test con destinazione temporanea e
     subprocess sostituito, senza invocare systemctl.
+
+## 2026-10-04 — Prova reale spec 01 (GM)
+
+44. GM — Ritardo di presa ridotto a 0,5 s (`policy.grab_delay_ms = 500`, supera la 18 sul
+    valore): la presa con 1 s gli è sembrata lenta. In più la pausa durante lo scambio (spec 02)
+    deve coprire anche l'annuncio vocale degli occhiali alla connessione («connessione stabilita
+    su casa»), che ritarda l'audio e non serve: va misurata la sua durata prima della spec 02.
+
