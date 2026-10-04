@@ -1,125 +1,249 @@
-# Spec 01 — Report di verifica: STOP prima dell'implementazione
+# Spec 01 — Report di consegna
 
-Data: 2026-10-04 · Autore: Codex · Branch: `main` · Base: `2824948`.
+Data: 2026-10-04 · Codex · branch `main` · base documentale `99927b5`.
 
 ## Obiettivo ed esito
 
-Implementare esclusivamente §3 della spec 01 nelle tre tappe richieste, con test
-isolati e un commit verde per tappa. **Obiettivo non raggiunto**: applicata la
-condizione di stop documentale prima della tappa (a). Questo è un report di blocco,
-non una consegna del demone e non una dichiarazione di done.
+Implementato §3 della spec 01: demone headless, policy pura, adattatori Gio,
+API D-Bus, CLI e unit utente systemd. Consegnate tutte e tre le tappe tecniche,
+ciascuna con `make check` verde. **DoD B e chiusura complessiva restano pendenti**:
+la prova reale 1–18 e la firma sono riservate a GM e non sono state simulate.
 
-## Evidenza del blocco
+Questo report sostituisce quello di stop committato in `7a22ab0`. Lo stop era
+fondato sulla mancanza delle misure del blocco schermo e del cambio profilo;
+M6–M7 e gli aggiornamenti della spec in `99927b5`, più l'incarico esplicito di
+ripresa, hanno risolto il prerequisito. Le misure ancora aperte non sono state
+trattate come blocchi ulteriori, secondo le istruzioni di GM/Claude.
 
-`AGENTS.md`, «Prima di pianificare», punto 2, prescrive:
+## Cambiamenti
 
-> se una spec dipende da un comportamento non misurato in `hardware-lab.md`,
-> fermati e segnalalo.
+- Configurazione TOML validata, modello creato solo se assente, chiavi sconosciute
+  segnalate e ignorate; priorità e destinazione da ripristinare in JSON atomico.
+- Policy senza Gio, orologio o I/O, con stati released/connecting/on_pc/releasing/
+  unavailable, sei timer, anti ping-pong, doppio switch e rilascio per lock/sleep.
+- BlueZ asincrono sul solo dispositivo configurato, ObjectManager e segnali,
+  riaggancio dopo perdita del proprietario e scarto dei callback obsoleti.
+- Audio tramite sottoprocessi Gio: parser incrementale UTF-8/JSON concatenato,
+  istantanee coalescenti, filtri stream, recupero con attesa crescente,
+  instradamento serializzato e ripristino rispettoso del predefinito utente.
+- Sessione: OR deduplicato delle due fonti di lock; logind User.Display; inibitore
+  delay con fd reale passato sul bus privato e chiuso sulle azioni della policy.
+- Servizio `app.scambio.Scambio1` con XML condiviso, PropertiesChanged,
+  Transition/Error, Reload/SIGHUP e arresto senza scollegamento o cambio route.
+  Avvio coordinato: lock/sleep prima dell'adozione del dispositivo.
+- CLI sottile con codici 0/1/2/3, nessuna attivazione D-Bus automatica, import del
+  core solo nel ramo daemon. Unit systemd e installatore esplicito, non eseguito.
+- Tooling, migrazione degli hook graphify sotto `.githooks`, test isolati,
+  harness di processo e strumento riproducibile per misura idle su finti.
 
-La spec §3.1.4 richiede il rilascio Bluetooth al blocco tramite l'OR di
-`LockedHint` e `ScreenSaver.Active`, ma dichiara esplicitamente:
+## Commit
 
-> il loro comportamento al blocco non è misurato: lo verifica il punto 6 della prova reale
+Tutti su `main`, nessun push, tutti con trailer
+`Co-Authored-By: Codex <noreply@openai.com>` e senza `--no-verify`.
 
-Anche §8, punto 4, conferma il blocco schermo non misurato e la ricreazione del
-sink al cambio A2DP/HFP non misurata. `hardware-lab.md` contiene M1–M5, senza una
-misura datata dei segnali di blocco. M1 misura il cambio profilo, ma non documenta
-la sequenza di scomparsa/ricomparsa del sink prevista da O9–O11.
+| Tappa | Commit | Gate nel pre-commit |
+|---|---|---|
+| (a) tooling/config/stato/policy | `b342658` | verde, 81 test |
+| (b) adattatori | `cadd653` | verde, 101 test |
+| (c) servizio/CLI/systemd/integrazione | `9f282ac` | verde, 132 test |
 
-La decisione 29 approva eccezioni per installazione della unit e testi inglesi,
-e conferma comportamenti di prodotto. Non deroga esplicitamente al requisito
-«misura prima». L'approvazione generale della spec non risolve il conflitto con
-la regola di precedenza di AGENTS.md e con lo stop ribadito nell'incarico.
+Il commit successivo contiene questo report e l'evidenza della misura idle;
+si identifica con `git log -1 --format=fuller -- docs/verification/01/report.md`.
 
-**Interpretazione applicata:** rimandare queste misure a dopo l'implementazione
-contrasta con il prerequisito di AGENTS.md. Non è una scelta tecnica reversibile
-che Codex possa registrare autonomamente dalla decisione 30. L'autorizzazione
-alla misura CPU/RSS su finti riguarda quella misura specifica e non è stata
-estesa a una deroga generale sul comportamento hardware.
+## Verifiche eseguite ed evidenza
 
-Non sono state eseguite misure reali né sostituite con risultati dbusmock.
+Ambiente: Python 3.12.3, gi di sistema; ruff 0.16.10, mypy 2.4.0,
+pytest 9.1.1, python-dbusmock 0.38.1, pygobject-stubs 2.10.0.
 
-## Consultazioni e verifiche
+- `make venv`, `make hooks`, `make check`: riusciti nella working copy.
+- Copia pulita dei sorgenti in directory temporanea, nuovo repository e nuovo
+  venv: `make venv`, `make hooks`, `make check` tutti exit 0. Questa verifica
+  comprendeva 112 test; i successivi 20 casi aggiungono regressioni senza cambiare
+  implementazione o tooling.
+- Verifica negativa del gate: introdotto temporaneamente un file Python con
+  errore sintattico; tentato commit, rifiutato dal pre-commit (exit 1, make exit 2),
+  HEAD invariato. File rimosso prima del commit (a); nessun hook aggirato.
+- Gate finale del commit (c): 24 file formattati, ruff verde, mypy senza errori
+  su 14 file sorgente, **132 passed in 11.00 s, zero skip**.
+- `git diff --check` e `git diff --cached --check`: verdi.
+- Isolamento in `tests/conftest.py`: prima della raccolta avvia due PrivateDBus;
+  ogni test verifica che entrambi gli indirizzi siano esattamente quelli creati.
+  Ogni costruzione Audio nei test passa il comando del finto pactl (o un percorso
+  volutamente inesistente nel test del comando mancante).
+- Gli harness di processo e misura rifiutano bus non dbusmock. Il finto pactl
+  blocca su FIFO quando non riceve eventi; registra comandi e LC_ALL senza
+  eseguire operazioni audio reali.
+- Nessun demone sui bus reali; nessun bluetoothctl, pactl reale, install-user,
+  systemctl --user o modifica di sistema eseguiti.
 
-- Letti AGENTS.md, docs/context/01–06, hardware-lab, decisioni, spec nell'ordine
-  richiesto; completata separatamente la lettura delle porzioni troncate nell'output.
-- `graphify query` sul conflitto misure/spec; `graphify affected` sulla spec
-  (nessun nodo interessato) e sul nuovo report (nessun nodo univoco, file nuovo).
-- `graphify path` tra AGENTS.md e spec: nessun percorso diretto trovato.
-- Consultato esclusivamente MCP `agvm-scambio`, sola lettura, brain restituito
-  `scambio_brain`: guida, retrieve_context e inspect_context_package, ricerca
-  `5a6725a3-094a-4a5e-9823-4e1406d304ff`. Il materiale restituito riguarda la
-  milestone 0 e non documenta la deroga cercata; non costituisce prova della
-  sua inesistenza. La conclusione sopra si fonda sui file del repository.
-- Nessuna ricerca con grep/rg; nessuna operazione sul registro brain o scrittura
-  di memoria.
-- `make check` eseguito: **exit 2**, `make: *** No rule to make target 'check'.  Stop.`
-  Il Makefile e il pre-commit non esistono ancora nella base della spec 01.
-- Nessun test unitario o di integrazione eseguito: il codice non esiste.
-  Non ci sono test verdi o saltati da dichiarare.
-- Nessun demone avviato, bus reale utilizzato, comando Bluetooth/audio reale,
-  `make install-user` o `systemctl --user` eseguito.
+### Copertura della tabella e degli adattatori
 
-## Checklist §6: fatte e non fatte
+`tests/test_policy.py::test_rules` contiene casi nominati **G1–G12, R1–R6,
+C1–C10, O1–O11, L1–L4, U1–U2**. Ogni caso verifica stato, azioni previste,
+immodificabilità dell'input e presenza della transizione quando lo stato cambia.
+Ulteriori test coprono guardie di presa, doppio switch, completamenti e timeout,
+anti ping-pong, ingresso con pending release/lock/sleep, adozione esterna con
+priorità, scadenze configurate, AlreadyConnected e rilascio dell'inibitore in
+ogni stato. La checklist menziona P, ma la tabella non contiene righe P: le tre
+procedure PRESA/RILASCIO/INGRESSO sono esercitate da questi casi e dall'integrazione.
 
-| Voce | Esito ed evidenza |
+`tests/test_adapters.py`: JSON spezzato byte per byte, valori `(null)`, filtri,
+coalescenza di venti eventi in una snapshot, refresh durante snapshot,
+riavvio/backoff e riemissione dei valori, assenza di attività senza eventi,
+route/move/restore e rispetto di default già BT, scelta utente, sink sparito,
+errori pactl; BlueZ bluez5 per connessione, alimentazione, riavvio, Alias,
+Paired, rimozione ed estraneità degli altri dispositivi; logind e ScreenSaver
+per OR, duplicati, sleep/wake, fd e assenza delle fonti.
+
+`tests/test_service.py`: CLI in sottoprocessi, GetAll, PropertiesChanged e
+Transition, ciclo completo con timer iniettati accelerati, priorità persistente,
+ricarica valida/non valida/restart-required e timer già avviati invariati,
+doppia istanza, SIGHUP/SIGTERM, arresto senza toccare route, riparazione dopo
+crash con dispositivo collegato/scollegato e scelta utente, backend incompatibile,
+comandi durante l'avvio, scadenza SLEEP e risultati tardivi ignorati.
+L'unit systemd è verificata tramite rendering, senza installarla.
+
+### Timer e misura CPU/RSS
+
+Ispezione AST del runtime: solo due siti nell'adattatore audio (coalescenza e
+riaggancio) e i due rami del pianificatore (millisecondi/secondi). Il pianificatore
+riceve esclusivamente i sei timer della policy, li rimuove alla cancellazione e
+scarta callback non più correnti. Le chiamate D-Bus hanno timeout configurabili.
+Nessun `time.sleep`, thread, asyncio o ciclo di polling nel runtime.
+
+Eseguito `.venv/bin/python tools/measure_idle.py`: due bus privati nuovi,
+bluez5, logind, ScreenSaver e finto pactl. Durata misurata **600,092 s**;
+inizio **2026-10-04 08:58:10 UTC**. Artefatto: [idle.json](idle.json).
+
+| Processo | CPU nell'intervallo | RSS iniziale | RSS dopo 10 min |
+|---|---:|---:|---:|
+| Demone | 0,0% | 22.788 KiB | 22.788 KiB |
+| Finto pactl subscribe | 0,0% | 11.516 KiB | 11.516 KiB |
+
+Delta CPU nullo alla risoluzione dei tick /proc; **zero chiamate pactl** durante
+l'intervallo; stato finale `released`. Il campione comprende il demone reale
+Python/Gio con trasporti simulati, non il Bluetooth/audio di sistema. Processi e
+bus privati sono stati terminati dal cleanup dello strumento.
+
+**GM eseguirà la misura reale al punto 18** della checklist: non è coperta da
+questi numeri e non viene dichiarata fatta.
+
+Limite del campione: il processo è stato avviato durante l'integrazione, prima
+delle ultime due guardie per backend audio disabilitato e comandi di priorità
+durante l'avvio. Il percorso a riposo misurato (backend disponibile, nessun
+comando/evento) è invariato; non si attribuisce al campione la verifica di
+quelle guardie, coperte dai test. Il finto pactl è rimasto lo stesso.
+
+## Checklist §6
+
+| Voce | Esito |
 |---|---|
-| Tooling, venv, hooks, blocco commit rosso | Non fatta; tappa (a) non iniziata |
-| Test di tutte le regole e adattatori | Non fatta; nessun codice implementato |
-| make check verde, zero skip | Non fatta; make check termina con exit 2 |
-| Nessun polling e misura CPU/RSS 10 min | Nessun polling introdotto; misura non fatta, demone e finto pactl non esistono |
-| Configurazione completa, nessun valore personale hardcodato | Configurazione non implementata; nessun codice con valori personali introdotto |
-| Testi e msgid CLI | Nessuna CLI implementata; elenco msgid vuoto |
-| design/ intatto, richieste elencate | Fatta; nessuna modifica o richiesta di design |
-| Report e decisioni tecniche | Report scritto; nessuna decisione tecnica presa, numero 30 lasciato disponibile |
-| Checklist reale copiata con comandi | Fatta; copia integrale sotto, non eseguita |
-| Prova reale e firma GM | Non fatta; tutti i punti 1–18 pendenti |
+| Tooling da repo pulito e hook che rifiuta il rosso | Fatto, evidenza sopra |
+| Regole della policy e adattatori con finti | Fatto, casi nominati e suite sopra |
+| make check verde, nessun test saltato | Fatto, 132 test |
+| Nessun polling, CPU/RSS su finti per 10 minuti | Vedi misura sopra; prova reale riservata a GM |
+| Configurazione della spec, nessun dato personale hardcodato | Fatto; MAC sintetici nei test, indirizzo runtime da config |
+| Nessun testo it/de nell'app, msgid CLI elencati | Fatto; lista sotto |
+| design/ non modificato, richieste esplicitate | Fatto; nessuna richiesta |
+| Report e decisioni tecniche dalla 30 | Fatto; decisioni 30–38 |
+| Checklist reale copiata con comandi | Fatto, §6.1 sotto |
+| Prova reale GM e firma | **Non fatta**, punti 1–18 pendenti |
 
-La misura CPU/RSS reale sarà eseguita da GM al punto 18. Anche la misura su
-bus privati con finti richiesta per questa sessione resta non eseguita a causa
-dello stop. Non viene attribuito alcun valore CPU/RSS al demone o a pactl.
+## Scostamenti e scelte tecniche
 
-## Cambiamenti, commit e scostamenti
+Decisioni reversibili 30–38 in `docs/decisions.md`. Sezione `[backend]` aggiuntiva
+per rendere configurabili anche i tempi tecnici fissi della prosa. Stubs fissati
+alla versione compatibile col PyGObject di sistema. Moduli ausiliari `api.py`,
+`core/ports.py`, `core/transport.py` isolano contratto e trasporto.
 
-Unico file aggiunto intenzionalmente: `docs/verification/01/report.md`.
-Nessuna modifica a src/, tests/, tooling, packaging, design/, docs/context/,
-docs/specs/, hardware-lab o decisions.md. Le tre tappe (a), (b), (c) e i loro
-commit non sono stati eseguiti, per la condizione di stop.
+Il reason `connect_timeout` segue C5, che lo richiede esplicitamente: è assente
+per svista dall'elenco riassuntivo dei reason in §3.2.1. Da riallineare da Claude;
+non sono stati aggiunti metodi, segnali o proprietà API. Il ripristino all'arresto
+menzionato nella vecchia decisione 22 non viene applicato: valgono §3.1.6 e la
+successiva decisione 29. Nessuna pausa/muto, MPRIS, UI, profili, estensioni,
+scorciatoie, pairing, attivazione D-Bus o packaging distributivo introdotti.
 
-Il commit documentale di questo report è identificabile con:
+## Assunzioni, limiti e handoff
 
-```sh
-git log -1 --format=fuller -- docs/verification/01/report.md
-```
+Le evidenze automatiche provano il comportamento con i finti, non il dispositivo
+reale. CPU/RSS del finto pactl non equivalgono a pactl di sistema. M1–M7 sono
+fonti documentali lette, non misure ripetute da Codex. Restano la prova reale di
+GM (in particolare sospensione e punto 18), audit Claude e firma DoD B.
 
-Messaggio previsto: `Document spec 01 measurement blocker`, con trailer
-`Co-Authored-By: Codex <noreply@openai.com>`. È il commit del report di stop
-richiesto dall'incarico, non un commit di tappa con gate verde. Nessun
-`--no-verify`, nessuna modifica o disabilitazione degli hook, nessun push.
-L'hook post-commit graphify già presente può aggiornare i propri artefatti.
+Nessuna domanda di prodotto bloccante emersa. Nessuna richiesta per `design/`.
+Tracker, contesto, spec e hardware-lab non modificati: Claude aggiornerà tracker,
+annotazione del reason e riferimenti ormai superati alla misura Scarlett in
+§6.1 punto 3/§8 punto 2, già coperta da M7. Brain consultato solo tramite
+agvm-scambio, senza operazioni di registro o scritture: la memoria restituita
+riguardava la milestone 0 e non è stata usata al posto della repo. Promozione
+della milestone al brain riservata a Claude dopo audit/prova reale.
 
-All'ispezione iniziale risultavano già modificati nove file in `graphify-out/`
-(labels e firma; GRAPH_REPORT, graph.json, manifest della directory datata;
-GRAPH_REPORT, graph.html, graph.json, manifest principali). Non sono stati
-ripristinati né inclusi nel commit del report.
+Ricerca tramite graphify query/affected/path; `graphify update .` eseguito dopo
+il tratto lungo senza commit e hook attivi su tutti i commit. Nessuna ricerca
+con grep/rg. Gli artefatti graphify già sporchi all'inizio e poi rigenerati dagli
+hook restano fuori dai commit di consegna; non sono state scartate modifiche
+preesistenti. Letture mirate del codice delle librerie installate hanno verificato
+le firme dbusmock; nessuna dipendenza runtime aggiunta rispetto alla spec.
 
-## Questioni aperte e handoff
+## Msgid CLI
 
-Per riprendere occorre risolvere il prerequisito: misure datate registrate da
-Claude in hardware-lab per i comportamenti richiesti, oppure una deroga GM
-esplicita alla regola «misura prima» per implementarli su finti e verificarli
-successivamente. Questa sessione non interattiva non richiede risposte e non
-introduce autonomamente la deroga.
+- `Switch Bluetooth audio between PC and phone`
+- `Run the daemon`
+- `Enable debug logging`
+- `Show daemon status`
+- `Output JSON`
+- `Switch the device destination`
+- `Show or change iPhone priority`
+- `Scambio is not running; run systemctl --user start scambio`
+- `D-Bus error: %(error)s`
 
-Tracker, contesto, spec, hardware-lab e brain restano ai rispettivi proprietari.
-Nessuna richiesta per design/. Nessuna assunzione sul funzionamento reale di
-lock, sospensione o ricreazione del sink viene presentata come evidenza.
+## File toccati
 
-## Prova reale futura: copia di §6.1, NON ESEGUITA
+- `.githooks/post-checkout`
+- `.githooks/post-commit`
+- `.githooks/pre-commit`
+- `Makefile`
+- `README.md`
+- `docs/decisions.md`
+- `packaging/systemd/scambio.service`
+- `pyproject.toml`
+- `src/scambio/__init__.py`
+- `src/scambio/__main__.py`
+- `src/scambio/api.py`
+- `src/scambio/cli.py`
+- `src/scambio/config.py`
+- `src/scambio/core/__init__.py`
+- `src/scambio/core/audio.py`
+- `src/scambio/core/bluez.py`
+- `src/scambio/core/dbus/app.scambio.Scambio1.xml`
+- `src/scambio/core/policy.py`
+- `src/scambio/core/ports.py`
+- `src/scambio/core/service.py`
+- `src/scambio/core/session.py`
+- `src/scambio/core/transport.py`
+- `src/scambio/state.py`
+- `tests/conftest.py`
+- `tests/fixtures/fake_pactl.py`
+- `tests/fixtures/run_daemon.py`
+- `tests/helpers.py`
+- `tests/test_adapters.py`
+- `tests/test_config_state.py`
+- `tests/test_policy.py`
+- `tests/test_service.py`
+- `tools/install_user.py`
+- `tools/measure_idle.py`
+- `docs/verification/01/report.md`
+- `docs/verification/01/idle.json`
 
-I comandi seguenti sono riportati per GM e richiedono prima l'implementazione.
-Non sono stati lanciati in questa sessione. L'indirizzo presente è copiato dalla
-checklist autorizzata, non inserito nel codice. Firma GM e data: **pendenti**.
+## Checklist reale per GM: NON ESEGUITA
+
+Comandi copiati dalla spec, **non lanciati** durante questa sessione. La venv
+fornisce `scambio` in `.venv/bin`: GM può usare `source .venv/bin/activate` prima
+dei comandi. Alla prima installazione, il modello viene creato dal primo avvio;
+configurare l'indirizzo e riavviare prima del punto 1. La voce 3 contiene ancora
+l'annotazione storica «non misurata finora», superata da M7.
+
+Firma GM: **pendente** · data: **pendente** · punti 1–18: **da eseguire**.
 
 ### 6.1 Checklist di prova reale per GM (occhiali + iPhone)
 

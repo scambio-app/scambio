@@ -1,0 +1,34 @@
+{
+  "environment": "private dbusmock system/session buses; bluez5/logind/ScreenSaver; fake pactl",
+  "started_utc": "2026-10-04T08:58:10.164949+00:00",
+  "elapsed_seconds": 600.0920778680011,
+  "processes": {
+    "daemon": {
+      "pid": 2736822,
+      "before": {
+        "cpu_seconds": 0.06,
+        "rss_kib": 22788
+      },
+      "after": {
+        "cpu_seconds": 0.06,
+        "rss_kib": 22788
+      },
+      "cpu_percent_interval": 0.0
+    },
+    "fake_pactl": {
+      "pid": 2736832,
+      "before": {
+        "cpu_seconds": 0.01,
+        "rss_kib": 11516
+      },
+      "after": {
+        "cpu_seconds": 0.01,
+        "rss_kib": 11516
+      },
+      "cpu_percent_interval": 0.0
+    }
+  },
+  "pactl_calls_during_idle": 0,
+  "state_after": "released",
+  "real_measurement": "Pending GM checklist item 18"
+}
