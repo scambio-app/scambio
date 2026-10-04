@@ -77,3 +77,14 @@ AGENTS.md o manca una decisione di prodotto, fermati e scrivilo nel report.
 - Scritto da Claude solo alle milestone: aggiunte datate, con il metodo di misura; una memoria
   superata si corregge con una nota esplicita, mai «l'ultima vince» implicito.
 - Non è un blocker: se l'MCP non risponde, repo e misure bastano.
+
+## 7. Chat di progetto e handoff (GM, 2026-10-04)
+
+- Una chat **orchestratore** per decisioni di prodotto, misure e priorità; una **chat di sviluppo**
+  per ogni unità (spec, mock/design, audit).
+- Ogni chat, quando il contesto diventa lungo o inizia una nuova unità, propone a GM di aprire una
+  nuova chat e gli fornisce il **prompt di handoff** pronto da copiare. Prima salva in repo tutto
+  ciò che è stato deciso o misurato: il prompt punta ai file, non li riassume per intero.
+- Struttura del prompt: progetto e ruolo · fonte di verità e ordine di lettura · stato in 3–5 righe
+  con l'ultimo commit · compito e criterio di fatto · vincoli · come chiudere e cosa riportare
+  all'orchestratore.
