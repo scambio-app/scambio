@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+build/
+dist/
+*.egg-info/
+graphify-out/cache/
+design/ui/*.ui
+.flatpak-builder/
