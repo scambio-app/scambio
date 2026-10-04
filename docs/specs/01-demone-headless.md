@@ -1,6 +1,6 @@
 # Spec 01 — Demone headless
 
-Stato: approvata (GM, 2026-10-04) · Autore: Claude · Data: 2026-10-04
+Stato: consegnata (audit 2 ok, in attesa della prova reale di GM) · Autore: Claude · Data: 2026-10-04
 
 ## 1. Obiettivo
 
@@ -552,6 +552,15 @@ prova reale.
     obsoleti, rilascio dell'inibitore nelle uscite verso `released` con `sleeping` (C4, C8, O8,
     U1), sequenza di backoff 1→30 s, ripristino con istantanea fallita.
 11. Spec: `connect_timeout` mancava fra i `reason` di §3.2.1 (decisione 32 di Codex) — corretto.
+
+**Audit 2 — 2026-10-04** su `bbf17c7`, `19db613`, `00f58b7`, `8808f2e`. `make check` verde
+rieseguito da Claude (192 test, 0 saltati); file protetti invariati. Verificati nel diff i punti
+1–4 e 7 (`audio.py`: `_down` unico con rimozione del timer e stato `backend_down`;
+`restore_default_sink` cancellato solo con istantanea valida che prova il ripristino superfluo o
+dopo comandi riusciti; coda di instradamento con `guard`/`complete` idempotente; lettura protetta
+con `_down` su qualsiasi eccezione) e la mappa punto → commit → test nel report; Codex ha anche
+eseguito i nuovi test contro il codice pre-audit (falliscono, quindi sono sensibili). Esito:
+**ok per la prova reale** (§6.1).
 
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
