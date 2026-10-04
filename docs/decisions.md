@@ -41,3 +41,47 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     l'app-id `app.scambio.Scambio` (Flatpak, file .desktop, icone) e il nome D-Bus del demone
     `app.scambio.Scambio` (oggetto `/app/scambio/Scambio`): Flatpak consente di possedere solo nomi
     D-Bus sotto il proprio app-id.
+
+## 2026-10-04 — Spec 01, demone headless
+
+18. GM — La presa automatica parte solo se l'audio resta attivo per almeno 1 s
+    (`policy.grab_delay_ms = 1000`, configurabile): filtra i suoni brevi senza ruolo.
+19. GM — Attivare la Priorità iPhone mentre il dispositivo è sul PC lo rilascia subito, come lo
+    switch.
+20. GM — Approvata la dipendenza runtime `pactl` ≥ 16 (`pulseaudio-utils`): esclude Ubuntu
+    22.04; nel Flatpak andrà inclusa.
+21. Claude — Eventi audio: sottoprocesso `pactl -f json subscribe` con `LC_ALL=C`, parsing
+    incrementale con `raw_decode` (M4), istantanee `pactl -f json list` coalescenti a 50 ms,
+    riavvio con attesa crescente. Scartati: `pw-dump --monitor` (scarica oggetti interi a ogni
+    modifica, verboso e costoso), libpulse via ctypes (strutture ABI a mano, fragile con mypy
+    strict; resta possibile come backend alternativo dietro la stessa interfaccia), binding
+    PipeWire nativi (nessun binding Python mantenuto). «Silenzio» = nessuno stream non `corked`
+    e non escluso; nessuna misura di livello (costerebbe CPU). M5 conferma che basta per Chrome.
+22. Claude — Instradamento: con il dispositivo sul PC l'uscita predefinita è il dispositivo
+    (comportamento da cuffia: anche le notifiche vanno lì). Scambio la imposta solo se WirePlumber
+    non l'ha già fatto, salva il predefinito precedente nello stato persistente e lo ripristina al
+    rilascio, all'arresto e all'avvio dopo un crash.
+23. Claude — Stato persistente (Priorità iPhone, predefinito da ripristinare) in
+    `~/.local/share/scambio/state.json`, scritto in modo atomico; `config.toml` è solo letto dal
+    demone (lo crea come modello se manca). `policy.iphone_priority` esce dalla configurazione.
+24. Claude — Blocco schermo = `LockedHint` di logind (sessione da `User.Display`, perché un
+    servizio utente non appartiene alla sessione) OR `org.freedesktop.ScreenSaver.Active`;
+    sospensione con `PrepareForSleep` e inibitore `delay`.
+25. Claude — `core/policy.py` è una funzione pura `step(ctx, event, config)`; i timer sono azioni
+    ed eventi. Regola anti ping-pong: dopo una presa fallita o una perdita esterna con audio
+    attivo, nessuna presa automatica finché l'audio non tace.
+26. Claude — Interfaccia D-Bus `app.scambio.Scambio1` su `/app/scambio/Scambio` (nome del bus
+    invariato, decisione 17); il suffisso 1 permette versioni future senza rompere i client.
+27. Claude — Testi della CLI: msgid inglesi marcati con gettext; i cataloghi it/de arrivano con
+    la spec 03. Stati e codici d'errore sono stringhe stabili non tradotte.
+28. Claude — Servizio utente systemd `Type=dbus` legato a `graphical-session.target`;
+    `make install-user` installa la unit senza abilitarla né avviarla.
+29. GM — Approvata la spec 01 con tre eccezioni/conferme: (a) `make install-user` può scrivere
+    `~/.config/systemd/user/scambio.service`, solo se lanciato a mano (il demone non scrive mai
+    fuori da `~/.config/scambio/` e `~/.local/share/scambio/`); (b) fino alla spec 03 testi della
+    CLI, commenti del modello di configurazione e motivo dell'inibitore di sospensione sono in
+    inglese (eccezione temporanea all'invariante it/en/de); (c) confermati i comportamenti
+    ricavati: nessuna presa automatica a schermo bloccato; anti ping-pong dopo prese fallite o
+    perdite esterne; l'arresto di Scambio non scollega il dispositivo; con il dispositivo sul PC
+    anche le notifiche vanno lì; una connessione manuale esterna viene rispettata anche con
+    Priorità iPhone attiva.

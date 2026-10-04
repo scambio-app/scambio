@@ -10,7 +10,7 @@ ancora. Ogni scostamento introdotto da una spec si registra qui e in `docs/decis
 | Linguaggio | Python ≥ 3.11 (sviluppo su 3.12) | `tomllib` incluso; PyGObject maturo |
 | Event loop / IPC | GLib main loop, D-Bus via **Gio** (PyGObject) | un solo loop, zero dipendenze extra, adatto a Flatpak |
 | Bluetooth | BlueZ su D-Bus (`org.bluez`) | standard su tutte le distro |
-| Audio | PipeWire tramite il protocollo pulse (pipewire-pulse) | eventi su stream e uscite; meccanismo esatto deciso nella spec 01 |
+| Audio | PipeWire tramite il protocollo pulse: `pactl -f json subscribe` + istantanee (decisioni 20–21) | eventi senza polling; nessun binding nativo |
 | Sessione | logind (`org.freedesktop.login1`) + `org.freedesktop.ScreenSaver` | lock/unlock e sospensione su KDE e GNOME |
 | Player | MPRIS (`org.mpris.MediaPlayer2.*`) | pausa/ripresa dei player durante la presa |
 | Scorciatoia | XDG Desktop Portal `GlobalShortcuts`, riserva CLI | standard cross-desktop, funziona in Flatpak |
@@ -48,25 +48,34 @@ Regola di dipendenza: `ui/` e `cli.py` dipendono solo dall'API D-Bus del demone 
 nello stesso processo, passano dall'interfaccia definita). `core/policy.py` non conosce D-Bus:
 riceve eventi e restituisce azioni, così è testabile in isolamento.
 
-## 3. Macchina a stati (bozza, da fissare nella spec 01)
+## 3. Macchina a stati (fissata nella spec 01, §3.1.5)
 
-Stati: `RILASCIATO` (dispositivo non sul PC), `IN_PRESA` (connessione in corso, audio in pausa),
-`SUL_PC` (collegato, audio instradato), `IN_RILASCIO`. Variabile ortogonale: `priorita_iphone`.
+La tabella completa evento → azione è in `docs/specs/01-demone-headless.md` §3.1.5; qui resta il
+quadro. Stati definitivi: `released`, `connecting`, `on_pc`, `releasing`, `unavailable`
+(nomi del codice e dell'API, uguali a `05-ui-context.md`).
 
-| Evento | Effetto principale |
+| Stato | Significato |
 |---|---|
-| audio PC avviato (non evento di sistema) | se `RILASCIATO` e non priorità → `IN_PRESA` |
-| uscita BT pronta | `IN_PRESA` → `SUL_PC`, sposta e riprende lo stream |
-| silenzio ≥ `release_idle_seconds` | `SUL_PC` → `IN_RILASCIO` |
-| blocco schermo / sospensione | `SUL_PC` → `IN_RILASCIO` subito |
-| switch manuale | `SUL_PC` → rilascio + priorità on; altrimenti presa + priorità off |
-| errore/timeout connessione | ritorno a `RILASCIATO`, audio ripreso sull'uscita precedente, notifica |
+| `released` | dispositivo non sul PC; presa automatica se c'è audio e nessun impedimento |
+| `connecting` | connessione in corso (nostra o esterna), in attesa dell'uscita audio |
+| `on_pc` | collegato, audio instradato; timer di silenzio quando l'audio tace |
+| `releasing` | scollegamento in corso |
+| `unavailable` | Bluetooth spento, dispositivo assente o non configurato |
+
+Variabile ortogonale persistente: Priorità iPhone. La pausa/ripresa degli stream durante la
+presa si aggiunge con la spec 02.
 
 ## 4. Configurazione (chiavi iniziali)
 
-`device.address`, `device.profile`, `policy.release_idle_seconds = 120`,
-`policy.connect_timeout_seconds`, `policy.iphone_priority = false`,
-`shortcut.preferred = "<Super>g"`, `ui.language = "auto"`.
+Elenco completo con tipi, default e vincoli in `docs/specs/01-demone-headless.md` §3.2.3:
+`device.address`, `device.profile`, `policy.grab_delay_ms = 1000`,
+`policy.release_idle_seconds = 120`, `policy.connect_timeout_seconds = 10`,
+`policy.sink_timeout_seconds = 5`, `policy.sleep_release_timeout_seconds = 4`,
+`audio.ignore_roles`, `audio.ignore_apps`, `shortcut.preferred = "<Super>g"`,
+`ui.language = "auto"`.
+
+La Priorità iPhone non è configurazione ma stato persistente in
+`~/.local/share/scambio/state.json` (decisione 23).
 
 ## 5. Punto di estensione (open-core)
 
@@ -95,3 +104,5 @@ stato aggiornato.
 
 - 2026-10-04 — prima stesura (Claude).
 - 2026-10-04 — nome D-Bus e app-id `app.scambio.Scambio` (decisione 17).
+- 2026-10-04 — spec 01: meccanismo audio, instradamento, stato persistente, sessione,
+  macchina a stati, interfaccia `app.scambio.Scambio1` (decisioni 18–28).

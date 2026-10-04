@@ -8,7 +8,7 @@ queste regole; da quel momento la configurazione eseguibile (`pyproject.toml`, `
 
 1. `ruff format --check`
 2. `ruff check`
-3. `mypy` — `--strict` su `src/scambio/core/` e `config.py`; normale sul resto
+3. `mypy` — `--strict` su `src/scambio/core/`, `config.py` e `state.py`; normale sul resto
 4. `pytest` — unit + integrazione su D-Bus di sessione privato
 
 Strumenti di sviluppo (ruff, mypy, pytest, python-dbusmock) in un virtualenv locale `.venv/`;
@@ -20,8 +20,9 @@ Strumenti di sviluppo (ruff, mypy, pytest, python-dbusmock) in un virtualenv loc
 - Type hints ovunque; niente `Any` nel core salvo interfacce PyGObject, isolate in adattatori.
 - Codice asincrono tramite callback/`Gio.Task`/async di Gio sul main loop GLib; niente thread
   salvo necessità documentata; niente `asyncio` parallelo al loop GLib.
-- Nessun `time.sleep`, nessun loop di polling: timer solo con `GLib.timeout_add_seconds` legati a
-  uno stato (es. timer di rilascio) e cancellati quando lo stato cambia.
+- Nessun `time.sleep`, nessun loop di polling: timer solo con `GLib.timeout_add_seconds` (o
+  `GLib.timeout_add` per durate sotto il secondo: coalescenza degli eventi audio, ritardo di presa)
+  legati a uno stato e cancellati quando lo stato cambia. Elenco dei timer ammessi nella spec 01.
 - Logging con il modulo `logging` (journald quando sotto systemd); mai indirizzi completi di
   dispositivi diversi da quello configurato, mai dati personali.
 - Nomi in inglese nel codice; testi utente solo tramite gettext con le chiavi del contratto in

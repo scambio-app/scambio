@@ -47,6 +47,10 @@ Per ogni elemento interattivo: ID del widget in Blueprint, azione GAction (`app.
 `app.toggle-priority`, `app.open-settings`, `app.quit`), proprietà dell'API D-Bus collegata,
 chiave del testo. Codex usa solo questi nomi; se gliene serve uno nuovo lo chiede nel report.
 
+API del demone usata dalle UI: proprietà, metodi e segnali di `app.scambio.Scambio1` in
+`docs/specs/01-demone-headless.md` §3.2.1. `priority` ed `error` della tabella §3 si derivano da
+`IphonePriority` e `LastError`.
+
 ## 6. Lingue
 
 Chiavi gettext; cataloghi `design/i18n/{it,en,de}.po`. Lingua di sistema di default, forzabile da

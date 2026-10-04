@@ -14,8 +14,8 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 | Fase | Contenuto | Stato |
 |---|---|---|
 | 0 | Fondazioni documentali e misure iniziali | ✅ chiusa |
-| 1 | Spec 01 — demone headless: tooling, config, BlueZ, eventi audio, sessione, macchina a stati, API D-Bus, CLI `switch/status/priority` | da scrivere |
-| 2 | Spec 02 — presa con pausa/ripresa (MPRIS + muto/spostamento stream) e rilascio a tempo | da scrivere |
+| 1 | Spec 01 — demone headless: tooling, config, BlueZ, eventi audio, sessione, macchina a stati, instradamento, API D-Bus, CLI `switch/status/priority`, servizio utente | approvata 2026-10-04 → `/goal` a Codex |
+| 2 | Spec 02 — pausa/ripresa durante presa e rilascio (MPRIS + muto dello stream); l'instradamento e il rilascio a tempo sono già nella spec 01 | da scrivere |
 | 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | da fare |
 | 4 | Spec 04 — scorciatoia globale (portal) + finestra impostazioni | da fare |
 | 5 | Avvio automatico, packaging (Flatpak), prima release | da fare |
@@ -23,7 +23,7 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 
 ## 3. Decisioni di prodotto prese (non ridiscutere)
 
-Vedi `docs/decisions.md`, voci 1–17.
+Vedi `docs/decisions.md`, voci 1–29.
 
 ## 4. Domande aperte
 
@@ -37,5 +37,7 @@ Vedi `docs/decisions.md`, voci 1–17.
 
 ## 5. Prossimi passi
 
-1. Claude scrive la spec 01 e la sottopone a GM con la propria revisione.
-2. `/goal` a Codex.
+1. ~~Claude scrive la spec 01~~ — approvata da GM il 2026-10-04.
+2. GM passa a Codex il `/goal` in fondo alla spec 01.
+3. Audit di Claude sulla consegna, poi prova reale di GM (§6.1 della spec).
+4. Misure aperte: Firefox in pausa (M5), Q4 prima della spec 02.

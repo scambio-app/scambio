@@ -55,6 +55,38 @@ demone non deve modificare `Trusted`. Unico caso non coperto: perdita di link no
 (fuori portata) mentre sono sul PC, con la logica di riconnessione di BlueZ — da osservare se
 emergono problemi.
 
+## 2026-10-04 — M4: `pactl -f json` 16.1 (software, per la spec 01)
+
+Metodo: `pactl -f json subscribe` letto da pipe con timestamp; `paplay` con proprietà
+`media.name`/`media.role` impostate; confronto fra locale `it_IT` e `LC_ALL=C`.
+
+| Misura | Esito |
+|---|---|
+| Formato di `subscribe` | oggetti JSON **concatenati senza separatori** (niente a capo) |
+| Bufferizzazione su pipe | nessuna: ogni evento arriva subito (scarto < 10 ms) |
+| Localizzazione | con locale italiano i valori sono tradotti (`"nuovo"`, `"sorgente"`, `"scheda"`); con `LC_ALL=C` sono stabili (`new`, `change`, `remove`; `sink-input`, `sink`, `source`, `card`, `client`) |
+| Stringhe non ASCII | sostituite con `"(null)"` e avviso su stderr; il JSON resta valido |
+| Eventi di uno stream breve | `new` client → `new` sink-input → più `change` → `remove` sink-input (≈ 0,2 s per un suono breve) |
+| Campi utili di un sink-input | `corked`, `sink`, `properties.media.role`, `properties.application.name`, `properties.application.process.binary` |
+| Sink Bluetooth | `properties.api.bluez5.address` = MAC del dispositivo; nome `bluez_output.<MAC con _>.1` |
+
+## 2026-10-04 — M5: stream dei browser in pausa e uscita predefinita
+
+Metodo: script usa e getta che a ogni evento `sink-input` di `pactl subscribe` stampa i
+sink-input (app, ruolo, `corked`); GM avvia e mette in pausa un video YouTube in **Google
+Chrome**, poi chiude la scheda. Occhiali collegati al PC durante la prova.
+
+| Misura | Esito |
+|---|---|
+| Ruolo degli stream di Chrome | nessuno (`media.role` assente) |
+| Stream in pausa | Chrome lo segna `corked` e lo **chiude ≈ 5 s dopo** (osservato due volte) |
+| Stream multipli | Chrome ha aperto un secondo stream durante la riproduzione; è rimasto non `corked` per ≈ 28 s prima di passare a `corked` e chiudersi; il momento esatto della pausa non è stato cronometrato, quindi il ritardo massimo resta incerto (≤ 30 s) |
+| Uscita predefinita | in WirePlumber non è configurato un sink predefinito (`default-nodes` ha solo la sorgente): con gli occhiali collegati il predefinito diventa da solo `bluez_output.80_AA_1C_XX_XX_XX.1` |
+
+Conclusione: con Chrome il «silenzio» basato su stream chiusi o `corked` funziona; il ritardo
+(≤ 30 s nel caso peggiore osservato) è piccolo rispetto ai 120 s del rilascio. Firefox non
+misurato.
+
 ## Conseguenze per il design
 
 - Il PC non può sapere prima di connettersi se il telefono usa il dispositivo: «non prendere se
@@ -67,3 +99,4 @@ emergono problemi.
 - Q4: chiamata GSM invece di WhatsApp.
 - Q5: portal GlobalShortcuts su Plasma 5.27.
 - Latenza della prima uscita audio in HFP (apertura del link SCO).
+- Firefox: stream in pausa (M5 copre solo Chrome).
