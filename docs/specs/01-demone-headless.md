@@ -233,7 +233,7 @@ in corso, riusato all'uscita da `connecting` e `releasing`).
 | C4 | connecting | `ConnectResult(altro errore)` | `EmitError(connect_failed)`, `blocked_until_silence = audio_active`; se `device_connected` → RILASCIO(`connect_failed`); altrimenti `CancelTimer(CONNECT, SINK)` → released · `connect_failed` |
 | C5 | connecting | `TimerFired(CONNECT)` | `EmitError(connect_timeout)`, `blocked_until_silence = audio_active`, RILASCIO(`connect_timeout`) (il `Disconnect` interrompe il tentativo; se il dispositivo non è collegato risponde con errore e vale L1) |
 | C6 | connecting | `TimerFired(SINK)`, `origin = self` | `EmitError(sink_timeout)`, `blocked_until_silence = audio_active`, RILASCIO(`sink_timeout`) |
-| C7 | connecting | `TimerFired(SINK)`, `origin = external` | `EmitError(sink_timeout)`, `reason = sink_timeout`, INGRESSO(no) — non si scollega un dispositivo collegato a mano; se il sink arriva dopo vale O10 |
+| C7 | connecting | `TimerFired(SINK)`, `origin = external` | `reason = sink_timeout`, INGRESSO(no), **poi** `EmitError(sink_timeout)` (così `LastError` resta visibile) — non si scollega un dispositivo collegato a mano; se il sink arriva dopo vale O10 |
 | C8 | connecting | `DeviceConnected(false)` | `CancelTimer(CONNECT, SINK)`; se `origin = self` → `EmitError(connect_failed)`, `blocked_until_silence = audio_active`, → released · `connect_failed`; altrimenti → released · `external_disconnect` |
 | C9 | connecting | `Switch` verso iPhone, `SetPriority(true)`, `Locked(true)`, `Sleep(true)` | `pending = release`, `pending_reason` = `switch` \| `priority` \| `locked` \| `sleep`. Il demone non interrompe un `Connect` in corso: attende l'esito (al massimo `CONNECT`) e rilascia in INGRESSO |
 | C10 | connecting | `Switch` verso PC (c'era `pending = release`) | `pending = none` |
@@ -318,7 +318,7 @@ client. Ogni cambio di proprietà emette `org.freedesktop.DBus.Properties.Proper
 
 | Segnale | Firma | Quando |
 |---|---|---|
-| `Transition` | `(s from, s to, s reason)` | ogni cambio di stato; `reason` ∈ {`audio_started`, `idle_timeout`, `locked`, `sleep`, `switch`, `priority`, `external_connect`, `external_disconnect`, `connect_failed`, `sink_timeout`, `sink_lost`, `disconnect_failed`, `availability`} |
+| `Transition` | `(s from, s to, s reason)` | ogni cambio di stato; `reason` ∈ {`audio_started`, `idle_timeout`, `locked`, `sleep`, `switch`, `priority`, `external_connect`, `external_disconnect`, `connect_failed`, `connect_timeout`, `sink_timeout`, `sink_lost`, `disconnect_failed`, `availability`} |
 | `Error` | `(s code, s detail)` | `code` ∈ {`connect_failed`, `connect_timeout`, `sink_timeout`, `sink_lost`, `disconnect_failed`, `device_unavailable`, `device_not_configured`, `config_invalid`, `audio_backend_down`}; `detail` tecnico in inglese, per il log |
 
 Questi nomi diventano parte del contratto di `05-ui-context.md` (le UI delle spec 03–04 li
@@ -516,6 +516,42 @@ ricaricare con `systemctl --user reload scambio` (rimettere 120 alla fine).
 | 18 | Dopo 10 min di inattività: `ps -o rss,pcpu -p $(pgrep -f 'scambio daemon') $(pgrep -f 'pactl -f json subscribe')` | CPU ≈ 0 %, RSS annotato |
 
 ## 7. Note di revisione (Claude, dopo la consegna)
+
+**Audit 1 — 2026-10-04** su `b342658`, `cadd653`, `9f282ac`, `3fdddfe` (report in
+`docs/verification/01/report.md`). Verificato da Claude su `casa`: `make check` verde (132 test,
+0 saltati, 11 s); file protetti (`AGENTS.md`, `design/`, `docs/context/`, `docs/specs/`,
+`hardware-lab.md`) invariati; nessun `time.sleep`, thread, asyncio, `bluetoothctl`, scrittura di
+`Trusted`, MAC personale. Revisione statica (agente di controllo) di policy, adattatori, servizio e
+CLI contro §3: tabella G/R/C/O/L/U conforme riga per riga. Esito: **da correggere** prima della
+prova reale.
+
+1. `audio.py` `_down`: un `refresh` fallito durante un backend già giù (es. `RestoreRouting`
+   durante il riavvio di PipeWire) richiama `_down`, che non rimuove il timer di riaggancio già
+   programmato: doppio timer, backoff raddoppiato, un `pactl subscribe` orfano.
+2. `audio.py` `RestoreRouting`: se l'istantanea fallisce o il backend è disabilitato,
+   `restore_default_sink` viene cancellato senza ripristino. Deve restare salvato (la spec lo
+   cancella solo se il sink non esiste più o il predefinito è stato cambiato dall'utente).
+3. `audio.py` coda di instradamento: un'eccezione nel callback (es. `s["index"]` assente) lascia
+   `routing_busy = True` e blocca ogni `Disconnect` successivo; serve `try/finally` che chiuda
+   sempre l'operazione, e un timeout sui figli `pactl` di instradamento.
+4. `audio.py` `JSONStream`: un oggetto corrotto blocca il parser per sempre e un
+   `UnicodeDecodeError` ferma il ciclo di lettura senza `_down`. Decodifica con `errors="replace"`;
+   su JSON non valido scartare fino al prossimo `{` (o `_down`).
+5. `service.py` segnale `Error`: `detail` uguale al codice; deve essere il testo tecnico.
+6. C7: `LastError` azzerato da INGRESSO subito dopo l'errore — **errore della spec**, corretto
+   sopra (errore emesso dopo INGRESSO).
+7. `RestoreRouting` riscrive `state.json` anche quando non c'era nulla da ripristinare.
+8. `session.py`: al riaggancio di logind l'inibitore viene ripreso anche con `sleeping` vero;
+   non va ripreso finché non arriva `PrepareForSleep(false)`.
+9. `tools/install_user.py uninstall` non è idempotente (`check=True` su stop/disable).
+10. Test: `test_rules` controlla solo che le azioni attese siano un sottoinsieme; servono
+    confronti esatti (azioni in ordine e campi del contesto) e i rami mancanti: R2 (priorità,
+    blocco), R5 con `sink_ready`, R6 bloccato/sospeso, C4 con dispositivo collegato, C8 esterno,
+    L1 da `DeviceConnected(false)` e con `pending = grab` bloccato, L4 varianti, U1 solo
+    collegato, G7/G9 sul contesto, G12 con `ConnectResult` tardivo dopo C4 e risultati/timer
+    obsoleti, rilascio dell'inibitore nelle uscite verso `released` con `sleeping` (C4, C8, O8,
+    U1), sequenza di backoff 1→30 s, ripristino con istantanea fallita.
+11. Spec: `connect_timeout` mancava fra i `reason` di §3.2.1 (decisione 32 di Codex) — corretto.
 
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
