@@ -142,3 +142,10 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     Nessun nuovo codice o firma D-Bus. C7 conserva `sink_timeout` dopo INGRESSO come
     richiesto dalla spec corretta; `connect_timeout` resta invariato (voce 32 ora
     confermata dall'elenco dei reason di §3.2.1).
+43. Codex — L'acquisizione dell'inibitore è vietata mentre `Session.sleeping` è
+    vero, inclusi riaggancio del proprietario logind, cambio User.Display e risposta
+    asincrona tardiva. I fd tardivi vengono chiusi; solo il segnale di risveglio
+    consente una nuova acquisizione. La disinstallazione tollera gli esiti non zero
+    di stop/disable (unit assente o inattiva), elimina il file se presente e conserva
+    il controllo d'errore su daemon-reload. Test con destinazione temporanea e
+    subprocess sostituito, senza invocare systemctl.

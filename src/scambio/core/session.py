@@ -142,6 +142,8 @@ class Session:
             self._inhibit()
 
     def _inhibit(self) -> None:
+        if self.sleeping or self.login.closed:
+            return
         self.release_inhibitor()
         generation = self.inhibit_generation
 
@@ -152,7 +154,11 @@ class Session:
             except GLib.Error as exc:
                 LOG.warning("Cannot acquire sleep inhibitor: %s", exc)
                 return
-            if self.login.closed or generation != self.inhibit_generation:
+            if (
+                self.login.closed
+                or self.sleeping
+                or generation != self.inhibit_generation
+            ):
                 os.close(fd)
             else:
                 self.fd = fd
