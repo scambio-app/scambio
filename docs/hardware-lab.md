@@ -38,6 +38,23 @@ osservazione di GM; due ripetizioni.
 | Profilo attivo sul PC | A2DP |
 | Dopo il rilascio (`disconnect` 2,2 s) | la chiamata torna negli occhiali da sola |
 
+## 2026-10-04 — M3: riconnessione spontanea all'accensione (Q3)
+
+Metodo: `dbus-monitor` sui segnali `PropertiesChanged` del dispositivo sul bus di sistema +
+journal di bluetoothd; GM chiude gli occhiali nella custodia (15 s), li riapre e li indossa;
+osservazione per 30–50 s. Configurazione BlueZ di default (`ReconnectAttempts` non impostato).
+
+| Prova | Partenza | Esito |
+|---|---|---|
+| A — iPhone con Bluetooth acceso | occhiali sul PC | alla chiusura della custodia il link cade (Connected=false); alla riapertura **si collegano all'iPhone**; il PC non tenta di riprenderli |
+| B — iPhone con Bluetooth spento | occhiali scollegati | alla riapertura **non si collegano al PC** per ≥ 50 s, pur essendo in portata (connessione manuale dal PC subito dopo riuscita in 1,86 s) |
+
+Conclusioni: gli occhiali, all'accensione, cercano solo il telefono; né loro né bluetoothd
+avviano da soli una connessione col PC. Con `Trusted=yes` non si osservano prese spontanee: il
+demone non deve modificare `Trusted`. Unico caso non coperto: perdita di link non volontaria
+(fuori portata) mentre sono sul PC, con la logica di riconnessione di BlueZ — da osservare se
+emergono problemi.
+
 ## Conseguenze per il design
 
 - Il PC non può sapere prima di connettersi se il telefono usa il dispositivo: «non prendere se
@@ -47,8 +64,6 @@ osservazione di GM; due ripetizioni.
 
 ## Da misurare
 
-- Q3: riconnessione spontanea al PC all'accensione / uscita dalla custodia, con e senza iPhone in
-  portata.
 - Q4: chiamata GSM invece di WhatsApp.
 - Q5: portal GlobalShortcuts su Plasma 5.27.
 - Latenza della prima uscita audio in HFP (apertura del link SCO).

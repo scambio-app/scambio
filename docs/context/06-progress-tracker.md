@@ -31,12 +31,11 @@ Vedi `docs/decisions.md`, voci 1–17.
 |---|---|---|---|
 | Q1 | Licenza del core (es. GPL-3.0 vs MIT/Apache-2.0) | GM | prima della prima release |
 | ~~Q2~~ | ~~Dominio `scambio.app`~~ — **chiusa 2026-10-04**: acquistato da GM (decisione 17) | — | — |
-| Q3 | Il dispositivo si ricollega da solo al PC all'accensione / uscita dalla custodia? | misura | prima della spec 01 |
+| ~~Q3~~ | ~~Riconnessione spontanea~~ — **chiusa 2026-10-04** (M3): mai verso il PC | — | — |
 | Q4 | Conferma del comportamento con una chiamata GSM (finora solo WhatsApp) | misura | prima della spec 02 |
 | Q5 | Supporto reale del portal GlobalShortcuts su Plasma 5.27 | misura | prima della spec 04 |
 
 ## 5. Prossimi passi
 
-1. Misura Q3 con GM.
-2. Claude scrive la spec 01 e la sottopone a GM con la propria revisione.
-3. `/goal` a Codex.
+1. Claude scrive la spec 01 e la sottopone a GM con la propria revisione.
+2. `/goal` a Codex.

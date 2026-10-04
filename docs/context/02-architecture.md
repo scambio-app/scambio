@@ -82,8 +82,8 @@ di PipeWire riagganciandosi ai servizi.
 
 ## 7. Rischi tecnici aperti
 
-- `Trusted=yes` permette al dispositivo di ricollegarsi da solo al PC: da misurare prima di
-  decidere come impedirlo (vedi `hardware-lab.md`).
+- ~~`Trusted=yes` e riconnessione spontanea~~ — misurato (M3, 2026-10-04): nessuna presa
+  spontanea del PC; il demone non tocca `Trusted`.
 - Supporto reale del portal GlobalShortcuts su Plasma 5.27 e su GNOME.
 - Su GNOME senza estensione AppIndicator il tray non è visibile: la finestra e le notifiche devono
   bastare da sole.
