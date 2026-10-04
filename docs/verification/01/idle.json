@@ -1,29 +1,29 @@
 {
   "environment": "private dbusmock system/session buses; bluez5/logind/ScreenSaver; fake pactl",
-  "started_utc": "2026-10-04T08:58:10.164949+00:00",
-  "elapsed_seconds": 600.0920778680011,
+  "started_utc": "2026-10-04T09:44:38.191350+00:00",
+  "elapsed_seconds": 600.101164296997,
   "processes": {
     "daemon": {
-      "pid": 2736822,
+      "pid": 3105483,
       "before": {
-        "cpu_seconds": 0.06,
-        "rss_kib": 22788
+        "cpu_seconds": 0.05,
+        "rss_kib": 23048
       },
       "after": {
-        "cpu_seconds": 0.06,
-        "rss_kib": 22788
+        "cpu_seconds": 0.05,
+        "rss_kib": 23048
       },
       "cpu_percent_interval": 0.0
     },
     "fake_pactl": {
-      "pid": 2736832,
+      "pid": 3105493,
       "before": {
-        "cpu_seconds": 0.01,
-        "rss_kib": 11516
+        "cpu_seconds": 0.0,
+        "rss_kib": 11580
       },
       "after": {
-        "cpu_seconds": 0.01,
-        "rss_kib": 11516
+        "cpu_seconds": 0.0,
+        "rss_kib": 11580
       },
       "cpu_percent_interval": 0.0
     }
