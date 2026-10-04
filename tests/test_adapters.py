@@ -116,7 +116,9 @@ def test_audio_respects_default(fake_pactl, tmp_path, mode):
         done = []
         (audio.route if mode == "already" else audio.restore)(lambda: done.append(True))
         spin_until(lambda: done)
-        assert store.value.restore_default_sink is None
+        assert store.value.restore_default_sink == (
+            "speakers" if mode == "failure" else None
+        )
         if mode != "failure":
             assert not any(
                 c["args"][0] == "set-default-sink" for c in fake_pactl.calls()

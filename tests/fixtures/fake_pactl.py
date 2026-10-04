@@ -3,6 +3,7 @@
 
 import json
 import os
+import signal
 import sys
 from pathlib import Path
 
@@ -16,6 +17,8 @@ with (root / "calls").open("a") as log:
         + "\n"
     )
 state = json.loads((root / "snapshot.json").read_text())
+if " ".join(args) in state.get("hang_commands", []):
+    signal.pause()
 if args == ["--version"]:
     print("pactl " + state.get("version", "16.1"))
 elif args == ["-f", "json", "subscribe"]:

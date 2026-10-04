@@ -22,20 +22,37 @@ class JSONStream:
     def __init__(self) -> None:
         self.buffer = ""
         self.decoder = json.JSONDecoder()
-        self.utf8 = codecs.getincrementaldecoder("utf-8")()
+        self.utf8 = codecs.getincrementaldecoder("utf-8")(errors="replace")
 
     def feed(self, data: bytes) -> list[dict[str, Any]]:
         self.buffer += self.utf8.decode(data)
         values = []
         while self.buffer.strip():
             self.buffer = self.buffer.lstrip()
-            try:
-                value, end = self.decoder.raw_decode(self.buffer)
-            except json.JSONDecodeError:
+            if not self.buffer.startswith("{"):
+                raise ValueError("Invalid subscription JSON object")
+            # Wait for a complete object, including nested objects and split strings.
+            depth, quoted, escaped = 0, False, False
+            for index, char in enumerate(self.buffer):
+                if quoted:
+                    if escaped:
+                        escaped = False
+                    elif char == "\\":
+                        escaped = True
+                    elif char == '"':
+                        quoted = False
+                elif char == '"':
+                    quoted = True
+                elif char == "{":
+                    depth += 1
+                elif char == "}":
+                    depth -= 1
+                    if depth == 0:
+                        values.append(self.decoder.decode(self.buffer[: index + 1]))
+                        self.buffer = self.buffer[index + 1 :]
+                        break
+            else:
                 break
-            self.buffer = self.buffer[end:]
-            if isinstance(value, dict):
-                values.append(value)
         return values
 
 
@@ -70,6 +87,8 @@ class Audio:
         )
         self.launcher.setenv("LC_ALL", "C", True)
         self.children: set[Gio.Subprocess] = set()
+        self.command_timers: dict[Gio.Subprocess, int] = {}
+        self.backend_down = False
         self.subscriber: Gio.Subprocess | None = None
         self.closed = False
         self.ready = False
@@ -110,11 +129,27 @@ class Audio:
             callback("", False)
             return
 
+        expired = False
+
+        def timeout() -> bool:
+            nonlocal expired
+            expired = True
+            self.command_timers.pop(child, None)
+            child.force_exit()
+            return False
+
+        self.command_timers[child] = GLib.timeout_add(
+            self.config.backend.command_timeout_seconds * 1000, timeout
+        )
+
         def finished(process: Gio.Subprocess, result: Gio.AsyncResult) -> None:
+            timer = self.command_timers.pop(process, 0)
+            if timer:
+                GLib.source_remove(timer)
             self.children.discard(process)
             try:
                 _, output, _ = process.communicate_utf8_finish(result)
-                ok = process.get_successful()
+                ok = process.get_successful() and not expired
             except GLib.Error:
                 output, ok = "", False
             if not self.closed:
@@ -136,9 +171,12 @@ class Audio:
         self._run(["--version"], version)
 
     def _subscribe(self) -> None:
-        self.retry = 0
-        if self.closed:
+        if self.retry:
+            GLib.source_remove(self.retry)
+            self.retry = 0
+        if self.closed or self.subscriber is not None:
             return
+        self.backend_down = False
         self.generation += 1
         generation = self.generation
         self.parser = JSONStream()
@@ -155,17 +193,18 @@ class Audio:
         def read(source: Gio.InputStream, result: Gio.AsyncResult) -> None:
             try:
                 data = source.read_bytes_finish(result).get_data()
-            except GLib.Error:
-                data = b""
-            if self.closed or generation != self.generation:
-                return
-            if not data:
+                if self.closed or generation != self.generation:
+                    return
+                if not data:
+                    self._down(generation)
+                    return
+                for event in self.parser.feed(data):
+                    if event.get("on") in {"sink-input", "sink", "server"}:
+                        self._schedule()
+                source.read_bytes_async(65536, GLib.PRIORITY_DEFAULT, None, read)
+            except Exception:
+                LOG.exception("Cannot read audio subscription")
                 self._down(generation)
-                return
-            for event in self.parser.feed(data):
-                if event.get("on") in {"sink-input", "sink", "server"}:
-                    self._schedule()
-            source.read_bytes_async(65536, GLib.PRIORITY_DEFAULT, None, read)
 
         def exited(process: Gio.Subprocess, result: Gio.AsyncResult) -> None:
             process.wait_finish(result)
@@ -178,9 +217,13 @@ class Audio:
         self.refresh()
 
     def _down(self, generation: int) -> None:
-        if self.closed or generation != self.generation:
+        if self.closed or self.backend_down or generation != self.generation:
             return
+        self.backend_down = True
         self.generation += 1
+        if self.retry:
+            GLib.source_remove(self.retry)
+            self.retry = 0
         if self.subscriber is not None:
             self.subscriber.force_exit()
             self.subscriber = None
@@ -195,6 +238,7 @@ class Audio:
         self.retry = GLib.timeout_add_seconds(delay, self._retry)
 
     def _retry(self) -> bool:
+        self.retry = 0
         self._subscribe()
         return False
 
@@ -211,7 +255,7 @@ class Audio:
         return False
 
     def refresh(self, done: Callable[[bool], None] | None = None) -> None:
-        if not self.enabled:
+        if not self.enabled or self.backend_down:
             if done:
                 done(False)
             return
@@ -245,11 +289,12 @@ class Audio:
                         results[2].strip(),
                     )
                     self.ready = True
-                    self.retry_delay = self.config.backend.retry_initial_seconds
                     if self.force:
                         self.emit(Event("AudioBackend", True))
                     self._publish()
-                except (ValueError, TypeError, KeyError):
+                    self.retry_delay = self.config.backend.retry_initial_seconds
+                except Exception:
+                    LOG.exception("Cannot process audio snapshot")
                     ok = False
             if not ok:
                 self._down(generation)
@@ -327,51 +372,88 @@ class Audio:
         self.routing_busy = True
         route, done = self.routing.popleft()
 
+        completed = False
+
         def complete() -> None:
-            if not route:
-                self.store.value.restore_default_sink = None
-                self._save()
-            self.routing_busy = False
-            done()
-            self._route_next()
-
-        def snapshot(ok: bool) -> None:
-            old = self.default
-            saved = self.store.value.restore_default_sink
-            target = self.sink if route else saved
-            names = {str(s.get("name", "")) for s in self.sinks}
-            if (
-                not ok
-                or not target
-                or target not in names
-                or old == target
-                or (not route and not self._is_device(old))
-            ):
-                complete()
+            nonlocal completed
+            if completed:
                 return
-            if route and not saved:
-                self.store.value.restore_default_sink = old
-                if not self._save():
-                    complete()  # Never mutate routing without a durable restore target.
-                    return
-            old_indices = {s["index"] for s in self.sinks if s.get("name") == old}
-            commands = [["set-default-sink", target]] + [
-                ["move-sink-input", str(s["index"]), target]
-                for s in self.streams
-                if s.get("sink") in old_indices
-            ]
+            completed = True
+            self.routing_busy = False
+            try:
+                done()
+            except Exception:
+                LOG.exception("Audio routing completion failed")
+            finally:
+                self._route_next()
 
-            def command_finished(output: str, success: bool) -> None:
-                if not success:
-                    LOG.warning("Audio routing command failed")
-                if commands:
-                    self._run(commands.pop(0), command_finished)
-                else:
+        def guard(work: Callable[[], bool]) -> None:
+            pending = False
+            try:
+                pending = work()
+            except Exception:
+                LOG.exception("Audio routing operation failed")
+            finally:
+                if not pending:
                     complete()
 
-            self._run(commands.pop(0), command_finished)
+        def forget() -> None:
+            self.store.value.restore_default_sink = None
+            self._save()
 
-        self.refresh(snapshot)
+        def snapshot(ok: bool) -> None:
+            def prepare() -> bool:
+                old = self.default
+                saved = self.store.value.restore_default_sink
+                target = self.sink if route else saved
+                if not ok or not target:
+                    return False
+                names = {str(s.get("name", "")) for s in self.sinks}
+                if target not in names or (not route and not self._is_device(old)):
+                    if not route:
+                        forget()  # A valid snapshot proves restoration is obsolete.
+                    return False
+                if old == target:
+                    return False
+                if route and not saved:
+                    self.store.value.restore_default_sink = old
+                    if not self._save():
+                        return False  # Do not route without a durable restore target.
+                old_indices = {s["index"] for s in self.sinks if s.get("name") == old}
+                commands = [["set-default-sink", target]] + [
+                    ["move-sink-input", str(s["index"]), target]
+                    for s in self.streams
+                    if s.get("sink") in old_indices
+                ]
+                successful = True
+
+                def command_finished(output: str, success: bool) -> None:
+                    def advance() -> bool:
+                        nonlocal successful
+                        successful = successful and success
+                        if not success:
+                            LOG.warning("Audio routing command failed")
+                        if commands:
+                            self._run(commands.pop(0), command_finished)
+                            return True
+                        if not route and successful:
+                            forget()
+                        return False
+
+                    guard(advance)
+
+                self._run(commands.pop(0), command_finished)
+                return True
+
+            guard(prepare)
+
+        def begin() -> bool:
+            if not route and self.store.value.restore_default_sink is None:
+                return False
+            self.refresh(snapshot)
+            return True
+
+        guard(begin)
 
     def _save(self) -> bool:
         try:
@@ -384,10 +466,11 @@ class Audio:
     def close(self) -> None:
         self.closed = True
         self.generation += 1
-        for source in (self.coalesce, self.retry):
+        for source in (self.coalesce, self.retry, *self.command_timers.values()):
             if source:
                 GLib.source_remove(source)
         self.coalesce = self.retry = 0
+        self.command_timers.clear()
         for process in tuple(self.children):
             process.force_exit()
             process.wait_async(None, lambda p, r: p.wait_finish(r))

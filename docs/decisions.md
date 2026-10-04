@@ -119,3 +119,21 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     entrambi i bus e un finto pactl esplicito. CPU misurata come delta dei tick
     /proc su 600 secondi monotoni, RSS ai due estremi; nessun campionamento periodico.
     I timer accelerati sono iniettati solo dai test; nessuna opzione di produzione.
+
+## 2026-10-04 — Spec 01, correzioni dopo audit 1 (Codex)
+
+39. Codex — Un solo tentativo di recupero audio pendente: un guasto invalida la
+    generazione e marca il backend indisponibile fino al prossimo tentativo; ulteriori
+    guasti/istantanee durante l'attesa non aumentano il backoff. Il riavvio rimuove
+    esplicitamente il timer precedente. Solo un'istantanea pubblicata con successo
+    ripristina il ritardo iniziale.
+40. Codex — `[backend].command_timeout_seconds=10` limita tutti i figli pactl finiti
+    (versione, istantanee e instradamento); il processo subscribe resta guidato da eventi.
+    Alla scadenza il figlio viene terminato e raccolto, e l'operazione si conclude come
+    fallita. La coda chiude ogni operazione anche in caso di eccezione nei callback.
+41. Codex — Supera la cancellazione in errore della voce 35: un ripristino senza
+    istantanea affidabile o con comando fallito conserva il sink salvato. Si cancella
+    dopo successo oppure quando un'istantanea valida dimostra che il sink non esiste
+    più o che il predefinito è già cambiato. Senza sink salvato non si scrive lo stato.
+    La sottoscrizione decodifica UTF-8 con sostituzione; JSON completo malformato o
+    eccezioni di lettura invalidano il backend e riavviano una sola sottoscrizione.

@@ -41,6 +41,7 @@ class Backend:
     retry_max_seconds: int = 30
     dbus_margin_seconds: int = 5
     dbus_timeout_seconds: int = 10
+    command_timeout_seconds: int = 10
 
 
 @dataclass(frozen=True)
@@ -82,6 +83,7 @@ retry_initial_seconds = 1
 retry_max_seconds = 30
 dbus_margin_seconds = 5
 dbus_timeout_seconds = 10
+command_timeout_seconds = 10
 """
 
 
