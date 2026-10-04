@@ -40,3 +40,21 @@ def pytest_sessionfinish(session, exitstatus):
             os.environ.pop(key, None)
         else:
             os.environ[key] = _ORIGINAL[key]
+
+
+@pytest.fixture
+def fake_pactl(tmp_path):
+    from helpers import FakePactl
+
+    fake = FakePactl(tmp_path / "pulse")
+    yield fake
+    fake.close()
+
+
+@pytest.fixture
+def bluez_server():
+    from helpers import bluez_mock
+
+    mock, device, adapter = bluez_mock()
+    yield mock, device, adapter
+    mock.terminate()

@@ -101,3 +101,10 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
 33. Codex — Stubs PyGObject fissati a 2.10.0: la versione corrente 2.17 richiede
     PyGObject >=3.55 da pip e non è compatibile con l'obbligo di usare gi di sistema.
     Venv con `/usr/bin/python3 --system-site-packages`; runtime pip vuoto.
+34. Codex — Adapter Gio con generazioni per scartare callback tardivi; BlueZ accoda
+    segnali durante GetManagedObjects, pubblica Connected prima di Availability(true).
+    Session deduplica l'OR e invalida risposte iniziali superate da segnali; fd di
+    inibizione tardivi vengono chiusi. Protocol separati senza dipendenze Gio.
+35. Codex — Instradamento serializzato, con istantanea fresca prima di ogni azione;
+    il ripristino termina (anche in errore) prima di cancellare lo stato salvato.
+    Snapshot e azioni usano solo il comando pactl iniettato esplicitamente.
