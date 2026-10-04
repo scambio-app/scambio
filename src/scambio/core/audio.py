@@ -73,6 +73,7 @@ class Audio:
         self.subscriber: Gio.Subprocess | None = None
         self.closed = False
         self.ready = False
+        self.enabled = False
         self.generation = 0
         self.parser = JSONStream()
         self.coalesce = 0
@@ -129,6 +130,7 @@ class Audio:
                 LOG.error("Install pulseaudio-utils (pactl >= 16)")
                 self.emit(Event("AudioBackend", False))
                 return
+            self.enabled = True
             self._subscribe()
 
         self._run(["--version"], version)
@@ -209,6 +211,10 @@ class Audio:
         return False
 
     def refresh(self, done: Callable[[bool], None] | None = None) -> None:
+        if not self.enabled:
+            if done:
+                done(False)
+            return
         if done:
             self.snapshot_waiters.append(done)
         if self.refresh_running:

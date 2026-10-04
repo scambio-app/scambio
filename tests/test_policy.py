@@ -358,3 +358,73 @@ def test_policy_import_has_no_gi():
     tree = ast.parse(inspect.getsource(policy))
     imports = [n.module for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)]
     assert not any(n and n.startswith("gi") for n in imports)
+
+
+@pytest.mark.parametrize("value", ["", "org.bluez.Error.AlreadyConnected"])
+@pytest.mark.parametrize("connected,sink", [(True, True), (True, False), (False, True)])
+def test_connect_success_combinations(value, connected, sink):
+    c = Context(
+        state="connecting",
+        device_connected=connected,
+        sink_ready=sink,
+        last_error="connect_failed",
+    )
+    c, actions = step(c, Event("ConnectResult", value), Policy())
+    assert c.state == ("on_pc" if connected and sink else "connecting")
+    if connected and sink:
+        assert c.last_error == "" and c.routed
+    else:
+        assert any(a.kind == "StartTimer" and a.value == "SINK" for a in actions)
+
+
+@pytest.mark.parametrize(
+    "kind,reason",
+    [
+        ("Switch", "switch"),
+        ("SetPriority", "priority"),
+        ("Locked", "locked"),
+        ("Sleep", "sleep"),
+    ],
+)
+def test_pending_release_reasons(kind, reason):
+    c, actions = step(Context(state="connecting"), Event(kind, True), Policy())
+    assert (c.pending, c.pending_reason) == ("release", reason)
+    assert not any(a.kind == "Disconnect" for a in actions)
+
+
+@pytest.mark.parametrize(
+    "event",
+    [
+        Event("AudioActive", True),
+        Event("SetPriority", False),
+        Event("Locked", False),
+        Event("Sleep", False),
+    ],
+)
+def test_released_automatic_triggers(event):
+    c, actions = step(
+        Context(state="released", audio_active=True), event, Policy(grab_delay_ms=0)
+    )
+    assert c.state == "released"
+    assert any(
+        a.kind == "StartTimer" and a.value == "GRAB_DELAY" and a.milliseconds == 0
+        for a in actions
+    )
+
+
+@pytest.mark.parametrize(
+    "state", ["released", "connecting", "on_pc", "releasing", "unavailable"]
+)
+def test_sleep_inhibitor_availability_every_state(state):
+    c = Context(state=state, sleeping=True, pending="grab", routed=True)
+    c, actions = step(c, Event("Availability", False), Policy())
+    assert c.state == "unavailable" and not c.routed and c.pending == "none"
+    assert any(a.kind == "ReleaseSleepInhibitor" for a in actions)
+    assert {a.value for a in actions if a.kind == "CancelTimer"} == {
+        "GRAB_DELAY",
+        "IDLE",
+        "CONNECT",
+        "SINK",
+        "RELEASE",
+        "SLEEP",
+    }

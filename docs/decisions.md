@@ -108,3 +108,14 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
 35. Codex — Instradamento serializzato, con istantanea fresca prima di ogni azione;
     il ripristino termina (anche in errore) prima di cancellare lo stato salvato.
     Snapshot e azioni usano solo il comando pactl iniettato esplicitamente.
+36. Codex — Il servizio attende le prime letture di tutti gli adattatori, applica
+    prima lock/sleep e poi audio/connessione/disponibilità. Ripara l'instradamento
+    prima dell'adozione solo se il dispositivo risulta scollegato. I comandi di
+    priorità durante l'avvio sono persistiti immediatamente.
+37. Codex — Ripristino asincrono prima di Disconnect, con timer RELEASE e SLEEP
+    indipendenti: un backend audio lento non impedisce la scadenza dell'inibitore.
+    Il backend pactl assente/vecchio resta disabilitato anche durante RestoreRouting.
+38. Codex — Harness di processo e misura idle richiedono indirizzi dbusmock per
+    entrambi i bus e un finto pactl esplicito. CPU misurata come delta dei tick
+    /proc su 600 secondi monotoni, RSS ai due estremi; nessun campionamento periodico.
+    I timer accelerati sono iniettati solo dai test; nessuna opzione di produzione.

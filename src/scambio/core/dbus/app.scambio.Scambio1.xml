@@ -1,0 +1,19 @@
+<node>
+  <interface name="app.scambio.Scambio1">
+    <method name="Switch"><arg name="state" type="s" direction="out"/></method>
+    <method name="SetPriority"><arg name="enabled" type="b" direction="in"/></method>
+    <method name="Reload"/>
+    <property name="State" type="s" access="read"/>
+    <property name="IphonePriority" type="b" access="read"/>
+    <property name="AudioActive" type="b" access="read"/>
+    <property name="Locked" type="b" access="read"/>
+    <property name="DeviceAddress" type="s" access="read"/>
+    <property name="DeviceName" type="s" access="read"/>
+    <property name="DeviceConnected" type="b" access="read"/>
+    <property name="IdleReleaseAt" type="t" access="read"/>
+    <property name="LastError" type="s" access="read"/>
+    <property name="Version" type="s" access="read"/>
+    <signal name="Transition"><arg name="from" type="s"/><arg name="to" type="s"/><arg name="reason" type="s"/></signal>
+    <signal name="Error"><arg name="code" type="s"/><arg name="detail" type="s"/></signal>
+  </interface>
+</node>

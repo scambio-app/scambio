@@ -1,0 +1,15 @@
+[Unit]
+Description=Scambio Bluetooth audio switcher
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=app.scambio.Scambio
+ExecStart="@REPO@/.venv/bin/scambio" daemon
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target
