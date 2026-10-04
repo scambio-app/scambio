@@ -33,7 +33,8 @@ L'unità include anche il tooling del repository (venv, ruff, mypy, pytest, pyth
 - Misure: M1 (presa ≈ 1,7 s fino all'uscita `bluez_output.*`; rilascio 2,4 s; dopo il rilascio
   l'iPhone si ricollega da solo), M2 (presa durante chiamata reversibile), M3 (nessuna
   riconnessione spontanea verso il PC; il demone non tocca `Trusted`), M4 (comportamento di
-  `pactl -f json` 16.1) e M5 (stream dei browser in pausa) in `docs/hardware-lab.md`.
+  `pactl -f json` 16.1), M5 (stream dei browser in pausa), M6 (segnali di blocco schermo su
+  KDE) e M7 (cambio profilo A2DP↔HFP, scollegamento) in `docs/hardware-lab.md`.
 
 ## 3. Dettagli
 
@@ -142,9 +143,10 @@ adattatori e reimmette nella policy i risultati come eventi. Gli adattatori espo
      proprietà `LockedHint` via `PropertiesChanged`;
   2. `org.freedesktop.ScreenSaver` sul bus di sessione: segnale `ActiveChanged(b)` e stato
      iniziale con `GetActive()`.
-  Su `casa` entrambe le interfacce esistono (verificato il 4 ottobre 2026), ma il loro
-  comportamento al blocco non è misurato: lo verifica il punto 6 della prova reale, e l'OR
-  rende sufficiente una sola fonte funzionante. Il log `info` indica quale fonte ha segnalato.
+  Misurato (M6): su KDE le due fonti cambiano insieme, ≈ 0,27 s dopo Meta+L; `ActiveChanged`
+  arriva due volte (due percorsi oggetto), quindi l'adattatore emette `Locked` solo ai cambi
+  del valore combinato. Il log `info` indica quale fonte ha segnalato. GNOME non è misurato:
+  l'OR rende sufficiente una sola fonte funzionante.
   L'adattatore emette `Locked(bool)` solo ai cambi del valore combinato. Se una fonte manca, si
   usa l'altra; se mancano entrambe, log `warning` e `Locked(False)` fisso.
 - **Sospensione**: `org.freedesktop.login1.Manager.PrepareForSleep(b)`. Il demone tiene un
@@ -355,7 +357,7 @@ config non valida.
 | `policy.release_idle_seconds` | int | 120 | 10–3600 |
 | `policy.connect_timeout_seconds` | int | 10 | 2–60 |
 | `policy.sink_timeout_seconds` | int | 5 | 1–30 |
-| `policy.sleep_release_timeout_seconds` | int | 4 | 1–10 (logind concede di solito 5 s) |
+| `policy.sleep_release_timeout_seconds` | int | 4 | 1–10 (sotto `InhibitDelayMaxUSec` di logind: 30 s su `casa`, M6) |
 | `audio.ignore_roles` | list[str] | `["event", "notification", "test"]` | — |
 | `audio.ignore_apps` | list[str] | `[]` | nomi applicazione o binario |
 | `shortcut.preferred` | str | `"<Super>g"` | solo validata (spec 04) |
@@ -518,7 +520,7 @@ ricaricare con `systemctl --user reload scambio` (rimettere 120 alla fine).
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
 Riletta da me e poi da un agente di controllo indipendente contro `AGENTS.md`, `01`, `02`, `03`,
-le decisioni 1–29 e le misure M1–M5. L'agente ha trovato 36 punti; li ho corretti tutti nella
+le decisioni 1–29 e le misure M1–M7. L'agente ha trovato 36 punti; li ho corretti tutti nella
 spec (sopra). I più importanti: stati senza uscita (`releasing` senza timeout, ora timer
 `RELEASE`), inibitore della sospensione non rilasciato in alcuni rami (ora regola G10 + timer
 `SLEEP` nella policy, quindi testabile), `pending` mai azzerato, adozioni senza timer `IDLE`
@@ -541,8 +543,10 @@ Cosa resta, e cosa correggerei se emergesse:
    funziona (M5: stream chiuso ≈ 5 s dopo la pausa, caso peggiore osservato ≤ 30 s). Firefox e
    altri player non sono misurati: se uno tiene lo stream aperto in pausa, la correzione è MPRIS
    nella spec 02, non il polling.
-4. **Blocco schermo e HFP non misurati.** Blocco: due fonti in OR, verificate dalla prova 6.
-   Cambio A2DP↔HFP con ricreazione del sink: tollerato da O9–O11, non misurato.
+4. **Blocco schermo e HFP misurati dopo lo stop di Codex** (M6, M7): le due fonti di blocco
+   concordano su KDE; il cambio A2DP↔HFP ricrea il sink con lo stesso nome in < 10 ms, quindi
+   O9–O11 sono una rete di sicurezza. Non misurati: GNOME e l'autoswitch a HFP quando un'app
+   apre il microfono.
 5. **Pausa durante la presa (decisione 4).** In questa spec l'audio parte dagli altoparlanti e
    passa agli occhiali dopo ≈ 2,7 s; la pausa arriva con la spec 02, come da piano delle fasi.
 6. **Da approvare da GM (decisione 29)**, perché toccano invarianti di `AGENTS.md` o

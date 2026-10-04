@@ -87,6 +87,37 @@ Conclusione: con Chrome il «silenzio» basato su stream chiusi o `corked` funzi
 (≤ 30 s nel caso peggiore osservato) è piccolo rispetto ai 120 s del rilascio. Firefox non
 misurato.
 
+## 2026-10-04 — M6: segnali di blocco schermo (KDE Plasma 5.27)
+
+Metodo: `dbus-monitor` sul bus di sistema (`PropertiesChanged` della sessione grafica presa da
+`login1.User.Display`, qui `session/_32`) e sul bus di sessione (`org.freedesktop.ScreenSaver`,
+`org.kde.screensaver`); GM blocca con Meta+L e sblocca con la password; due cicli.
+
+| Misura | Esito |
+|---|---|
+| Ordine al blocco | `org.kde.screensaver.AboutToLock` → dopo ≈ 0,27 s `ScreenSaver.ActiveChanged(true)` e `LockedHint = true` (stesso millisecondo) |
+| Allo sblocco | `ActiveChanged(false)` e `LockedHint = false` insieme |
+| Coerenza delle fonti | le due fonti concordano sempre (2 cicli su 2) |
+| `ActiveChanged` | emesso due volte, su `/ScreenSaver` e su `/org/freedesktop/ScreenSaver`: va deduplicato |
+| Ritardo massimo di inibizione | `InhibitDelayMaxUSec` di logind = 30 s su `casa` |
+
+## 2026-10-04 — M7: cambio profilo A2DP ↔ HFP e scollegamento
+
+Metodo: occhiali collegati al PC; `pactl -f json subscribe` con timestamp;
+`pactl set-card-profile` da `a2dp-sink` a `headset-head-unit` e ritorno; poi
+`bluetoothctl disconnect`.
+
+| Misura | Esito |
+|---|---|
+| Profili della scheda | `off`, `a2dp-sink`, `a2dp-sink-sbc_xq`, `headset-head-unit`, `headset-head-unit-cvsd`, `headset-head-unit-msbc` |
+| Cambio profilo | il sink viene rimosso e ricreato con **lo stesso nome** `bluez_output.80_AA_1C_XX_XX_XX.1` (nuovo indice) in < 10 ms, nello stesso blocco di eventi |
+| `api.bluez5.profile` | cambia (`a2dp-sink` ↔ `headset-head-unit`); `api.bluez5.address` resta |
+| Uscita predefinita durante il cambio | resta il sink Bluetooth (stesso nome) |
+| Dopo lo scollegamento | il sink sparisce; WirePlumber rende predefinita da sola la Scarlett (nessun predefinito configurato) |
+
+Conseguenza: con la coalescenza a 50 ms un cambio di profilo di norma non produce nemmeno
+`DeviceSinkGone`; se lo produce, la ricomparsa arriva ben dentro `sink_timeout_seconds`.
+
 ## Conseguenze per il design
 
 - Il PC non può sapere prima di connettersi se il telefono usa il dispositivo: «non prendere se
@@ -99,4 +130,5 @@ misurato.
 - Q4: chiamata GSM invece di WhatsApp.
 - Q5: portal GlobalShortcuts su Plasma 5.27.
 - Latenza della prima uscita audio in HFP (apertura del link SCO).
+- Passaggio automatico a HFP quando un'app apre il microfono (autoswitch di WirePlumber).
 - Firefox: stream in pausa (M5 copre solo Chrome).
