@@ -85,3 +85,19 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     perdite esterne; l'arresto di Scambio non scollega il dispositivo; con il dispositivo sul PC
     anche le notifiche vanno lì; una connessione manuale esterna viene rispettata anche con
     Priorità iPhone attiva.
+## 2026-10-04 — Spec 01, implementazione (Codex)
+
+30. Codex — Eventi e azioni immutabili e contesto copiato per `step`; `last_error` nel
+    contesto rende verificabile l'azzeramento previsto da PRESA/INGRESSO senza I/O.
+    I callback obsoleti e i timer cancellati saranno scartati dall'esecutore/adattatori.
+31. Codex — Sezione tecnica opzionale `[backend]` per rispettare l'invariante dei tempi
+    configurabili: `coalesce_ms=50`, `retry_initial_seconds=1`, `retry_max_seconds=30`,
+    `dbus_margin_seconds=5`, `dbus_timeout_seconds=10`. Interi positivi fino a 60000;
+    retry iniziale non superiore al massimo. Nessun nuovo timer periodico.
+32. Codex — Precedenza alla procedura C5 per il reason `connect_timeout`, omesso per
+    svista dall'elenco riassuntivo di §3.2.1 ma esplicitamente prescritto dalla tabella.
+    Nessuna nuova proprietà/metodo/segnale D-Bus. Arresto senza ripristino secondo
+    §3.1.6 e decisione 29; riparazione al successivo avvio se scollegato.
+33. Codex — Stubs PyGObject fissati a 2.10.0: la versione corrente 2.17 richiede
+    PyGObject >=3.55 da pip e non è compatibile con l'obbligo di usare gi di sistema.
+    Venv con `/usr/bin/python3 --system-site-packages`; runtime pip vuoto.
