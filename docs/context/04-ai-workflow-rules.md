@@ -71,12 +71,35 @@ AGENTS.md o manca una decisione di prodotto, fermati e scrivilo nel report.
 - Spec piccole: un'unità che Codex chiude in una sessione, con una prova visibile.
 - Per controlli veloci (audit di layout) usare un agente economico quando possibile.
 
-## 6. Brain AGVM (`scambio_brain`)
+## 6. Brain AGVM (`scambio_brain`) e graphify
 
-- Separato da `kuchl_brain`. Consultato dopo repo e misure, solo come contesto.
-- Scritto da Claude solo alle milestone: aggiunte datate, con il metodo di misura; una memoria
-  superata si corregge con una nota esplicita, mai «l'ultima vince» implicito.
-- Non è un blocker: se l'MCP non risponde, repo e misure bastano.
+**Isolamento da Kuchl.** Un'unica istanza AGVM su casa (API :8010) ospita più brain, separati
+per `brain_id` con archivi distinti. Il «brain attivo» del registro è globale e resta
+`kuchl_brain`: nessuno lo cambia. Si accede a Scambio solo indicando il brain in modo esplicito:
+- Codex: server MCP `agvm-scambio` in `~/.codex/config.toml` (`AGVM_MCP_BRAIN_ID=scambio_brain`,
+  `AGVM_MCP_BRAIN_POLICY=fixed`, sola lettura). Il server `agvm-local-memory-os` resta di Kuchl.
+- Chat Claude: API HTTP o MCP sempre con `brain_id="scambio_brain"`; mai `select_brain`.
+
+**Lettura.** Ordine: graphify (codice e documenti) → brain (perché e storia) → file. Ogni
+memoria del brain va datata e verificata prima di diventare un fatto. Se il brain non risponde,
+repo e misure bastano.
+
+**Scrittura.** Solo Claude, solo con preview + commit esplicito, alle milestone (chiusura di
+una spec verificata, nuova misura in hardware-lab, decisione di prodotto importante). Testo
+additivo, datato, con la fonte e il metodo di misura; una memoria superata si corregge con una
+nota esplicita di correzione. Codex non scrive sul brain: le sue scoperte vanno nel report e
+Claude le promuove.
+
+**Checklist di chiusura di ogni chat o sessione.**
+1. Tracker (06) aggiornato; decisioni nuove in `decisions.md`; misure in `hardware-lab.md`.
+2. File di contesto corretti se sono diventati falsi (non affiancati).
+3. Commit (il grafo si aggiorna da solo).
+4. Milestone? → scrittura nel brain con preview e commit.
+5. Prompt di handoff se serve (§7).
+
+**Graphify.** Indicizza codice e markdown; hook post-commit e post-checkout installati in
+`.git/hooks`. Quando la spec 01 attiverà `core.hooksPath=.githooks`, gli hook di graphify vanno
+spostati lì accanto al pre-commit (altrimenti smettono di girare).
 
 ## 7. Chat di progetto e handoff (GM, 2026-10-04)
 

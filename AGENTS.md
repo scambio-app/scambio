@@ -12,10 +12,23 @@ datate con il metodo usato.
 2. **Misura prima, leggi dopo.** Il comportamento Bluetooth/audio non si deduce dalla prosa né
    dalla memoria: se una spec dipende da un comportamento non misurato in `hardware-lab.md`,
    fermati e segnalalo.
-3. Usa graphify (quando il codice esiste): `graphify query` prima di `grep`, `graphify affected`
-   prima di toccare un simbolo. Un documento sbagliato si corregge, non se ne scrive uno nuovo
-   accanto.
-4. Il brain AGVM `scambio_brain` è solo consultivo: non vince mai su repo e misure.
+3. **Come si cerca (vincolante, ogni chat e ogni sessione Codex):**
+   - **Codice e documenti → graphify.** `graphify query "<domanda>"` per capire,
+     `graphify affected "<simbolo>"` prima di toccare qualcosa, `graphify path "<a>" "<b>"`
+     per i collegamenti. Mai `grep`/`rg`/`find` a tentoni.
+   - **Contesto di progetto (perché, storia, decisioni) → brain `scambio_brain`.**
+     Codex usa **solo** il server MCP `agvm-scambio` (fisso su `scambio_brain`, sola lettura);
+     non usa mai `agvm-local-memory-os`, che è di Kuchl. Le chat Claude passano sempre
+     `brain_id="scambio_brain"` esplicito.
+   - `grep` è ammesso solo come ultima risorsa, quando graphify e brain non rispondono, e va
+     dichiarato nel report con il motivo.
+   - Il brain non sostituisce la lettura del codice né le misure: in caso di conflitto vincono
+     repo e `hardware-lab.md`; una memoria del brain va verificata prima di usarla come fatto.
+4. **Divieti sul brain:** mai `select_brain`, `create_brain` o altre operazioni sul registro
+   (cambierebbero il brain attivo di Kuchl); mai scrivere su `kuchl_brain`.
+5. **Tieni aggiornato:** il grafo si ricostruisce da solo a ogni commit (hook post-commit);
+   dopo un tratto lungo senza commit lancia `graphify update .`. A fine unità: tracker, decisioni,
+   hardware-lab e, alle milestone, il brain (vedi `docs/context/04-ai-workflow-rules.md` §6).
 
 ## Proprietà dei file (vincolante)
 
