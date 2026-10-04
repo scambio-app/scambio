@@ -137,3 +137,8 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     più o che il predefinito è già cambiato. Senza sink salvato non si scrive lo stato.
     La sottoscrizione decodifica UTF-8 con sostituzione; JSON completo malformato o
     eccezioni di lettura invalidano il backend e riavviano una sola sottoscrizione.
+42. Codex — Il segnale pubblico `Error` separa codice stabile e descrizione tecnica
+    inglese tramite una mappa dell'esecutore; la policy continua a produrre solo codici.
+    Nessun nuovo codice o firma D-Bus. C7 conserva `sink_timeout` dopo INGRESSO come
+    richiesto dalla spec corretta; `connect_timeout` resta invariato (voce 32 ora
+    confermata dall'elenco dei reason di §3.2.1).

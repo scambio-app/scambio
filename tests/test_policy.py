@@ -3,259 +3,829 @@ from dataclasses import replace
 import pytest
 
 from scambio.config import Policy
-from scambio.core.policy import Context, Event, step
+from scambio.core.policy import Action, Context, Event, step
 
-# One named case per table row; branches and procedures are checked below.
+
+# Explicit expectations from spec §3.1.5. These constants describe action records,
+# not calls to the policy or an alternative state machine.
+def cancel(*names):
+    return [Action("CancelTimer", name) for name in names]
+
+
+def start(name, milliseconds):
+    return Action("StartTimer", name, milliseconds)
+
+
+def transition(before, after, reason="availability"):
+    return Action("EmitTransition", transition=(before, after, reason))
+
+
+ENTER = cancel("CONNECT", "SINK")
+RELEASE = [
+    *cancel("IDLE", "GRAB_DELAY", "CONNECT", "SINK"),
+    Action("RestoreRouting"),
+    Action("Disconnect"),
+    start("RELEASE", 10000),
+]
+GRAB = [Action("Connect"), start("CONNECT", 10000)]
+SLEEP_RELEASE = [Action("ReleaseSleepInhibitor"), *cancel("SLEEP")]
+
+# name, initial context, event, context changes, complete ordered actions
 CASES = [
     (
         "G1",
-        {"blocked_until_silence": True},
+        {"blocked_until_silence": True, "audio_active": True},
         Event("AudioActive", False),
-        "unavailable",
+        {"audio_active": False, "blocked_until_silence": False},
         [],
     ),
-    ("G2", {}, Event("DeviceSinkAppeared", "bt"), "unavailable", []),
-    ("G3", {}, Event("Locked", True), "unavailable", []),
-    ("G4", {}, Event("Sleep", True), "unavailable", ["StartTimer"]),
-    ("G5", {}, Event("TimerFired", "SLEEP"), "unavailable", ["ReleaseSleepInhibitor"]),
-    ("G6", {}, Event("SetPriority", True), "unavailable", ["SavePriority"]),
+    ("G2", {}, Event("DeviceSinkAppeared", "bt"), {"sink_ready": True}, []),
+    (
+        "G2-connected",
+        {},
+        Event("DeviceConnected", True),
+        {"device_connected": True},
+        [],
+    ),
+    (
+        "G2-gone",
+        {"sink_ready": True},
+        Event("DeviceSinkGone"),
+        {"sink_ready": False},
+        [],
+    ),
+    ("G3", {}, Event("Locked", True), {"locked": True}, []),
+    ("G4", {}, Event("Sleep", True), {"sleeping": True}, [start("SLEEP", 4000)]),
+    (
+        "G4-wake",
+        {"sleeping": True},
+        Event("Sleep", False),
+        {"sleeping": False},
+        cancel("SLEEP"),
+    ),
+    (
+        "G5",
+        {"sleeping": True},
+        Event("TimerFired", "SLEEP"),
+        {},
+        [Action("ReleaseSleepInhibitor")],
+    ),
+    (
+        "G6",
+        {},
+        Event("SetPriority", True),
+        {"priority": True},
+        [Action("SavePriority", True)],
+    ),
     (
         "G7",
-        {"state": "released"},
+        {
+            "state": "released",
+            "priority": True,
+            "blocked_until_silence": True,
+            "last_error": "connect_failed",
+        },
         Event("Switch"),
-        "connecting",
-        ["SavePriority", "Connect"],
+        {
+            "state": "connecting",
+            "priority": False,
+            "blocked_until_silence": False,
+            "last_error": "",
+            "origin": "self",
+            "reason": "switch",
+        },
+        [
+            Action("SavePriority", False),
+            *GRAB,
+            transition("released", "connecting", "switch"),
+        ],
     ),
     (
         "G8",
-        {"state": "on_pc", "sleeping": True},
+        {"state": "on_pc", "sleeping": True, "routed": True, "pending": "grab"},
         Event("Availability", False),
-        "unavailable",
-        ["RestoreRouting", "ReleaseSleepInhibitor"],
+        {"state": "unavailable", "routed": False, "pending": "none"},
+        [
+            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE"),
+            Action("RestoreRouting"),
+            *SLEEP_RELEASE,
+            transition("on_pc", "unavailable"),
+        ],
     ),
-    ("G9", {"state": "on_pc"}, Event("AudioBackend", False), "on_pc", ["EmitError"]),
+    (
+        "G9",
+        {
+            "state": "on_pc",
+            "audio_active": True,
+            "device_connected": True,
+            "sink_ready": True,
+            "priority": True,
+            "routed": True,
+            "pending": "release",
+            "pending_reason": "priority",
+            "origin": "self",
+            "reason": "switch",
+            "blocked_until_silence": True,
+        },
+        Event("AudioBackend", False),
+        {"last_error": "audio_backend_down"},
+        [Action("EmitError", "audio_backend_down")],
+    ),
+    (
+        "G9-recovered",
+        {
+            "state": "on_pc",
+            "audio_active": True,
+            "device_connected": True,
+            "routed": True,
+            "last_error": "audio_backend_down",
+        },
+        Event("AudioBackend", True),
+        {},
+        [],
+    ),
     (
         "G10",
-        {"state": "releasing", "sleeping": True},
+        {"state": "releasing", "sleeping": True, "pending": "grab"},
         Event("DisconnectResult"),
-        "released",
-        ["ReleaseSleepInhibitor"],
+        {"state": "released", "pending": "none"},
+        [*cancel("RELEASE"), transition("releasing", "released"), *SLEEP_RELEASE],
     ),
-    ("G11", {}, Event("Availability", True), "released", ["EmitTransition"]),
-    ("G12", {"state": "released"}, Event("ConnectResult"), "released", []),
+    (
+        "G10-eligible",
+        {"state": "releasing", "audio_active": True},
+        Event("DisconnectResult"),
+        {"state": "released"},
+        [
+            *cancel("RELEASE"),
+            transition("releasing", "released"),
+            start("GRAB_DELAY", 1000),
+        ],
+    ),
+    (
+        "G11",
+        {},
+        Event("Availability", True),
+        {"state": "released"},
+        [transition("unavailable", "released")],
+    ),
+    (
+        "G12",
+        {
+            "state": "released",
+            "last_error": "connect_failed",
+            "blocked_until_silence": True,
+        },
+        Event("ConnectResult"),
+        {},
+        [],
+    ),
     (
         "R1",
         {"state": "released"},
         Event("AudioActive", True),
-        "released",
-        ["StartTimer"],
+        {"audio_active": True},
+        [start("GRAB_DELAY", 1000)],
     ),
     (
         "R2",
-        {"state": "released"},
+        {"state": "released", "audio_active": True, "blocked_until_silence": True},
         Event("AudioActive", False),
-        "released",
-        ["CancelTimer"],
+        {"audio_active": False, "blocked_until_silence": False},
+        cancel("GRAB_DELAY"),
+    ),
+    (
+        "R2-priority",
+        {"state": "released"},
+        Event("SetPriority", True),
+        {"priority": True},
+        [Action("SavePriority", True), *cancel("GRAB_DELAY")],
+    ),
+    (
+        "R2-locked",
+        {"state": "released"},
+        Event("Locked", True),
+        {"locked": True},
+        cancel("GRAB_DELAY"),
     ),
     (
         "R3",
         {"state": "released"},
         Event("Sleep", True),
-        "released",
-        ["ReleaseSleepInhibitor"],
+        {"sleeping": True},
+        [
+            start("SLEEP", 4000),
+            *cancel("GRAB_DELAY", "SLEEP"),
+            Action("ReleaseSleepInhibitor"),
+        ],
     ),
     (
         "R4",
-        {"state": "released", "audio_active": True},
+        {"state": "released", "audio_active": True, "last_error": "sink_timeout"},
         Event("TimerFired", "GRAB_DELAY"),
-        "connecting",
-        ["Connect"],
+        {
+            "state": "connecting",
+            "origin": "self",
+            "last_error": "",
+            "reason": "audio_started",
+        },
+        [*GRAB, transition("released", "connecting", "audio_started")],
     ),
     (
         "R5",
         {"state": "released"},
         Event("DeviceConnected", True),
-        "connecting",
-        ["StartTimer"],
+        {"state": "connecting", "device_connected": True, "reason": "external_connect"},
+        [start("SINK", 5000), transition("released", "connecting", "external_connect")],
     ),
-    ("R6", {"state": "released"}, Event("Switch"), "connecting", ["Connect"]),
+    (
+        "R5-sink-ready",
+        {
+            "state": "released",
+            "sink_ready": True,
+            "priority": True,
+            "origin": "self",
+            "last_error": "connect_failed",
+        },
+        Event("DeviceConnected", True),
+        {
+            "state": "on_pc",
+            "device_connected": True,
+            "origin": "external",
+            "reason": "external_connect",
+            "last_error": "",
+            "routed": True,
+        },
+        [
+            *ENTER,
+            Action("RouteToDevice"),
+            start("IDLE", 120000),
+            transition("released", "on_pc", "external_connect"),
+        ],
+    ),
+    (
+        "R6",
+        {"state": "released"},
+        Event("Switch"),
+        {"state": "connecting", "origin": "self", "reason": "switch"},
+        [
+            Action("SavePriority", False),
+            *GRAB,
+            transition("released", "connecting", "switch"),
+        ],
+    ),
+    (
+        "R6-locked",
+        {
+            "state": "released",
+            "locked": True,
+            "priority": True,
+            "blocked_until_silence": True,
+        },
+        Event("Switch"),
+        {"priority": False, "blocked_until_silence": False},
+        [Action("SavePriority", False)],
+    ),
+    (
+        "R6-sleeping",
+        {
+            "state": "released",
+            "sleeping": True,
+            "priority": True,
+            "blocked_until_silence": True,
+        },
+        Event("Switch"),
+        {"priority": False, "blocked_until_silence": False},
+        [Action("SavePriority", False)],
+    ),
     (
         "C1",
         {"state": "connecting"},
         Event("ConnectResult"),
-        "connecting",
-        ["StartTimer"],
+        {},
+        [*cancel("CONNECT"), start("SINK", 5000)],
     ),
     (
         "C2",
         {"state": "connecting"},
         Event("ConnectResult", "org.bluez.Error.InProgress"),
-        "connecting",
+        {},
         [],
     ),
     (
         "C3",
-        {"state": "connecting", "device_connected": True},
+        {
+            "state": "connecting",
+            "device_connected": True,
+            "last_error": "connect_failed",
+        },
         Event("DeviceSinkAppeared", "bt"),
-        "on_pc",
-        ["RouteToDevice"],
+        {"state": "on_pc", "sink_ready": True, "routed": True, "last_error": ""},
+        [
+            *ENTER,
+            Action("RouteToDevice"),
+            start("IDLE", 120000),
+            transition("connecting", "on_pc"),
+        ],
+    ),
+    (
+        "C3-connected",
+        {"state": "connecting", "sink_ready": True, "audio_active": True},
+        Event("DeviceConnected", True),
+        {"state": "on_pc", "device_connected": True, "routed": True},
+        [*ENTER, Action("RouteToDevice"), transition("connecting", "on_pc")],
     ),
     (
         "C4",
-        {"state": "connecting"},
+        {"state": "connecting", "audio_active": True, "pending": "release"},
         Event("ConnectResult", "org.bluez.Error.Failed"),
-        "released",
-        ["EmitError"],
+        {
+            "state": "released",
+            "blocked_until_silence": True,
+            "pending": "none",
+            "reason": "connect_failed",
+            "last_error": "connect_failed",
+        },
+        [
+            Action("EmitError", "connect_failed"),
+            *ENTER,
+            transition("connecting", "released", "connect_failed"),
+        ],
+    ),
+    (
+        "C4-connected",
+        {
+            "state": "connecting",
+            "device_connected": True,
+            "audio_active": True,
+            "routed": True,
+        },
+        Event("ConnectResult", "org.bluez.Error.Failed"),
+        {
+            "state": "releasing",
+            "blocked_until_silence": True,
+            "routed": False,
+            "reason": "connect_failed",
+            "last_error": "connect_failed",
+        },
+        [
+            Action("EmitError", "connect_failed"),
+            *RELEASE,
+            transition("connecting", "releasing", "connect_failed"),
+        ],
     ),
     (
         "C5",
-        {"state": "connecting"},
+        {"state": "connecting", "audio_active": True},
         Event("TimerFired", "CONNECT"),
-        "releasing",
-        ["Disconnect"],
+        {
+            "state": "releasing",
+            "blocked_until_silence": True,
+            "reason": "connect_timeout",
+            "last_error": "connect_timeout",
+        },
+        [
+            Action("EmitError", "connect_timeout"),
+            *RELEASE,
+            transition("connecting", "releasing", "connect_timeout"),
+        ],
     ),
     (
         "C6",
-        {"state": "connecting", "origin": "self"},
+        {"state": "connecting", "origin": "self", "audio_active": True},
         Event("TimerFired", "SINK"),
-        "releasing",
-        ["Disconnect"],
+        {
+            "state": "releasing",
+            "blocked_until_silence": True,
+            "reason": "sink_timeout",
+            "last_error": "sink_timeout",
+        },
+        [
+            Action("EmitError", "sink_timeout"),
+            *RELEASE,
+            transition("connecting", "releasing", "sink_timeout"),
+        ],
     ),
     (
         "C7",
-        {"state": "connecting", "origin": "external"},
+        {"state": "connecting", "origin": "external", "device_connected": True},
         Event("TimerFired", "SINK"),
-        "on_pc",
-        ["EmitError"],
+        {"state": "on_pc", "reason": "sink_timeout", "last_error": "sink_timeout"},
+        [
+            *ENTER,
+            start("IDLE", 120000),
+            transition("connecting", "on_pc", "sink_timeout"),
+            Action("EmitError", "sink_timeout"),
+        ],
     ),
     (
         "C8",
-        {"state": "connecting", "origin": "self"},
+        {
+            "state": "connecting",
+            "origin": "self",
+            "device_connected": True,
+            "audio_active": True,
+        },
         Event("DeviceConnected", False),
-        "released",
-        ["EmitError"],
+        {
+            "state": "released",
+            "device_connected": False,
+            "blocked_until_silence": True,
+            "reason": "connect_failed",
+            "last_error": "connect_failed",
+        },
+        [
+            *ENTER,
+            Action("EmitError", "connect_failed"),
+            transition("connecting", "released", "connect_failed"),
+        ],
+    ),
+    (
+        "C8-external",
+        {"state": "connecting", "device_connected": True, "audio_active": True},
+        Event("DeviceConnected", False),
+        {
+            "state": "released",
+            "device_connected": False,
+            "reason": "external_disconnect",
+        },
+        [
+            *ENTER,
+            transition("connecting", "released", "external_disconnect"),
+            start("GRAB_DELAY", 1000),
+        ],
     ),
     (
         "C9",
         {"state": "connecting"},
         Event("SetPriority", True),
-        "connecting",
-        ["SavePriority"],
+        {"priority": True, "pending": "release", "pending_reason": "priority"},
+        [Action("SavePriority", True)],
     ),
     (
         "C10",
-        {"state": "connecting", "pending": "release"},
+        {
+            "state": "connecting",
+            "priority": True,
+            "pending": "release",
+            "pending_reason": "priority",
+            "blocked_until_silence": True,
+        },
         Event("Switch"),
-        "connecting",
-        ["SavePriority"],
+        {"priority": False, "blocked_until_silence": False, "pending": "none"},
+        [Action("SavePriority", False)],
     ),
-    ("O1", {"state": "on_pc"}, Event("AudioActive", False), "on_pc", ["StartTimer"]),
-    ("O2", {"state": "on_pc"}, Event("AudioActive", True), "on_pc", ["CancelTimer"]),
+    (
+        "O1",
+        {"state": "on_pc", "audio_active": True},
+        Event("AudioActive", False),
+        {"audio_active": False},
+        [start("IDLE", 120000)],
+    ),
+    (
+        "O2",
+        {"state": "on_pc"},
+        Event("AudioActive", True),
+        {"audio_active": True},
+        cancel("IDLE"),
+    ),
     (
         "O3",
-        {"state": "on_pc"},
+        {"state": "on_pc", "routed": True},
         Event("TimerFired", "IDLE"),
-        "releasing",
-        ["Disconnect"],
+        {"state": "releasing", "routed": False, "reason": "idle_timeout"},
+        [*RELEASE, transition("on_pc", "releasing", "idle_timeout")],
     ),
-    ("O4", {"state": "on_pc"}, Event("Locked", True), "releasing", ["Disconnect"]),
-    ("O5", {"state": "on_pc"}, Event("Sleep", True), "releasing", ["Disconnect"]),
+    (
+        "O4",
+        {"state": "on_pc", "routed": True},
+        Event("Locked", True),
+        {"state": "releasing", "locked": True, "routed": False, "reason": "locked"},
+        [*RELEASE, transition("on_pc", "releasing", "locked")],
+    ),
+    (
+        "O5",
+        {"state": "on_pc", "routed": True},
+        Event("Sleep", True),
+        {"state": "releasing", "sleeping": True, "routed": False, "reason": "sleep"},
+        [start("SLEEP", 4000), *RELEASE, transition("on_pc", "releasing", "sleep")],
+    ),
     (
         "O6",
-        {"state": "on_pc"},
+        {"state": "on_pc", "routed": True, "blocked_until_silence": True},
         Event("Switch"),
-        "releasing",
-        ["Disconnect", "SavePriority"],
+        {"state": "releasing", "priority": True, "routed": False, "reason": "switch"},
+        [
+            Action("SavePriority", True),
+            *RELEASE,
+            transition("on_pc", "releasing", "switch"),
+        ],
     ),
-    ("O7", {"state": "on_pc"}, Event("SetPriority", True), "releasing", ["Disconnect"]),
+    (
+        "O7",
+        {"state": "on_pc", "routed": True},
+        Event("SetPriority", True),
+        {"state": "releasing", "priority": True, "routed": False, "reason": "priority"},
+        [
+            Action("SavePriority", True),
+            *RELEASE,
+            transition("on_pc", "releasing", "priority"),
+        ],
+    ),
     (
         "O8",
-        {"state": "on_pc"},
+        {
+            "state": "on_pc",
+            "routed": True,
+            "device_connected": True,
+            "audio_active": True,
+        },
         Event("DeviceConnected", False),
-        "released",
-        ["RestoreRouting"],
+        {
+            "state": "released",
+            "device_connected": False,
+            "routed": False,
+            "blocked_until_silence": True,
+            "reason": "external_disconnect",
+        },
+        [
+            *cancel("IDLE", "SINK"),
+            Action("RestoreRouting"),
+            transition("on_pc", "released", "external_disconnect"),
+        ],
     ),
     (
         "O9",
-        {"state": "on_pc", "device_connected": True},
+        {
+            "state": "on_pc",
+            "device_connected": True,
+            "routed": True,
+            "sink_ready": True,
+        },
         Event("DeviceSinkGone"),
-        "on_pc",
-        ["StartTimer"],
+        {"sink_ready": False, "routed": False},
+        [start("SINK", 5000)],
     ),
     (
         "O10",
         {"state": "on_pc"},
         Event("DeviceSinkAppeared", "bt"),
-        "on_pc",
-        ["RouteToDevice"],
+        {"sink_ready": True, "routed": True},
+        [*cancel("SINK"), Action("RouteToDevice")],
     ),
     (
         "O11",
-        {"state": "on_pc"},
+        {"state": "on_pc", "routed": True, "audio_active": True},
         Event("TimerFired", "SINK"),
-        "releasing",
-        ["EmitError", "Disconnect"],
+        {
+            "state": "releasing",
+            "routed": False,
+            "blocked_until_silence": True,
+            "reason": "sink_lost",
+            "last_error": "sink_lost",
+        },
+        [
+            Action("EmitError", "sink_lost"),
+            *RELEASE,
+            transition("on_pc", "releasing", "sink_lost"),
+        ],
     ),
     (
         "L1",
         {"state": "releasing"},
         Event("DisconnectResult"),
-        "released",
-        ["CancelTimer"],
+        {"state": "released"},
+        [*cancel("RELEASE"), transition("releasing", "released")],
+    ),
+    (
+        "L1-disconnected",
+        {"state": "releasing", "device_connected": True},
+        Event("DeviceConnected", False),
+        {"state": "released", "device_connected": False},
+        [*cancel("RELEASE"), transition("releasing", "released")],
+    ),
+    (
+        "L1-grab-locked",
+        {"state": "releasing", "pending": "grab", "locked": True, "audio_active": True},
+        Event("DisconnectResult"),
+        {"state": "released", "pending": "none"},
+        [*cancel("RELEASE"), transition("releasing", "released")],
     ),
     (
         "L2",
-        {"state": "releasing", "device_connected": True},
+        {"state": "releasing", "device_connected": True, "pending": "grab"},
         Event("DisconnectResult", "failed"),
-        "on_pc",
-        ["EmitError", "RouteToDevice"],
+        {
+            "state": "on_pc",
+            "pending": "none",
+            "routed": True,
+            "reason": "disconnect_failed",
+            "last_error": "disconnect_failed",
+        },
+        [
+            *cancel("RELEASE"),
+            Action("EmitError", "disconnect_failed"),
+            Action("RouteToDevice"),
+            start("IDLE", 120000),
+            transition("releasing", "on_pc", "disconnect_failed"),
+        ],
     ),
-    ("L3", {"state": "releasing"}, Event("Switch"), "releasing", ["SavePriority"]),
+    (
+        "L3",
+        {"state": "releasing", "priority": True, "blocked_until_silence": True},
+        Event("Switch"),
+        {"pending": "grab", "priority": False, "blocked_until_silence": False},
+        [Action("SavePriority", False)],
+    ),
     (
         "L4",
-        {"state": "releasing", "pending": "grab"},
+        {"state": "releasing", "pending": "grab", "blocked_until_silence": True},
         Event("Switch"),
-        "releasing",
-        ["SavePriority"],
+        {"pending": "none", "priority": True},
+        [Action("SavePriority", True)],
     ),
-    ("U1", {}, Event("Availability", True), "released", ["EmitTransition"]),
-    ("U2", {}, Event("Switch"), "unavailable", ["EmitError"]),
+    (
+        "L4-priority",
+        {"state": "releasing", "pending": "grab"},
+        Event("SetPriority", True),
+        {"pending": "none", "priority": True},
+        [Action("SavePriority", True)],
+    ),
+    (
+        "L4-locked",
+        {"state": "releasing", "pending": "grab"},
+        Event("Locked", True),
+        {"pending": "none", "locked": True},
+        [],
+    ),
+    (
+        "L4-sleeping",
+        {"state": "releasing", "pending": "grab"},
+        Event("Sleep", True),
+        {"pending": "none", "sleeping": True},
+        [start("SLEEP", 4000)],
+    ),
+    (
+        "U1",
+        {"origin": "self"},
+        Event("Availability", True),
+        {"state": "released", "origin": "external"},
+        [transition("unavailable", "released")],
+    ),
+    (
+        "U1-connected",
+        {"device_connected": True, "origin": "self"},
+        Event("Availability", True),
+        {"state": "connecting", "origin": "external"},
+        [start("SINK", 5000), transition("unavailable", "connecting")],
+    ),
+    (
+        "U1-sink-ready",
+        {
+            "device_connected": True,
+            "sink_ready": True,
+            "priority": True,
+            "origin": "self",
+            "last_error": "connect_failed",
+        },
+        Event("Availability", True),
+        {"state": "on_pc", "origin": "external", "routed": True, "last_error": ""},
+        [
+            *ENTER,
+            Action("RouteToDevice"),
+            start("IDLE", 120000),
+            transition("unavailable", "on_pc"),
+        ],
+    ),
+    (
+        "U2",
+        {"priority": True, "blocked_until_silence": True},
+        Event("Switch"),
+        {"last_error": "device_unavailable"},
+        [Action("EmitError", "device_unavailable")],
+    ),
 ]
 
 
-@pytest.mark.parametrize(
-    "rule,values,event,state,expected", CASES, ids=[r[0] for r in CASES]
-)
-def test_rules(rule, values, event, state, expected):
+def assert_step(values, event, changes, actions, config=None):
     original = Context(**values)
-    c, actions = step(original, event, Policy())
-    assert original == Context(**values)  # no mutation
-    assert c.state == state
-    names = [a.kind for a in actions]
-    assert all(e in names for e in expected)
-    if not expected:
-        assert not actions
-    if event.kind == "AudioActive":
-        assert c.audio_active is event.value
-        if not event.value:
-            assert not c.blocked_until_silence
-    if rule == "G2":
-        assert c.sink_ready
-    if rule == "G3":
-        assert c.locked
-    if rule == "G4":
-        assert c.sleeping
-    if rule in {"C10", "L4"}:
-        assert c.pending == "none"
-    if rule == "C9":
-        assert (c.pending, c.pending_reason) == ("release", "priority")
-    if rule == "L3":
-        assert c.pending == "grab"
-    if rule == "U2":
-        assert c.priority == original.priority
-        assert "SavePriority" not in names
-    transitions = [a.transition for a in actions if a.kind == "EmitTransition"]
-    assert bool(transitions) == (c.state != original.state)
+    assert step(original, event, config or Policy()) == (
+        replace(original, **changes),
+        actions,
+    )
+    assert original == Context(**values)
+
+
+@pytest.mark.parametrize(
+    "rule,values,event,changes,actions", CASES, ids=[r[0] for r in CASES]
+)
+def test_rules(rule, values, event, changes, actions):
+    assert_step(values, event, changes, actions)
+
+
+@pytest.mark.parametrize("rule", ["C4", "C8", "C8-external", "O8", "U1"])
+def test_sleeping_exits_release_inhibitor(rule):
+    _, values, event, changes, actions = next(case for case in CASES if case[0] == rule)
+    # G10 releases after the transition; sleeping forbids GRAB_DELAY.
+    expected = [action for action in actions if action != start("GRAB_DELAY", 1000)]
+    assert_step(
+        {**values, "sleeping": True}, event, changes, [*expected, *SLEEP_RELEASE]
+    )
+
+
+@pytest.mark.parametrize(
+    "state,events",
+    [
+        (
+            "released",
+            [
+                Event("ConnectResult"),
+                Event("DisconnectResult", "failed"),
+                *[
+                    Event("TimerFired", timer)
+                    for timer in ("CONNECT", "SINK", "RELEASE", "IDLE")
+                ],
+            ],
+        ),
+        (
+            "on_pc",
+            [
+                Event("ConnectResult", "failed"),
+                Event("DisconnectResult"),
+                *[
+                    Event("TimerFired", timer)
+                    for timer in ("CONNECT", "RELEASE", "GRAB_DELAY")
+                ],
+            ],
+        ),
+        (
+            "connecting",
+            [
+                Event("DisconnectResult"),
+                Event("TimerFired", "IDLE"),
+                Event("TimerFired", "RELEASE"),
+                Event("TimerFired", "GRAB_DELAY"),
+            ],
+        ),
+        (
+            "releasing",
+            [
+                Event("ConnectResult"),
+                Event("TimerFired", "CONNECT"),
+                Event("TimerFired", "SINK"),
+                Event("TimerFired", "IDLE"),
+                Event("TimerFired", "GRAB_DELAY"),
+            ],
+        ),
+        (
+            "unavailable",
+            [
+                Event("ConnectResult"),
+                Event("DisconnectResult"),
+                *[
+                    Event("TimerFired", timer)
+                    for timer in ("CONNECT", "SINK", "RELEASE", "IDLE", "GRAB_DELAY")
+                ],
+            ],
+        ),
+    ],
+)
+def test_obsolete_results_and_timers(state, events):
+    for event in events:
+        assert_step(
+            {
+                "state": state,
+                "last_error": "connect_failed",
+                "blocked_until_silence": True,
+            },
+            event,
+            {},
+            [],
+        )
+
+
+def test_late_connect_result_after_c4():
+    before = Context(state="connecting", origin="self", audio_active=True)
+    after, actions = step(before, Event("ConnectResult", "failed"), Policy())
+    assert after == replace(
+        before,
+        state="released",
+        reason="connect_failed",
+        last_error="connect_failed",
+        blocked_until_silence=True,
+    )
+    assert actions == [
+        Action("EmitError", "connect_failed"),
+        *ENTER,
+        transition("connecting", "released", "connect_failed"),
+    ]
+    for result in [
+        "",
+        "failed",
+        "org.bluez.Error.AlreadyConnected",
+        "org.bluez.Error.InProgress",
+    ]:
+        assert step(after, Event("ConnectResult", result), Policy()) == (after, [])
 
 
 @pytest.mark.parametrize("state", ["connecting", "releasing"])

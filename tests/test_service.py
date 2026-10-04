@@ -445,3 +445,107 @@ def test_reload_future_timers_and_property_signals(fake_pactl, bluez_server, tmp
         bus.signal_unsubscribe(sub)
         service.close()
         drain()
+
+
+@pytest.mark.parametrize(
+    "values,event,code,detail",
+    [
+        (
+            {"state": "connecting"},
+            Event("ConnectResult", "failed"),
+            "connect_failed",
+            "BlueZ failed to connect the configured device.",
+        ),
+        (
+            {"state": "connecting"},
+            Event("TimerFired", "CONNECT"),
+            "connect_timeout",
+            "The configured device did not connect before the deadline.",
+        ),
+        (
+            {"state": "connecting", "device_connected": True},
+            Event("TimerFired", "SINK"),
+            "sink_timeout",
+            "The device audio sink did not appear before the deadline.",
+        ),
+        (
+            {"state": "on_pc"},
+            Event("TimerFired", "SINK"),
+            "sink_lost",
+            "The device audio sink was lost and did not return before the deadline.",
+        ),
+        (
+            {"state": "releasing", "device_connected": True},
+            Event("DisconnectResult", "failed"),
+            "disconnect_failed",
+            "The device remains connected after the release attempt.",
+        ),
+        (
+            {},
+            Event("Switch"),
+            "device_unavailable",
+            "The configured device is unavailable in BlueZ.",
+        ),
+        (
+            {"state": "released"},
+            Event("AudioBackend", False),
+            "audio_backend_down",
+            "The pactl audio backend is unavailable.",
+        ),
+    ],
+)
+def test_error_signal_technical_detail(
+    fake_pactl, bluez_server, tmp_path, values, event, code, detail
+):
+    from helpers import gio_bus
+
+    from scambio.core.policy import Context
+
+    config = Config(device=Device(ADDRESS))
+    store = Store(tmp_path / "state.json")
+    bus, system, observer = (
+        gio_bus(Gio.BusType.SESSION),
+        gio_bus(Gio.BusType.SYSTEM),
+        gio_bus(Gio.BusType.SESSION),
+    )
+
+    def factory(emit):
+        return (
+            BlueZ(system, config, emit),
+            Audio(config, store, emit, fake_pactl.command),
+            Session(system, bus, config, emit),
+        )
+
+    service = Service(bus, config, store, tmp_path / "config.toml", factory)
+    signals = []
+    subscription = observer.signal_subscribe(
+        None,
+        INTERFACE,
+        None,
+        PATH,
+        None,
+        Gio.DBusSignalFlags.NONE,
+        lambda *args: signals.append((args[4], args[5].unpack())),
+    )
+    try:
+        assert service.start()
+        spin_until(lambda: service.initialized)
+        drain()
+        signals.clear()
+        service.ctx = Context(**values)
+        service.event(event)
+        spin_until(lambda: any(name == "Error" for name, _ in signals))
+        assert [params for name, params in signals if name == "Error"] == [
+            (code, detail)
+        ]
+        assert code != detail and service.properties()["LastError"].unpack() == code
+        if code == "sink_timeout":
+            assert service.ctx.state == "on_pc"
+            assert signals == [
+                ("Transition", ("connecting", "on_pc", "sink_timeout")),
+                ("Error", (code, detail)),
+            ]
+    finally:
+        observer.signal_unsubscribe(subscription)
+        service.close()
+        drain()

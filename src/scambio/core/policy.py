@@ -236,11 +236,12 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
             enter(True)
         elif timer in {"CONNECT", "SINK"}:
             code = "connect_timeout" if timer == "CONNECT" else "sink_timeout"
-            error(code)
             if timer == "SINK" and c.origin == "external":
                 c = replace(c, reason=code)
                 enter(False)
+                error(code)
             else:
+                error(code)
                 c = replace(c, blocked_until_silence=c.audio_active)
                 release(code)
         elif kind == "DeviceConnected" and not value:

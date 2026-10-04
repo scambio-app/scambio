@@ -21,6 +21,17 @@ from scambio.core.session import Session
 from scambio.state import Store
 
 LOG = logging.getLogger(__name__)
+ERROR_DETAILS = {
+    "connect_failed": "BlueZ failed to connect the configured device.",
+    "connect_timeout": "The configured device did not connect before the deadline.",
+    "sink_timeout": "The device audio sink did not appear before the deadline.",
+    "sink_lost": (
+        "The device audio sink was lost and did not return before the deadline."
+    ),
+    "disconnect_failed": "The device remains connected after the release attempt.",
+    "device_unavailable": "The configured device is unavailable in BlueZ.",
+    "audio_backend_down": "The pactl audio backend is unavailable.",
+}
 Schedule = Callable[[int, Callable[[], bool]], int]
 Factory = Callable[[Emit], tuple[BluetoothPort, AudioPort, SessionPort]]
 
@@ -206,7 +217,7 @@ class Service:
         elif kind == "ReleaseSleepInhibitor":
             self.session.release_inhibitor()
         elif kind == "EmitError":
-            self._signal("Error", GLib.Variant("(ss)", (value, value)))
+            self._signal("Error", GLib.Variant("(ss)", (value, ERROR_DETAILS[value])))
         elif kind == "EmitTransition":
             LOG.info("Transition %s -> %s (%s)", *action.transition)
             self._signal("Transition", GLib.Variant("(sss)", action.transition))
