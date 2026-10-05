@@ -1,6 +1,6 @@
 # Spec 01 — Demone headless
 
-Stato: consegnata (audit 2 ok, in attesa della prova reale di GM) · Autore: Claude · Data: 2026-10-04
+Stato: consegnata, prova reale parziale (correzione anti ping-pong in corso) · Autore: Claude · Data: 2026-10-04
 
 ## 1. Obiettivo
 
@@ -171,9 +171,10 @@ successivo del loop (così `grab_delay_ms = 0` segue la stessa strada di ogni al
 `pending_reason`, `origin` ∈ {`self`, `external`}, `routed`, `reason` (motivo della transizione
 in corso, riusato all'uscita da `connecting` e `releasing`).
 
-**Timer**: `GRAB_DELAY` (`policy.grab_delay_ms`), `IDLE` (`policy.release_idle_seconds`),
+**Timer** (sette): `GRAB_DELAY` (`policy.grab_delay_ms`), `IDLE` (`policy.release_idle_seconds`),
 `CONNECT` (`policy.connect_timeout_seconds`), `SINK` (`policy.sink_timeout_seconds`),
-`RELEASE` (`policy.connect_timeout_seconds`), `SLEEP` (`policy.sleep_release_timeout_seconds`).
+`RELEASE` (`policy.connect_timeout_seconds`), `SLEEP` (`policy.sleep_release_timeout_seconds`),
+`UNBLOCK` (`policy.unblock_silence_seconds`, default 10; aggiunto dopo la prova reale, decisione 45).
 
 **Azioni**: `Connect`, `Disconnect`, `RouteToDevice`, `RestoreRouting`, `StartTimer`,
 `CancelTimer`, `SavePriority(b)`, `ReleaseSleepInhibitor`, `EmitError(code)`,
@@ -204,14 +205,15 @@ in corso, riusato all'uscita da `connecting` e `releasing`).
 
 | # | Evento | Effetto |
 |---|---|---|
-| G1 | `AudioActive(v)` | `audio_active = v`; se `v = false` → `blocked_until_silence = false` |
+| G1 | `AudioActive(v)` | `audio_active = v`; se `v = false` e `blocked_until_silence` → `StartTimer(UNBLOCK)`; se `v = true` → `CancelTimer(UNBLOCK)`. Il blocco **non** si azzera subito: un buco breve fra due stream (Chrome che ricrea lo stream quando cambia l'uscita, M8) non è silenzio |
+| G1b | `TimerFired(UNBLOCK)` | `blocked_until_silence = false` (silenzio continuo di `unblock_silence_seconds`) |
 | G2 | `DeviceConnected(v)`, `DeviceSinkAppeared` / `DeviceSinkGone` | aggiorna `device_connected` / `sink_ready` |
 | G3 | `Locked(v)` | aggiorna `locked` |
 | G4 | `Sleep(v)` | aggiorna `sleeping`; `v = true` → `StartTimer(SLEEP)`; `v = false` → `CancelTimer(SLEEP)` |
 | G5 | `TimerFired(SLEEP)` | `ReleaseSleepInhibitor` (paracadute: logind non aspetta oltre) |
 | G6 | `SetPriority(v)` | `priority = v`, `SavePriority(v)` |
 | G7 | `Switch` | se *destinazione PC*: `priority = true`; altrimenti `priority = false` e `blocked_until_silence = false`; `SavePriority`; poi la riga «switch verso iPhone» o «switch verso PC» dello stato |
-| G8 | `Availability(false)` | annulla tutti i timer tranne `SLEEP`; `RestoreRouting`; `routed = false`; `pending = none`; se `sleeping` → `ReleaseSleepInhibitor`, `CancelTimer(SLEEP)` → `unavailable` (`availability`) |
+| G8 | `Availability(false)` | se lo stato era `on_pc`, `connecting` o `releasing` → `blocked_until_silence = audio_active` (spegnere il Bluetooth è una perdita esterna, M8); annulla tutti i timer tranne `SLEEP` e `UNBLOCK`; `RestoreRouting`; `routed = false`; `pending = none`; se `sleeping` → `ReleaseSleepInhibitor`, `CancelTimer(SLEEP)` → `unavailable` (`availability`) |
 | G9 | `AudioBackend(v)` | `v = false` → `EmitError(audio_backend_down)`; il contesto non cambia (un riavvio di PipeWire non rilascia; al riaggancio l'adattatore riemette tutti i valori, §3.1.2) |
 | G10 | Ingresso in `released` | `pending = none`; se `sleeping` → `ReleaseSleepInhibitor`, `CancelTimer(SLEEP)`; se idoneo → `StartTimer(GRAB_DELAY)` |
 | G11 | Ogni cambio di stato | `EmitTransition(from, to, reason)` |
@@ -260,9 +262,9 @@ Gli eventi non elencati per uno stato hanno solo l'effetto delle regole globali.
 **Conseguenze volute, da non «correggere»:**
 - Con schermo bloccato o Priorità iPhone non c'è presa automatica. Allo sblocco, se l'audio è
   ancora attivo, la presa riparte (R1) dopo `GRAB_DELAY`.
-- Anti ping-pong: dopo una presa fallita, un sink perso o una perdita esterna con audio in
-  corso, nessuna nuova presa automatica finché l'audio non tace almeno una volta (G1). Lo switch
-  manuale prova sempre.
+- Anti ping-pong: dopo una presa fallita, un sink perso, una perdita esterna o il Bluetooth
+  spento con audio in corso, nessuna nuova presa automatica finché l'audio non tace per almeno
+  `unblock_silence_seconds` di fila (G1, G1b, G8). Lo switch manuale prova sempre.
 - Una presa esterna (applet KDE) con Priorità iPhone attiva viene rispettata: il PC tiene il
   dispositivo e lo rilascia per silenzio, blocco o sospensione.
 - Al rilascio con audio in corso (blocco, switch, priorità) l'audio continua dagli altoparlanti
@@ -353,10 +355,11 @@ config non valida.
 |---|---|---|---|
 | `device.address` | str | `""` | MAC `XX:XX:XX:XX:XX:XX` o vuoto |
 | `device.profile` | str | `"generic"` | `generic` \| `meta_glasses`; in questa spec solo validata, nessun effetto |
-| `policy.grab_delay_ms` | int | 1000 | 0–10000 |
+| `policy.grab_delay_ms` | int | 500 (decisione 44; era 1000) | 0–10000 |
 | `policy.release_idle_seconds` | int | 120 | 10–3600 |
 | `policy.connect_timeout_seconds` | int | 10 | 2–60 |
 | `policy.sink_timeout_seconds` | int | 5 | 1–30 |
+| `policy.unblock_silence_seconds` | int | 10 | 1–120 (decisione 45) |
 | `policy.sleep_release_timeout_seconds` | int | 4 | 1–10 (sotto `InhibitDelayMaxUSec` di logind: 30 s su `casa`, M6) |
 | `audio.ignore_roles` | list[str] | `["event", "notification", "test"]` | — |
 | `audio.ignore_apps` | list[str] | `[]` | nomi applicazione o binario |
@@ -561,6 +564,16 @@ dopo comandi riusciti; coda di instradamento con `guard`/`complete` idempotente;
 con `_down` su qualsiasi eccezione) e la mappa punto → commit → test nel report; Codex ha anche
 eseguito i nuovi test contro il codice pre-audit (falliscono, quindi sono sensibili). Esito:
 **ok per la prova reale** (§6.1).
+
+**Prova reale di GM — 2026-10-04/05** (occhiali + iPhone, `release_idle_seconds = 30`).
+Ok: 1–7, 9–13, 15, 17 (presa con 0,5 s percepita «molto più veloce»). **8 non applicabile su
+`casa`**: la sospensione è disattivata a livello di sistema per scelta di GM (target mascherati).
+**14 e 16 falliti, stessa causa**: dopo la perdita esterna (custodia) e dopo il Bluetooth spento e
+riacceso, con il video in corso, Scambio ha ritentato la presa dopo 0,5–2,6 s. Il buco di stream
+creato da Chrome quando cambia l'uscita azzerava l'anti ping-pong (G1), e G8 non trattava il
+Bluetooth spento come perdita esterna. Correzione nella spec: timer `UNBLOCK` (G1, G1b) e G8
+(decisione 45); default di `grab_delay_ms` a 500 (decisione 44). Da ripetere: 14 e 16. 18
+(CPU/RSS reali) misurato da Claude: vedi report.
 
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 

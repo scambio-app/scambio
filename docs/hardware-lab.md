@@ -118,6 +118,20 @@ Metodo: occhiali collegati al PC; `pactl -f json subscribe` con timestamp;
 Conseguenza: con la coalescenza a 50 ms un cambio di profilo di norma non produce nemmeno
 `DeviceSinkGone`; se lo produce, la ricomparsa arriva ben dentro `sink_timeout_seconds`.
 
+## 2026-10-04 — M8: osservazioni di GM durante la prova reale della spec 01
+
+Metodo: Scambio in esecuzione (spec 01, `grab_delay_ms = 500`), YouTube in Chrome sul PC, iPhone
+di GM; osservazione diretta di GM con il log del demone.
+
+| Osservazione | Esito |
+|---|---|
+| Presa con ritardo 0,5 s | percepita «molto più veloce», audio quasi subito |
+| Annuncio vocale degli occhiali alla connessione | presente in una presa precedente, assente nelle successive (non sistematico) |
+| Notifiche dell'iPhone con occhiali sul PC | si sentono negli occhiali **sovrapposte** all'audio del PC |
+| Musica avviata sull'iPhone con occhiali sul PC | suona dagli altoparlanti dell'iPhone (il PC non viene «rubato») |
+| Custodia chiusa con video in riproduzione sul PC | `external_disconnect` dopo ≈ 4 s; uscita tornata alla Scarlett. **Poi, 2,6 s dopo, nuova presa automatica** (fallita dopo 5,2 s perché gli occhiali erano chiusi): Chrome ha ricreato o fermato lo stream durante lo spostamento sulla Scarlett e la breve assenza di stream (> 50 ms) è stata letta come «silenzio», azzerando l'anti ping-pong (G1). Causa dedotta dai tempi, non osservata direttamente |
+| Chiamata WhatsApp: presa dal PC durante la chiamata, poi switch | la voce passa al telefono, poi torna negli occhiali da sola dopo lo switch, ma «ci mette un po'» (scollegamento del PC 2,2 s più la riconnessione dell'iPhone; tempo totale non cronometrato) |
+
 ## Conseguenze per il design
 
 - Il PC non può sapere prima di connettersi se il telefono usa il dispositivo: «non prendere se

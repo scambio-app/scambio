@@ -156,4 +156,7 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     valore): la presa con 1 s gli è sembrata lenta. In più la pausa durante lo scambio (spec 02)
     deve coprire anche l'annuncio vocale degli occhiali alla connessione («connessione stabilita
     su casa»), che ritarda l'audio e non serve: va misurata la sua durata prima della spec 02.
-
+45. Claude — Anti ping-pong più robusto dopo la prova reale (M8): il blocco si azzera solo dopo
+    `policy.unblock_silence_seconds` (default 10 s) di silenzio continuo, non al primo istante
+    senza stream; il Bluetooth spento mentre il dispositivo è sul PC conta come perdita esterna.
+    Motivo: Chrome ricrea lo stream quando cambia l'uscita, e il buco veniva letto come silenzio.
