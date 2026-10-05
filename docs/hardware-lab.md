@@ -9,6 +9,8 @@ PC `casa`: Kubuntu 24.04.5, KDE Plasma 5.27.12, xdg-desktop-portal-kde 5.27.11, 
 PipeWire con pipewire-pulse, Python 3.12.3, PyGObject presente. Dispositivo: Oakley Meta 002Z,
 già accoppiato e `Trusted=yes`; profili A2DP (SBC, SBC-XQ), HFP/HSP (CVSD, mSBC), AVRCP.
 Telefono: iPhone di GM.
+Aggiornamento 2026-10-05 (orchestratore): installato `gettext` 0.21 (`msgfmt`, `xgettext`) via
+`apt-get`, prerequisito della spec 03.
 
 ## 2026-10-04 — M1: presa dal PC con musica sull'iPhone
 
