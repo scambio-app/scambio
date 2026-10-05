@@ -73,6 +73,7 @@ class Service:
         self.player_busy = self.route_busy = self.pumping = False
         self.stopping = False
         self.stop_source = 0
+        self.resume_stop_source = 0
         self.timers: dict[str, int] = {}
         self.idle_release_at = 0
         self.name = ""
@@ -209,6 +210,26 @@ class Service:
         self.route_queue.append((player_gate, operation))
         self._pump()
 
+    @staticmethod
+    def _run_operation(
+        operation: Callable[[Done], None], done: Done, label: str
+    ) -> None:
+        finished = False
+
+        def complete() -> None:
+            nonlocal finished
+            if finished:
+                return
+            finished = True
+            done()
+
+        try:
+            operation(complete)
+        except Exception as exc:
+            # An adapter exception must release its queue, without remote payloads.
+            LOG.error("%s operation failed (%s)", label, type(exc).__name__)
+            complete()
+
     def _pump(self) -> None:
         if self.pumping or self.closed:
             return
@@ -230,7 +251,7 @@ class Service:
                         self.players_done += 1
                         self._pump()
 
-                    operation(players_finished)
+                    self._run_operation(operation, players_finished, "Player")
                 if (
                     not self.stopping
                     and not self.route_busy
@@ -246,7 +267,7 @@ class Service:
                         self.routes_done += 1
                         self._pump()
 
-                    operation(route_finished)
+                    self._run_operation(operation, route_finished, "Routing")
                 if not dispatched:
                     break
         finally:
@@ -299,7 +320,7 @@ class Service:
                     restored()
                     done()
 
-                self.audio.restore(finish)
+                self._run_operation(self.audio.restore, finish, "Restore")
 
             self._queue_route(restore, release_barrier)
         elif kind == "StartTimer":
@@ -453,10 +474,30 @@ class Service:
             return False
 
         self.stop_source = int(
-            GLib.timeout_add(2 * self.config.backend.player_timeout_ms, deadline)
+            GLib.timeout_add(4 * self.config.backend.player_timeout_ms, deadline)
         )
-        # Pending pauses must settle before deciding which entries belong to a grab.
-        self._queue_player(lambda completed: self.players.shutdown(finish))
+
+        # Drain the requested pauses/forget, then give grab recovery its own 2T.
+        # The total stop budget remains 4T, including any pending operation.
+        def shutdown(completed: Done) -> None:
+            def resume_deadline() -> bool:
+                self.resume_stop_source = 0
+                finish()
+                return False
+
+            self.resume_stop_source = int(
+                GLib.timeout_add(
+                    2 * self.config.backend.player_timeout_ms, resume_deadline
+                )
+            )
+
+            def resumed() -> None:
+                finish()
+                completed()
+
+            self._run_operation(self.players.shutdown, resumed, "Player shutdown")
+
+        self._queue_player(shutdown)
 
     def close(self) -> None:
         if self.closed:
@@ -465,6 +506,9 @@ class Service:
         if self.stop_source:
             GLib.source_remove(self.stop_source)
             self.stop_source = 0
+        if self.resume_stop_source:
+            GLib.source_remove(self.resume_stop_source)
+            self.resume_stop_source = 0
         self.player_queue.clear()
         self.route_queue.clear()
         self.players.close()

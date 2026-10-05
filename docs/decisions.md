@@ -255,3 +255,28 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     Le pause/forget già richieste si drenano entro il watchdog, senza avviare
     nuovi instradamenti. Evita di riprendere voci release dopo SIGTERM quando un
     ResumePlayers di L2 aspettava ancora RouteToDevice; regressione sui due kind.
+
+
+## 2026-10-05 — Spec 02, correzioni audit 1 (Codex)
+
+64. Codex — Ogni operazione delle code player/routing riceve un completamento
+    idempotente. Un'eccezione sincrona viene registrata senza payload remoto e
+    completa l'operazione, liberando la coda. RestoreRouting protegge anche il
+    proprio contatore e la disconnessione differita: callback duplicati o tardivi
+    non completano operazioni successive e non decrementano due volte il contatore.
+65. Codex — Correzione del budget di arresto della 60, mantenendo il trattamento
+    delle operazioni accodate della 63: il limite di 2 × player_timeout_ms parte
+    dall'inizio di shutdown/ripresa, dopo il prefisso player già richiesto. Un
+    limite complessivo di 4 × player_timeout_ms decorre da stop e include l'attesa
+    dell'operazione in corso. Entrambi dipendono dalla configurazione e vengono
+    rimossi alla conclusione; esistono solo durante l'arresto. Senza voci grab e
+    senza operazioni pendenti, stop conclude nello stesso giro, senza attesa.
+    Se il tetto complessivo scade, le voci grab persistite restano recuperabili
+    all'avvio seguente, come prima. Nessun nuovo timer della policy.
+66. Codex — Players.close cancella le RPC e completa una sola volta le operazioni
+    pendenti; metodi e callback tardivi non creano client né modificano lo stato.
+    Senza GetId valido, salvataggio/recupero conservano resume_players e registrano
+    un warning: identità sconosciuta non equivale a bus diverso. Il confine Gio
+    valida le risposte come stringa, tupla di nomi o risultato vuoto; niente Any
+    né assert nell'adattatore. Gli errori ai player indicano il nome MPRIS noto,
+    anche per GetNameOwner; il payload remoto non finisce nel log.

@@ -3,7 +3,7 @@
 import logging
 from collections.abc import Callable
 from functools import partial
-from typing import Any, Literal
+from typing import Literal
 
 from gi.repository import Gio, GLib
 
@@ -18,6 +18,32 @@ PATH = "/org/mpris/MediaPlayer2"
 PLAYER = "org.mpris.MediaPlayer2.Player"
 DBUS = "org.freedesktop.DBus"
 Kind = Literal["grab", "release"]
+Reply = str | tuple[str, ...] | None
+
+
+def decode_reply(raw: object, method: str) -> Reply:
+    """Narrow unpacked Gio values at the transport boundary, without coercion."""
+    if not isinstance(raw, tuple):
+        raise ValueError("invalid reply envelope")
+    if method in {"Pause", "Play"}:
+        if raw:
+            raise ValueError("expected empty reply")
+        return None
+    if len(raw) != 1:
+        raise ValueError("expected one reply value")
+    value: object = raw[0]
+    if method == "ListNames":
+        if not isinstance(value, (list, tuple)):
+            raise ValueError("expected name array")
+        names: list[str] = []
+        for name in value:
+            if not isinstance(name, str):
+                raise ValueError("expected bus name string")
+            names.append(name)
+        return tuple(names)
+    if not isinstance(value, str):
+        raise ValueError("expected string reply")
+    return value
 
 
 class Players:
@@ -26,10 +52,25 @@ class Players:
         self.held: dict[PlayerRef, Kind] = {}
         self.bus_id = ""
         self.clients: set[BusClient] = set()
+        self.operations: set[Done] = set()
         self.closed = False
 
     def reload(self, config: Config) -> None:
         self.config = config
+
+    def _completion(self, done: Done) -> Done:
+        finished = False
+
+        def complete() -> None:
+            nonlocal finished
+            if finished:
+                return
+            finished = True
+            self.operations.discard(complete)
+            done()
+
+        self.operations.add(complete)
+        return complete
 
     def _call(
         self,
@@ -38,19 +79,36 @@ class Players:
         interface: str,
         method: str,
         params: GLib.Variant | None,
-        done: Callable[[Any, str], None],
+        done: Callable[[Reply, str], None],
         timeout_ms: int | None = None,
+        *,
+        player: str | None = None,
     ) -> None:
+        if self.closed:
+            done(None, "closed")
+            return
         client = BusClient(
             self.bus, name, timeout_ms or self.config.backend.player_timeout_ms
         )
         self.clients.add(client)
 
-        def finish(reply: Any, error: str) -> None:
+        def finish(raw: object, error: str) -> None:
             self.clients.discard(client)
             client.close()
+            if self.closed:
+                done(None, "closed")
+                return
+            reply: Reply = None
+            if not error:
+                try:
+                    reply = decode_reply(raw, method)
+                except ValueError:
+                    error = "invalid_reply"
             if error:
-                LOG.warning("MPRIS %s failed for %s: %s", method, name, error)
+                # Remote errors and malformed replies may contain titles or URLs.
+                LOG.warning(
+                    "MPRIS %s failed for %s", method, player or "player discovery"
+                )
             done(reply, error)
 
         client.call(path, interface, method, params, finish)
@@ -59,28 +117,42 @@ class Players:
         self,
         method: str,
         params: GLib.Variant | None,
-        done: Callable[[Any, str], None],
+        done: Callable[[Reply, str], None],
         timeout_ms: int | None = None,
+        *,
+        player: str | None = None,
     ) -> None:
         self._call(
-            DBUS, "/org/freedesktop/DBus", DBUS, method, params, done, timeout_ms
+            DBUS,
+            "/org/freedesktop/DBus",
+            DBUS,
+            method,
+            params,
+            done,
+            timeout_ms,
+            player=player,
         )
 
     def _identity(self, done: Done) -> None:
-        if self.bus_id:
+        if self.closed or self.bus_id:
             done()
             return
 
-        def received(reply: Any, error: str) -> None:
-            if not error:
-                self.bus_id = str(reply[0])
+        def received(reply: Reply, error: str) -> None:
+            if not self.closed and not error and isinstance(reply, str):
+                self.bus_id = reply
             done()
 
         self._daemon("GetId", None, received)
 
     def _save(self) -> None:
+        if self.closed:
+            return
+        if not self.bus_id:
+            LOG.warning("Cannot update resume_players without a session bus identity")
+            return
         refs = tuple(ref for ref, kind in self.held.items() if kind == "grab")
-        value = ResumePlayers(self.bus_id, refs) if refs and self.bus_id else None
+        value = ResumePlayers(self.bus_id, refs) if refs else None
         if value == self.store.value.resume_players:
             return
         self.store.value.resume_players = value
@@ -96,17 +168,22 @@ class Players:
         done: Callable[[str, str], None],
         deadline: int,
     ) -> None:
+        if self.closed:
+            done("", "")
+            return
         remaining = (deadline - GLib.get_monotonic_time() + 999) // 1000
         if remaining <= 0:
             LOG.warning("MPRIS read deadline expired for %s", name)
             done("", "")
             return
-        # Read owner and status concurrently. Commands target the unique owner,
-        # never a replacement that acquires the well-known name in the meantime.
+        # Commands target the unique owner, never a replacement process.
         values: dict[str, str] = {}
 
-        def received(key: str, reply: Any, error: str) -> None:
-            values[key] = str(reply[0]) if not error else ""
+        def received(key: str, reply: Reply, error: str) -> None:
+            if self.closed:
+                done("", "")
+                return
+            values[key] = reply if not error and isinstance(reply, str) else ""
             if len(values) == 2:
                 done(values["owner"], values["status"])
 
@@ -115,6 +192,7 @@ class Players:
             GLib.Variant("(s)", (name,)),
             lambda reply, err: received("owner", reply, err),
             remaining,
+            player=name,
         )
         self._call(
             owner or name,
@@ -124,6 +202,7 @@ class Players:
             GLib.Variant("(ss)", (PLAYER, "PlaybackStatus")),
             lambda reply, err: received("status", reply, err),
             remaining,
+            player=name,
         )
 
     def _read_deadline(self) -> int:
@@ -133,25 +212,31 @@ class Players:
         )
 
     def pause(self, kind: Kind, done: Done) -> None:
+        if self.closed:
+            done()
+            return
+        done = self._completion(done)
         deadline = self._read_deadline()
         self.held = dict.fromkeys(self.held, kind)
         self._save()
         # Discovery shares the read budget; no additional watchdog or idle work.
-        discovery: dict[str, object] = {}
+        candidates: tuple[str, ...] | None = None
+        identity_ready = False
 
         def ready() -> None:
-            if len(discovery) != 2:
+            if self.closed:
+                done()
                 return
-            names = discovery["names"]
-            assert isinstance(names, list)
-            candidates = [
-                str(name)
-                for name in names
-                if str(name).startswith(PREFIX)
-                and str(name)[len(PREFIX) :].split(".", 1)[0].casefold()
+            if candidates is None or not identity_ready:
+                return
+            names = [
+                name
+                for name in candidates
+                if name.startswith(PREFIX)
+                and name[len(PREFIX) :].split(".", 1)[0].casefold()
                 not in self.config.audio.ignore_players
             ]
-            pending = len(candidates)
+            pending = len(names)
             if not pending:
                 done()
                 return
@@ -163,35 +248,55 @@ class Players:
                     done()
 
             def read(name: str, owner: str, status: str) -> None:
+                if self.closed:
+                    done()
+                    return
                 if not owner or status != "Playing":
                     finished()
                     return
                 ref = PlayerRef(name, owner)
 
-                def paused(reply: Any, error: str) -> None:
+                def paused(reply: Reply, error: str) -> None:
+                    if self.closed:
+                        done()
+                        return
                     if not error:
                         self.held[ref] = kind
                         self._save()
                         LOG.info("Paused player %s", name)
                     finished()
 
-                self._call(owner, PATH, PLAYER, "Pause", None, paused)
+                self._call(owner, PATH, PLAYER, "Pause", None, paused, player=name)
 
-            for name in candidates:
+            for name in names:
                 self._read(name, None, partial(read, name), deadline)
 
-        def names(reply: Any, error: str) -> None:
-            discovery["names"] = [] if error else reply[0]
+        def listed(reply: Reply, error: str) -> None:
+            nonlocal candidates
+            if self.closed:
+                done()
+                return
+            if not error and isinstance(reply, tuple):
+                candidates = reply
+            else:
+                candidates = ()
+                if not error:
+                    LOG.warning("MPRIS ListNames returned an invalid name array")
             ready()
 
         def identified() -> None:
-            discovery["id"] = self.bus_id
+            nonlocal identity_ready
+            identity_ready = True
             ready()
 
         self._identity(identified)
-        self._daemon("ListNames", None, names)
+        self._daemon("ListNames", None, listed)
 
     def resume(self, done: Done, *, deadline: int | None = None) -> None:
+        if self.closed:
+            done()
+            return
+        done = self._completion(done)
         deadline = deadline if deadline is not None else self._read_deadline()
         pending = len(self.held)
         if not pending:
@@ -205,26 +310,37 @@ class Players:
                 self.forget(done)
 
         def read(ref: PlayerRef, owner: str, status: str) -> None:
+            if self.closed:
+                done()
+                return
             if owner != ref.owner or status not in {"Paused", "Playing"}:
                 finished()
                 return
 
-            def played(reply: Any, error: str) -> None:
+            def played(reply: Reply, error: str) -> None:
+                if self.closed:
+                    done()
+                    return
                 if not error:
                     LOG.info("Resumed player %s", ref.name)
                 finished()
 
-            self._call(ref.owner, PATH, PLAYER, "Play", None, played)
+            self._call(ref.owner, PATH, PLAYER, "Play", None, played, player=ref.name)
 
         for ref in tuple(self.held):
             self._read(ref.name, ref.owner, partial(read, ref), deadline)
 
     def forget(self, done: Done) -> None:
-        self.held.clear()
-        self._save()
+        if not self.closed:
+            self.held.clear()
+            self._save()
         done()
 
     def recover(self, done: Done) -> None:
+        if self.closed:
+            done()
+            return
+        done = self._completion(done)
         deadline = self._read_deadline()
         saved = self.store.value.resume_players
         if saved is None:
@@ -232,7 +348,14 @@ class Players:
             return
 
         def identified() -> None:
-            if saved.bus_id == self.bus_id:
+            if self.closed:
+                done()
+            elif not self.bus_id:
+                LOG.warning(
+                    "Cannot recover resume_players without a session bus identity"
+                )
+                done()
+            elif saved.bus_id == self.bus_id:
                 self.held = dict.fromkeys(saved.players, "grab")
                 self.resume(done, deadline=deadline)
             else:
@@ -241,6 +364,9 @@ class Players:
         self._identity(identified)
 
     def shutdown(self, done: Done) -> None:
+        if self.closed:
+            done()
+            return
         self.held = {ref: kind for ref, kind in self.held.items() if kind == "grab"}
         self.resume(done)
 
@@ -249,3 +375,5 @@ class Players:
         for client in tuple(self.clients):
             client.close()
         self.clients.clear()
+        for done in tuple(self.operations):
+            done()

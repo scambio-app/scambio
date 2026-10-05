@@ -10,7 +10,8 @@ from gi.repository import Gio
 from helpers import drain, gio_bus, spin_until
 
 from scambio.config import Backend, Config
-from scambio.core.players import PATH, PLAYER, PREFIX, Players
+from scambio.core.players import PATH, PLAYER, PREFIX, Players, decode_reply
+from scambio.core.transport import BusClient
 from scambio.state import PlayerRef, ResumePlayers, Store
 
 
@@ -255,15 +256,15 @@ def test_discovery_shares_read_deadline(adapter, player_factory, monkeypatch, ca
     )
     original = adapter._daemon
 
-    def delayed(method, params, done, timeout_ms=None):
+    def delayed(method, params, done, timeout_ms=None, **kwargs):
         if method == "ListNames":
 
             def reply(value, error):
                 GLib.timeout_add(70, lambda: (done(value, error), False)[1])
 
-            original(method, params, reply, timeout_ms)
+            original(method, params, reply, timeout_ms, **kwargs)
         else:
-            original(method, params, done, timeout_ms)
+            original(method, params, done, timeout_ms, **kwargs)
 
     monkeypatch.setattr(adapter, "_daemon", delayed)
     complete(adapter.pause, "grab")
@@ -279,4 +280,184 @@ def test_close_cancels_pending_calls(adapter, player_factory):
     adapter.pause("grab", lambda: done.append(True))
     adapter.close()
     drain(150)
-    assert not done and not adapter.clients and p.calls() == []
+    assert done == [True] and not adapter.clients and p.calls() == []
+
+
+@pytest.mark.parametrize(
+    "method", ["GetId", "ListNames", "GetNameOwner", "Get", "Pause", "Play"]
+)
+def test_close_blocks_late_callbacks(adapter, player_factory, monkeypatch, method):
+    p = player_factory("late")
+    if method == "Play":
+        complete(adapter.pause, "grab")
+    pending = []
+    original = BusClient.call
+
+    def call(client, path, interface, name, params, done):
+        if name == method:
+            pending.append(done)
+        else:
+            original(client, path, interface, name, params, done)
+
+    monkeypatch.setattr(BusClient, "call", call)
+    done = []
+    if method == "Play":
+        adapter.resume(lambda: done.append(True))
+    else:
+        adapter.pause("grab", lambda: done.append(True))
+    spin_until(lambda: pending)
+    before = adapter.store.path.read_bytes() if adapter.store.path.exists() else None
+    saved = adapter.store.value.resume_players
+    adapter.close()
+    assert done == [True]
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("closed adapter performed I/O")
+
+    monkeypatch.setattr(BusClient, "call", unexpected)
+    monkeypatch.setattr(adapter.store, "save", unexpected)
+    replies = {
+        "GetId": (bus_id(),),
+        "ListNames": ([p.name],),
+        "GetNameOwner": (":1.999",),
+        "Get": ("Playing",),
+        "Pause": (),
+        "Play": (),
+    }
+    for callback in pending:
+        callback(replies[method], "")
+        callback(None, "late error")
+    drain()
+    assert done == [True]
+    assert not adapter.clients and not adapter.operations
+    assert adapter.store.value.resume_players == saved
+    assert (
+        adapter.store.path.read_bytes() if adapter.store.path.exists() else None
+    ) == before
+
+
+def test_closed_public_operations_only_complete(adapter, monkeypatch):
+    saved = ResumePlayers("saved-bus", (PlayerRef(PREFIX + "saved", ":1.99"),))
+    adapter.store.value.resume_players = saved
+    adapter.store.save()
+    before = adapter.store.path.read_bytes()
+    adapter.held = dict.fromkeys(saved.players, "grab")
+    adapter.close()
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("closed adapter performed I/O")
+
+    monkeypatch.setattr(BusClient, "__init__", unexpected)
+    monkeypatch.setattr(adapter.store, "save", unexpected)
+    complete(adapter.pause, "grab")
+    for method in (adapter.resume, adapter.recover, adapter.forget, adapter.shutdown):
+        complete(method)
+    assert adapter.held == dict.fromkeys(saved.players, "grab")
+    assert adapter.store.value.resume_players == saved
+    assert adapter.store.path.read_bytes() == before
+
+
+@pytest.mark.parametrize("operation", ["pause", "resume", "forget", "recover"])
+def test_unknown_bus_preserves_saved_players(
+    adapter, player_factory, monkeypatch, caplog, operation
+):
+    p = player_factory("identity")
+    owner = str(dbusmock.BusType.SESSION.get_connection().get_name_owner(p.name))
+    saved = ResumePlayers(bus_id(), (PlayerRef(p.name, owner),))
+    adapter.store.value.resume_players = saved
+    adapter.store.save()
+    before = adapter.store.path.read_bytes()
+    original = adapter._daemon
+
+    def daemon(method, params, done, timeout_ms=None, **kwargs):
+        if method == "GetId":
+            done(None, "failed")
+        else:
+            original(method, params, done, timeout_ms, **kwargs)
+
+    monkeypatch.setattr(adapter, "_daemon", daemon)
+    complete(getattr(adapter, operation), *(["grab"] if operation == "pause" else []))
+    assert adapter.bus_id == ""
+    assert adapter.store.value.resume_players == saved
+    assert adapter.store.path.read_bytes() == before
+    assert p.calls() == (["Pause"] if operation == "pause" else [])
+    assert "without a session bus identity" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "raw,method",
+    [
+        (None, "GetId"),
+        ((), "GetId"),
+        ((42,), "Get"),
+        (("bad",), "ListNames"),
+        (([42],), "ListNames"),
+        (("unexpected",), "Pause"),
+    ],
+)
+def test_invalid_transport_reply(raw, method):
+    with pytest.raises(ValueError):
+        decode_reply(raw, method)
+
+
+def test_malformed_discovery_completes(adapter, monkeypatch, caplog):
+    original = BusClient.call
+
+    def call(client, path, interface, method, params, done):
+        if method == "ListNames":
+            done(([42],), "")
+        else:
+            original(client, path, interface, method, params, done)
+
+    monkeypatch.setattr(BusClient, "call", call)
+    complete(adapter.pause, "grab")
+    assert not adapter.clients and not adapter.held
+    assert "MPRIS ListNames failed" in caplog.text
+
+
+def test_error_logs_player_without_remote_content(adapter, player_factory, caplog):
+    p = player_factory(
+        "private_error",
+        pause=(
+            "raise dbus.exceptions.DBusException("
+            '"Secret title https://private.invalid/video", name="org.test.Denied")'
+        ),
+    )
+    complete(adapter.pause, "grab")
+    assert f"MPRIS Pause failed for {p.name}" in caplog.text
+    assert "Secret title" not in caplog.text and "https://" not in caplog.text
+    caplog.clear()
+    name = PREFIX + "missing"
+    result = []
+    adapter._read(
+        name,
+        None,
+        lambda owner, status: result.append((owner, status)),
+        adapter._read_deadline(),
+    )
+    spin_until(lambda: result)
+    assert result == [("", "")]
+    assert f"MPRIS GetNameOwner failed for {name}" in caplog.text
+    assert "org.freedesktop.DBus" not in caplog.text
+    assert "Secret title" not in caplog.text and "https://" not in caplog.text
+
+
+def test_close_during_recovery_preserves_state(adapter, monkeypatch):
+    saved = ResumePlayers(bus_id(), (PlayerRef(PREFIX + "saved", ":1.99"),))
+    adapter.store.value.resume_players = saved
+    adapter.store.save()
+    before = adapter.store.path.read_bytes()
+    pending, done = [], []
+    monkeypatch.setattr(
+        BusClient,
+        "call",
+        lambda client, path, iface, method, params, callback: pending.append(callback),
+    )
+    adapter.recover(lambda: done.append(True))
+    assert len(pending) == 1
+    adapter.close()
+    pending[0]((saved.bus_id,), "")
+    assert done == [True]
+    assert len(pending) == 1 and not adapter.clients and not adapter.operations
+    assert adapter.store.value.resume_players == saved
+    assert adapter.store.path.read_bytes() == before

@@ -92,7 +92,7 @@ def test_grab_parallel_connect_resume_after_route(executor, player_factory):
     s.event(Event("AudioActive", False))
     s.event(Event("DeviceConnected", True))
     s.event(Event("DeviceSinkAppeared"))
-    assert s.ctx.held and s.idle_release_at == 0 and ports.calls[-1] == "route"
+    assert s.ctx.held and s.idle_release_at == 0 and ports.calls == ["connect", "route"]
     s.event(Event("TimerFired", "RESUME"))
     drain()
     assert p.calls() == ["Pause"]
@@ -135,7 +135,7 @@ def test_error_while_pause_pending(executor, player_factory):
     assert p.calls() == ["Pause"]
     ports.finish()
     spin_until(lambda: p.calls() == ["Pause", "Play"])
-    assert ports.calls[-1] == "disconnect"
+    assert ports.calls == ["connect", "restore", "disconnect"]
     s.event(Event("DisconnectResult"))
     s.event(Event("AudioActive", True))
     assert s.ctx.state == "released" and "GRAB_DELAY" not in s.timers
@@ -154,7 +154,7 @@ def test_release_during_resume_stays_paused(executor, player_factory, event):
     s.event(Event("TimerFired", "RESUME"))
     if event.kind == "Sleep":
         s.event(Event("TimerFired", "SLEEP"))
-        assert "inhibitor" in ports.calls
+        assert ports.calls == ["inhibitor"]
     spin_until(lambda: "restore" in ports.calls)
     ports.finish()
     s.event(Event("DisconnectResult"))
@@ -181,7 +181,7 @@ def test_cross_queue_dependencies_do_not_deadlock(executor, player_factory):
     spin_until(lambda: ports.calls == ["route", "restore"])
     assert p.calls() == ["Pause", "Play", "Pause"]
     ports.finish()
-    assert ports.calls[-1] == "disconnect"
+    assert ports.calls == ["route", "restore", "disconnect"]
 
 
 @pytest.mark.parametrize("same_bus", [True, False])
@@ -262,6 +262,7 @@ def test_sigterm_process(daemon, fake_pactl, tmp_path, player_factory, kind):
         fake_pactl.add_sink()
         fake_pactl.event()
         spin_until(lambda: str(properties()["State"]) == "on_pc")
+        spin_until(lambda: p.calls() == ["Pause", "Play"])
         assert client("switch").returncode == 0
         spin_until(lambda: str(properties()["State"]) in {"releasing", "released"})
     daemon.send_signal(signal.SIGTERM)
@@ -271,7 +272,7 @@ def test_sigterm_process(daemon, fake_pactl, tmp_path, player_factory, kind):
     if kind == "grab":
         assert calls == ["Pause", "Play"]
     else:
-        assert calls[-1] == "Pause"
+        assert calls == ["Pause", "Play", "Pause"]
     state = json.loads((tmp_path / "state.json").read_text())
     assert state["resume_players"] is None
 
@@ -381,3 +382,174 @@ def test_stop_supersedes_queued_resume(executor, player_factory, kind):
     ports.finish()
     drain()
     assert done == [True]
+
+
+@pytest.mark.parametrize("queue", ["player", "route"])
+@pytest.mark.parametrize("failure", ["raise", "double_done", "done_then_raise"])
+def test_queue_completes_once_after_adapter_failure(executor, caplog, queue, failure):
+    s, _ = executor
+    enqueue = s._queue_player if queue == "player" else lambda op: s._queue_route(op, 0)
+    prefix, late, tail, calls = [], [], [], []
+    enqueue(prefix.append)
+
+    def operation(done):
+        calls.append("operation")
+        late.append(done)
+        if failure != "raise":
+            done()
+        if failure == "double_done":
+            done()
+        else:
+            raise RuntimeError("adapter failed")
+
+    enqueue(operation)
+    enqueue(tail.append)
+    enqueue(lambda done: (calls.append("last"), done()))
+    prefix[0]()
+    assert calls == ["operation"]
+    assert getattr(s, "players_done" if queue == "player" else "routes_done") == 2
+    assert getattr(s, queue + "_busy")
+    late[0]()  # A stale completion cannot finish the next operation.
+    assert calls == ["operation"]
+    assert getattr(s, "players_done" if queue == "player" else "routes_done") == 2
+    assert getattr(s, queue + "_busy")
+    tail[0]()
+    assert calls == ["operation", "last"]
+    assert getattr(s, "players_done" if queue == "player" else "routes_done") == 4
+    assert not getattr(s, queue + "_busy")
+    if failure != "double_done":
+        assert "operation failed (RuntimeError)" in caplog.text
+
+
+@pytest.mark.parametrize("failure", ["route", "restore", "both"])
+def test_error_release_resumes_after_routing_exception(
+    executor, player_factory, monkeypatch, failure
+):
+    s, ports = executor
+    p = player_factory("routing_error")
+    complete(s.players.pause, "grab")
+    s.ctx = Context(state="connecting", origin="self", held=True, device_connected=True)
+    late = []
+
+    def routing(name, done):
+        ports.calls.append(name)
+        late.append(done)
+        if failure in {name, "both"}:
+            raise RuntimeError("routing failed")
+        done()
+
+    monkeypatch.setattr(ports, "route", lambda done: routing("route", done))
+    monkeypatch.setattr(ports, "restore", lambda done: routing("restore", done))
+    s._execute(A("RouteToDevice"))
+    s.event(Event("TimerFired", "CONNECT"))
+    spin_until(lambda: not held(s))
+    assert p.calls() == ["Pause", "Play"]
+    assert ports.calls == ["route", "restore", "disconnect"]
+    assert s.ctx.state == "releasing" and not s.ctx.held
+    assert s.routes_done == s.routes_added == 2
+    assert s.players_done == s.players_added == 1
+    assert s.restore_pending == 0 and not s.disconnect_pending
+    for done in late:
+        done()
+    assert s.routes_done == 2 and s.restore_pending == 0
+    assert ports.calls == ["route", "restore", "disconnect"]
+
+
+def test_stop_without_pending_players_is_immediate(executor):
+    s, _ = executor
+    done = []
+    s.stop(lambda: done.append(True))
+    assert done == [True] and s.closed
+    assert s.stop_source == s.resume_stop_source == 0
+
+
+def test_sigterm_during_slow_pause(daemon, fake_pactl, tmp_path, player_factory):
+    import time
+
+    import dbusmock
+    from test_players import PLAYER
+
+    # Each RPC is below T=400 ms. Pending Pause + resume reads/Play exceed 2T.
+    config = tmp_path / "config.toml"
+    config.write_text(
+        config.read_text().replace(
+            "player_timeout_ms = 1000", "player_timeout_ms = 400"
+        )
+    )
+    from scambio.api import INTERFACE, PATH
+
+    bus = dbusmock.BusType.SESSION.get_connection()
+    bus.get_object("app.scambio.Test", PATH).Reload(dbus_interface=INTERFACE)
+    marker = tmp_path / "pause-started"
+    p = player_factory(
+        "slow_shutdown",
+        pause=(
+            f"import pathlib, time; pathlib.Path({str(marker)!r}).touch(); "
+            f'time.sleep(0.33); self.props["{PLAYER}"]["PlaybackStatus"] = "Paused"'
+        ),
+        play=(
+            "import time; time.sleep(0.33); "
+            f'self.props["{PLAYER}"]["PlaybackStatus"] = "Playing"'
+        ),
+    )
+    p.obj.AddMethod(
+        "org.freedesktop.DBus.Properties",
+        "Get",
+        "ss",
+        "v",
+        "import time; time.sleep(0.33); "
+        f'ret = self.props["{PLAYER}"]["PlaybackStatus"]',
+        dbus_interface=dbusmock.MOCK_IFACE,
+    )
+    fake_pactl.update(
+        {"streams": [{"index": 7, "sink": 1, "corked": False, "properties": {}}]}
+    )
+    fake_pactl.event()
+    spin_until(marker.exists)
+    started = time.monotonic()
+    daemon.send_signal(signal.SIGTERM)
+    daemon.wait(timeout=5)
+    elapsed = time.monotonic() - started
+    assert daemon.returncode == 0
+    assert 0.8 < elapsed < 1.6
+    assert p.calls() == ["Pause", "Play"]
+    assert (
+        str(
+            p.obj.Get(
+                PLAYER,
+                "PlaybackStatus",
+                dbus_interface="org.freedesktop.DBus.Properties",
+            )
+        )
+        == "Playing"
+    )
+    assert json.loads((tmp_path / "state.json").read_text())["resume_players"] is None
+
+
+def test_stop_starts_resume_budget_after_current_operation(executor, monkeypatch):
+    from gi.repository import GLib
+
+    s, _ = executor
+    current, resumed, timers, removed = [], [], [], []
+
+    def timeout(milliseconds, callback):
+        timers.append((milliseconds, callback))
+        return len(timers)
+
+    monkeypatch.setattr(GLib, "timeout_add", timeout)
+    monkeypatch.setattr(GLib, "source_remove", removed.append)
+    monkeypatch.setattr(s.players, "shutdown", resumed.append)
+    s._queue_player(current.append)
+    done = []
+    s.stop(lambda: done.append(True))
+    timeout_ms = s.config.backend.player_timeout_ms
+    assert [ms for ms, _ in timers] == [4 * timeout_ms]
+    assert resumed == [] and done == []
+    current[0]()
+    assert [ms for ms, _ in timers] == [4 * timeout_ms, 2 * timeout_ms]
+    assert len(resumed) == 1 and done == []
+    resumed[0]()
+    resumed[0]()
+    assert done == [True] and removed == [1, 2]
+    assert s.players_done == s.players_added == 2
+    assert not s.player_busy

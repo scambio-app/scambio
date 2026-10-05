@@ -304,16 +304,53 @@ def test_switch_during_grab_and_double_switch_release():
     c, _ = step(c, Event("AudioActive", False), CFG)
     c, _ = step(c, Event("Switch"), CFG)
     c, _ = step(c, Event("DeviceConnected", True), CFG)
+    before = c
     c, actions = step(c, Event("DeviceSinkAppeared"), CFG)
-    assert c.state == "releasing" and c.held
-    assert A("PausePlayers", "release") in actions and A("ResumePlayers") not in actions
+    assert (c, actions) == (
+        replace(
+            before, state="releasing", sink_ready=True, pending="none", reason="switch"
+        ),
+        [
+            *ENTER,
+            *RELEASE[:5],
+            A("PausePlayers", "release"),
+            *RELEASE[5:],
+            transition("connecting", "releasing", "switch"),
+        ],
+    )
     c, _ = step(c, Event("Switch"), CFG)
+    before = c
     c, actions = step(c, Event("DisconnectResult"), CFG)
-    assert c.state == "connecting" and c.held
-    assert A("PausePlayers", "grab") in actions
+    assert (c, actions) == (
+        replace(before, state="connecting", pending="none"),
+        [
+            *cancel("RELEASE"),
+            A("PausePlayers", "grab"),
+            *GRAB,
+            transition("releasing", "connecting", "switch"),
+        ],
+    )
     c, _ = step(c, Event("DeviceConnected", True), CFG)
-    c, actions = step(c, Event("TimerFired", "RESUME"), CFG)
-    assert c.state == "on_pc" and not c.held and A("ResumePlayers") in actions
+    exact(
+        c,
+        Event("TimerFired", "RESUME"),
+        dict(held=False),
+        [A("ResumePlayers"), start("IDLE", 120000)],
+    )
+
+
+def test_switch_grab_from_released_with_audio():
+    exact(
+        Context(state="released", audio_active=True),
+        Event("Switch"),
+        dict(state="connecting", held=True, origin="self", reason="switch"),
+        [
+            A("SavePriority", False),
+            A("PausePlayers", "grab"),
+            *GRAB,
+            transition("released", "connecting", "switch"),
+        ],
+    )
 
 
 def test_exhaustive_six_events():
