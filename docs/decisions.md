@@ -199,3 +199,20 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     datate, etichette, cache) è derivato e si ricostruisce dopo ogni commit, quindi lasciava la
     repo sempre modificata. Rimosso dall'indice e messo in `.gitignore`; regola in `AGENTS.md` e
     `04` §6.
+53. Claude — Pausa e ripresa solo via MPRIS (`Pause`/`Play`) dall'adattatore `players.py`, a
+    richiesta, senza segnali né timer propri: si mettono in pausa tutti i player in `Playing`
+    tranne `audio.ignore_players` (default: `kdeconnect`, `plasma-browser-integration`,
+    `playerctld`). Scartati: abbinamento player ↔ stream per PID (Chrome suona da un processo
+    figlio, i sandbox cambiano i PID) e il muto degli stream (M10).
+54. Claude — Policy: contesto `held`, timer `RESUME`, azioni `PausePlayers(grab|release)`,
+    `ResumePlayers`, `ForgetPlayers`; «audio in corso» = `audio_active ∨ held` per IDLE e anti
+    ping-pong; i rilasci per `locked`/`sleep`/`switch`/`priority` tengono la pausa, quelli per
+    errore riprendono (spec 02 §3.1.4).
+55. Claude — Casi limite della decisione 50: Bluetooth spento durante una presa e occhiali
+    caduti prima della ripresa contano come presa fallita (l'audio riparte dalle casse); un
+    rilascio fallito a schermo bloccato o in sospensione lascia i player in pausa; un errore
+    dopo che l'utente aveva già chiesto il rilascio (switch, priorità, blocco) li lascia in
+    pausa.
+56. Claude — `policy.resume_delay_ms` (0–10000) con default dal profilo: `generic` 0,
+    `meta_glasses` 2000 provvisorio finché non si misura l'annuncio (prova reale spec 02).
+    Primo effetto di `device.profile`, con una tabella in `config.py`.

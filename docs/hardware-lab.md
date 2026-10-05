@@ -134,6 +134,45 @@ di GM; osservazione diretta di GM con il log del demone.
 | Connessione manuale dall'applet KDE con occhiali sull'iPhone (dopo astine chiuse/riaperte) | collegamento base riuscito ma audio rifiutato dagli occhiali (bluetoothd: HFP «Software caused connection abort», AVDTP «Permission denied»/timeout); scollegamento dopo 5–25 s. La `Connect()` di Scambio invece prende gli occhiali anche dall'iPhone (M1) |
 | Chiamata WhatsApp: presa dal PC durante la chiamata, poi switch | la voce passa al telefono, poi torna negli occhiali da sola dopo lo switch, ma «ci mette un po'» (scollegamento del PC 2,2 s più la riconnessione dell'iPhone; tempo totale non cronometrato) |
 
+## 2026-10-05 — M9: Firefox in pausa e controllo MPRIS (Claude, senza GM)
+
+Metodo: Firefox 157 (snap) con un profilo temporaneo fuori dalla repo e una pagina locale con un
+tono a 440 Hz in `<audio autoplay loop>`; script usa e getta su `pactl -f json subscribe` che
+stampa i sink-input a ogni evento; comandi MPRIS `Pause`/`Play` con `gdbus`, lanciati sia dal
+ponte di Claude sia con `systemd-run --user` (stesso contesto di un servizio utente come
+Scambio). Occhiali non collegati (uscita: Scarlett).
+
+| Misura | Esito |
+|---|---|
+| Nome MPRIS | `org.mpris.MediaPlayer2.firefox.instance_1_<N>`, owner = processo principale di Firefox; registrato solo dopo l'avvio della riproduzione |
+| `Pause` da processo con etichetta AppArmor diversa da `unconfined` (ponte di Claude) | rifiutata: `AccessDenied` dalla policy AppArmor dello snap (anche i segnali `kill`) |
+| `Pause`/`Play` da `systemd-run --user` (non confinato, come Scambio) | funzionano; risposta in ≈ 40 ms |
+| Stream dopo `Pause` | `corked = true` entro ≈ 0,2 s e **resta aperto** (osservato ≥ 50 s) |
+| Stream dopo `Play` | il vecchio stream viene rimosso e ne nasce uno **nuovo** sull'uscita predefinita, nello stesso blocco di eventi |
+| `PlaybackStatus` subito dopo `Pause` | `Paused` (lettura ≈ 40 ms dopo) |
+| Altri player MPRIS presenti su `casa` | `chromium.instance<N>` (Chrome, `Identity` = `Chrome`), `Gwenview`; entrambi `Stopped` a riposo |
+
+Conclusione: per Firefox il «silenzio» basato su `corked` funziona subito (M5 chiuso per
+Firefox); MPRIS è utilizzabile da Scambio come servizio utente. Effetto collaterale: un `Play`
+di prova alle 13:01 ha fatto partire una presa automatica di Scambio, fallita in 5 s perché gli
+occhiali non erano raggiungibili.
+
+## 2026-10-05 — M10: WirePlumber ricorda il muto degli stream (Claude, senza GM)
+
+Metodo: `pacat` di silenzio (`/dev/zero`) con `application.name=ScambioMisura`;
+`pactl set-sink-input-mute <idx> 1`; lettura di `~/.local/state/wireplumber/restore-stream`;
+nuovo `pacat` con lo stesso nome applicazione. WirePlumber 0.4.17.
+
+| Misura | Esito |
+|---|---|
+| Dopo il muto di uno stream | `restore-stream` registra `Output/Audio:application.name:ScambioMisura:mute=true` entro 1,5 s |
+| Nuovo stream della stessa applicazione | **parte già muto** |
+
+Conseguenza: mettere in muto uno stream (per esempio Chrome) durante la presa renderebbe muti
+anche gli stream successivi della stessa applicazione, e dopo un crash resterebbe muta per
+sempre. La spec 02 usa solo la pausa MPRIS (decisione 51). Residuo della misura: la voce
+`ScambioMisura` resta nel file di WirePlumber, innocua.
+
 ## Conseguenze per il design
 
 - Il PC non può sapere prima di connettersi se il telefono usa il dispositivo: «non prendere se
@@ -147,6 +186,7 @@ di GM; osservazione diretta di GM con il log del demone.
 - Q5: portal GlobalShortcuts su Plasma 5.27.
 - Latenza della prima uscita audio in HFP (apertura del link SCO).
 - Passaggio automatico a HFP quando un'app apre il microfono (autoswitch di WirePlumber).
-- Firefox: stream in pausa (M5 copre solo Chrome).
 - Annuncio vocale degli occhiali alla connessione al PC («connessione stabilita su …», osservato
-  da GM il 2026-10-04): durata, e se si può disattivare dall'app Meta AI. Serve alla spec 02.
+  da GM il 2026-10-04): durata dalla comparsa del sink, e se si può disattivare dall'app Meta AI.
+  Serve al default di `resume_delay_ms` della spec 02 (provvisorio 2000 ms); script pronto in
+  `~/Scrivania/Claude/scambio-misure/annuncio.py`, si fa con GM alla prova reale.

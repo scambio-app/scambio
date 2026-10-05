@@ -15,7 +15,7 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 |---|---|---|
 | 0 | Fondazioni documentali e misure iniziali | ✅ chiusa |
 | 1 | Spec 01 — demone headless: tooling, config, BlueZ, eventi audio, sessione, macchina a stati, instradamento, API D-Bus, CLI `switch/status/priority`, servizio utente | ✅ verificata 2026-10-05 (237 test, prova reale GM ok; sospensione n/a su casa) |
-| 2 | Spec 02 — pausa/ripresa durante presa e rilascio (MPRIS + muto dello stream); l'instradamento e il rilascio a tempo sono già nella spec 01 | da scrivere |
+| 2 | Spec 02 — pausa MPRIS durante presa e rilascio (decisioni 50–56; niente muto, M10); l'instradamento e il rilascio a tempo sono già nella spec 01 | spec in bozza (2026-10-05), in attesa di approvazione GM; annuncio e Q4 da misurare alla prova reale |
 | 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | da fare |
 | 4 | Spec 04 — scorciatoia globale (portal) + finestra impostazioni | da fare |
 | 5 | Avvio automatico, packaging (Flatpak), prima release | da fare |
