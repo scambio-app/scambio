@@ -342,14 +342,24 @@ spec 04).
 
 ## Comando `/goal`
 
+In due messaggi (Codex non accetta un `/goal` lungo): prima il `/goal` corto, subito dopo le
+istruzioni operative.
+
+Messaggio 1:
+
 ```
-/goal Implementa docs/specs/03-tray-notifiche.md seguendo AGENTS.md e docs/context/ (contratto
-in 05-ui-context.md §5, che è la fonte dei nomi e delle regole). Fatto solo quando ogni voce
-della Checklist di done (§6) è soddisfatta con evidenza e `make check` è verde. Scope: solo §3;
-§4 non si tocca; design/ non si modifica (lo carichi e basta: richieste di design nel report);
-mai Bluetooth, notifiche o bus di sessione reali nei test; le tue decisioni tecniche partono
-dal numero 90. Lavora in tre tappe con un commit verde ciascuna: (a) paths + i18n + CLI e
-inibitore e modello di config tradotti + make i18n; (b) presentation + client + notifiche; (c) tray SNI/dbusmenu +
-Quit() + apply_config + misura a riposo prima/dopo + report. Stop: se la spec contraddice
-AGENTS.md o 05, o manca una decisione di prodotto, fermati e scrivilo nel report.
+/goal Implementa docs/specs/03-tray-notifiche.md seguendo AGENTS.md; fatto quando la Checklist di done (§6) è soddisfatta con evidenza e `make check` è verde.
+```
+
+Messaggio 2:
+
+```
+Istruzioni operative per il goal della spec 03. Il contratto in docs/context/05-ui-context.md §5
+è la fonte dei nomi e delle regole. Scope: solo §3; §4 non si tocca; design/ non si modifica (lo
+carichi e basta: richieste di design nel report); mai Bluetooth, notifiche o bus di sessione
+reali nei test; le tue decisioni tecniche partono dal numero 90. Lavora in tre tappe con un
+commit verde ciascuna: (a) paths + i18n + CLI, inibitore e modello di config tradotti +
+make i18n; (b) presentation + client + notifiche; (c) tray SNI/dbusmenu + Quit() + apply_config
++ misura a riposo prima/dopo + report in docs/verification/03/report.md. Stop: se la spec
+contraddice AGENTS.md o 05, o manca una decisione di prodotto, fermati e scrivilo nel report.
 ```
