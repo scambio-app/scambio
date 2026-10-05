@@ -375,6 +375,16 @@ Esito: **ok per la prova reale**, con correzioni chieste a Codex prima della pro
 6. Log d'errore MPRIS senza il nome del player.
 7–8. Quattro test a sottoinsieme da rendere esatti; manca la riga PRESA da `Switch` con audio.
 
+**Audit 2 — 2026-10-05** su `7da08ef` (decisioni 64–66). `make check` verde rieseguito da
+Claude (390 test, 0 saltati); file protetti invariati. Verificati nel diff: completamento
+idempotente e protetto da eccezioni per ogni operazione delle due code (anche `RestoreRouting`);
+arresto con 2 × `player_timeout_ms` dall'inizio della ripresa delle voci `grab` e tetto
+complessivo 4 × da `stop()`, arresto immediato senza voci `grab` né operazioni in corso;
+`Players.close` e callback tardivi senza effetti; `bus_id` sconosciuto che conserva
+`resume_players`; niente `assert`/`Any` nell'adattatore; log con il nome MPRIS; test resi
+esatti e riga PRESA da `Switch` aggiunta. Percorso a riposo invariato: misura idle non ripetuta
+(motivata nel report). Esito: **ok per la prova reale** (§6.1).
+
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
 Riletta da me e poi da un agente indipendente contro `AGENTS.md`, `02`, la spec 01 §3.1.5, le
