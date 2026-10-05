@@ -216,3 +216,5 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
 56. Claude — `policy.resume_delay_ms` (0–10000) con default dal profilo: `generic` 0,
     `meta_glasses` 2000 provvisorio finché non si misura l'annuncio (prova reale spec 02).
     Primo effetto di `device.profile`, con una tabella in `config.py`.
+57. GM — Approvata la spec 02 con il ritardo di ripresa provvisorio di 2 s e i casi limite della
+    decisione 55; misure dell'annuncio e di Q4 al punto 0 della prova reale.

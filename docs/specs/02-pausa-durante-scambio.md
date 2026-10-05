@@ -1,6 +1,6 @@
 # Spec 02 — Pausa durante lo scambio
 
-Stato: bozza · Autore: Claude · Data: 2026-10-05
+Stato: approvata (GM, 2026-10-05) · Autore: Claude · Data: 2026-10-05
 
 ## 1. Obiettivo
 
@@ -35,8 +35,8 @@ lo schermo: gli occhiali tornano all'iPhone e il video è in pausa, non suona da
   `meta_glasses`, qui **provvisorio a 2000 ms**; Q4 riguarda la spec 01 (presa durante una
   chiamata). Entrambi si misurano all'inizio della prova reale (§6.1, punto 0); se l'annuncio
   misurato chiede un default diverso, la correzione è una riga in `config.py` (decisione 56).
-- Decisioni di questa spec: **53–56** in `docs/decisions.md` (Claude). Codex, se gli servono
-  voci tecniche, usa i numeri liberi dalla 57 alla 69.
+- Decisioni di questa spec: **53–56** in `docs/decisions.md` (Claude), approvazione **57** (GM).
+  Codex, se gli servono voci tecniche, usa i numeri liberi dalla 58 alla 69.
 
 ## 3. Dettagli
 
@@ -330,7 +330,7 @@ l'esaustivo); (b) adattatore MPRIS; (c) esecutore, ciclo di vita, integrazione, 
 - [ ] API D-Bus invariata (XML di introspezione identico).
 - [ ] `design/`, `docs/context/`, `docs/specs/`, `docs/hardware-lab.md` non modificati.
 - [ ] `docs/verification/02/report.md` scritto con la checklist §6.1 e i comandi esatti;
-      decisioni tecniche in `docs/decisions.md` solo se servono (57–69).
+      decisioni tecniche in `docs/decisions.md` solo se servono (58–69).
 - [ ] Prova reale eseguita da GM: … · GM, data.
 
 ### 6.1 Checklist di prova reale per GM (occhiali + iPhone)
