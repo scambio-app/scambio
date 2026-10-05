@@ -327,3 +327,14 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     inglese); **respinta la 82**: i commenti del modello di `config.toml` si traducono, con le
     chiavi `config-*` di `design/i18n/` nella lingua del momento in cui il file viene creato.
     Le decisioni tecniche di Codex per la spec 03 partono da 90.
+
+## 2026-10-05 — Spec 02, prova reale (chat di sviluppo; numeri 67–69 riservati alla spec 02)
+
+67. GM — Q4 chiusa senza misura: la presa durante una chiamata GSM si considera uguale a
+    WhatsApp (M2); a casa non c'è rete per provarla.
+68. Claude — Correzione di L1 dopo la prova reale (M12): `DisconnectResult(ok)` con
+    `device_connected` ancora vero non chiude il rilascio; si aspetta `DeviceConnected(false)`
+    (o la scadenza di `RELEASE`, che con il dispositivo ancora collegato vale L2). BlueZ può
+    rispondere a `Disconnect()` prima di emettere `Connected=false`: ripartire subito con la
+    presa (doppio switch) faceva leggere quel segnale ritardato come presa fallita. Il default
+    `resume_delay_ms = 2000` per `meta_glasses` resta definitivo (M11).

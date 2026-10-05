@@ -192,6 +192,39 @@ ogni 4 s sui sei stati; screenshot con `spectacle -b -n -f`, ritagliati sul tray
 Conseguenza: KIconLoader usa le cartelle dell'`index.theme` di sistema di hicolor (che elenca
 `scalable/status` ma non `symbolic/status`). Non misurati: tema chiaro, GNOME con AppIndicator.
 
+## 2026-10-05 — M11: annuncio vocale degli occhiali alla connessione (GM + Claude)
+
+Metodo: script usa e getta `~/Scrivania/Claude/scambio-misure/annuncio.py` (Scambio fermo):
+occhiali indossati sull'iPhone; `bluetoothctl connect`; appena compare il sink Bluetooth parte
+`paplay` di un bip ogni 0,5 s sul sink; GM preme INVIO al primo bip udito (tempo di reazione
+incluso, ≈ 0,2–0,3 s); 3 giri, scollegamento e ritorno all'iPhone fra un giro e l'altro.
+
+| Giro | `Connected` | Sink | Primo bip udito (dal sink) | Annuncio |
+|---|---|---|---|---|
+| 1 | 1,12 s | 1,72 s | 1,26 s | sì |
+| 2 | 0,27 s | 0,87 s | 1,00 s | sì |
+| 3 | 1,43 s | 2,13 s | 0,95 s | sì |
+
+Conclusione: l'annuncio c'è stato in 3 prese su 3 (in M8 sembrava non sistematico) e l'audio
+del PC diventa udibile ≈ 1,0–1,3 s dopo la comparsa del sink. GM non sa dire se i bip fossero
+dopo o sopra l'annuncio («era veloce»). Il ritardo di ripresa di 2000 ms (decisione 56) copre
+l'annuncio con margine; alla prova reale della spec 02 GM l'ha giudicato «perfetto».
+
+## 2026-10-05 — M12: prova reale della spec 02 (GM, log di Scambio)
+
+Metodo: Scambio su `5aa3e70`/`7da08ef`, occhiali e iPhone di GM, journal del demone letto da
+Claude dopo i passi.
+
+| Osservazione | Esito |
+|---|---|
+| Presa con video YouTube in Chrome | pausa e presa nello stesso secondo; ripresa negli occhiali 2 s dopo `on_pc`; GM: «va da dio» |
+| Prima riproduzione in una finestra nuova di Firefox | presa **senza pausa**: nessun player MPRIS in `Playing` al momento della presa (Firefox registra il nome MPRIS solo dopo l'inizio della riproduzione, M9). Dalle prese successive Firefox viene messo in pausa e ripreso |
+| Blocco schermo, switch, astine chiuse, Bluetooth spento con video negli occhiali | rilascio con pausa, nessuna ripresa (decisione 50) |
+| Riapertura delle astine con il video ripreso a mano | nuova presa solo dopo 11 s di silenzio (anti ping-pong) |
+| `paplay` (senza MPRIS) | presa senza pausa (decisione 51) |
+| **Doppio switch** (`scambio switch; scambio switch`) con video negli occhiali | **difetto**: `DisconnectResult(ok)` arriva **prima** di `Connected=false`; L1 riparte subito con la presa, il `Connected=false` ritardato viene letto come presa fallita (C8, `connect_failed` nello stesso millisecondo), Firefox riprende **sulla Scarlett**; 3,5 s dopo la `Connect` ancora in corso riesce e Scambio adotta gli occhiali come presa esterna (R5), quindi il video passa negli occhiali senza pausa |
+| Chiamata GSM (Q4) | non misurata: GM la considera equivalente a WhatsApp (M2) e a casa non ha rete (decisione 67) |
+
 ## Conseguenze per il design
 
 - Il PC non può sapere prima di connettersi se il telefono usa il dispositivo: «non prendere se
@@ -201,11 +234,7 @@ Conseguenza: KIconLoader usa le cartelle dell'`index.theme` di sistema di hicolo
 
 ## Da misurare
 
-- Q4: chiamata GSM invece di WhatsApp.
 - Q5: portal GlobalShortcuts su Plasma 5.27.
 - Latenza della prima uscita audio in HFP (apertura del link SCO).
 - Passaggio automatico a HFP quando un'app apre il microfono (autoswitch di WirePlumber).
-- Annuncio vocale degli occhiali alla connessione al PC («connessione stabilita su …», osservato
-  da GM il 2026-10-04): durata dalla comparsa del sink, e se si può disattivare dall'app Meta AI.
-  Serve al default di `resume_delay_ms` della spec 02 (provvisorio 2000 ms); script pronto in
-  `~/Scrivania/Claude/scambio-misure/annuncio.py`, si fa con GM alla prova reale.
+- Se l'annuncio vocale si può disattivare dall'app Meta AI (durata misurata in M11).

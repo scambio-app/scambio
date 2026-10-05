@@ -181,6 +181,12 @@ player ripartono, G1 lo annulla; se non ripartono, il blocco cade dopo
 | L1 | releasing | (come prima) | con PRESA(`switch`) (`pending = grab`) `held` resta e i player ripartiranno negli occhiali; altrimenti, se `held` → `ForgetPlayers`, `held = false`; poi come prima |
 | L2 | releasing | (come prima) | dopo `RouteToDevice`: se `held`: se `locked` ∨ `sleeping` → `ForgetPlayers` (niente musica a schermo bloccato); altrimenti `ResumePlayers` (il rilascio è fallito: l'audio torna negli occhiali); `held = false`; `IDLE` se ¬`audio_active` |
 
+**Correzione dopo la prova reale (decisione 68, M12).** La riga L1 della spec 01 si applica a
+`DisconnectResult(ok)` **solo** se ¬`device_connected`. Con `DisconnectResult(ok)` e
+`device_connected` ancora vero: nessuna azione, il timer `RELEASE` resta attivo; il rilascio si
+chiude con il successivo `DeviceConnected(false)` (L1) o, se scade `RELEASE` con il dispositivo
+ancora collegato, con L2. Tutto il resto di L1 e L2 è invariato.
+
 Tutte le altre righe sono invariate. R5/U1 (prese esterne, adozioni) non mettono in pausa nulla;
 O3 (`idle_timeout`) con la nuova O1 arriva solo senza audio e senza `held`; O4–O7 passano da
 RILASCIO con un motivo di P; C9 e C10 non cambiano.
@@ -353,6 +359,7 @@ Preparazione (la fa Claude): `systemctl --user restart scambio`; journal aperto 
 | 10 | Audio senza MPRIS: `paplay` di un file lungo | suona dalle casse fino alla presa, poi negli occhiali; nessuna pausa |
 | 11 | Spegni il Bluetooth dal tray con video sugli occhiali | `unavailable`; video in pausa |
 | 12 | Durante una presa con video: `systemctl --user kill -s KILL scambio` (lo lancia Claude) | systemd riavvia Scambio; il video riparte |
+| 13 | Dopo la correzione 68: video di Firefox negli occhiali, `scambio switch; scambio switch` | il video si ferma, gli occhiali tornano subito al PC e il video riparte negli occhiali; mai dalle casse |
 
 ## 7. Note di revisione (Claude, dopo la consegna)
 
