@@ -110,3 +110,65 @@ def test_unblock_silence_valid(seconds):
 def test_unblock_silence_invalid(seconds):
     with pytest.raises(ConfigInvalid, match="unblock_silence_seconds"):
         parse({"policy": {"unblock_silence_seconds": seconds}})
+
+
+@pytest.mark.parametrize("profile,delay", [("generic", 0), ("meta_glasses", 2000)])
+def test_player_config_profile_reload(tmp_path, profile, delay):
+    p = tmp_path / "config.toml"
+    p.write_text(f'[device]\nprofile = "{profile}"\n')
+    assert load(p).policy.resume_delay_ms == delay
+    p.write_text(p.read_text() + "[policy]\nresume_delay_ms = 37\n")
+    assert load(p).policy.resume_delay_ms == 37
+    assert parse({"audio": {"ignore_players": ["VLC"]}}).audio.ignore_players == (
+        "vlc",
+    )
+
+
+@pytest.mark.parametrize(
+    "section,key,values",
+    [
+        ("policy", "resume_delay_ms", [-1, 10001, True, "0", 1.5]),
+        ("backend", "player_timeout_ms", [99, 5001, False, "1000", 1.5]),
+        ("audio", "ignore_players", ["vlc", [3]]),
+    ],
+)
+def test_player_config_invalid(section, key, values):
+    for value in values:
+        with pytest.raises(ConfigInvalid):
+            parse({section: {key: value}})
+
+
+@pytest.mark.parametrize(
+    "key,section,values",
+    [
+        ("resume_delay_ms", "policy", [0, 10000]),
+        ("player_timeout_ms", "backend", [100, 5000]),
+    ],
+)
+def test_player_config_bounds(key, section, values):
+    for value in values:
+        assert getattr(getattr(parse({section: {key: value}}), section), key) == value
+
+
+def test_resume_state(tmp_path, caplog):
+    from scambio.state import PlayerRef, ResumePlayers
+
+    store = Store(tmp_path / "state.json")
+    base = dict(version=1, iphone_priority=True, restore_default_sink="speakers")
+    for malformed in [
+        [],
+        3,
+        {},
+        {"bus_id": "a", "players": [{}]},
+        {"bus_id": "a", "players": [{"name": "other", "owner": ":1.2"}]},
+    ]:
+        store.path.write_text(json.dumps(dict(base, resume_players=malformed)))
+        assert store.load() == State(1, True, "speakers")
+        assert "Ignoring malformed resume_players" in caplog.text
+    store.path.write_text(json.dumps(base))
+    assert store.load() == State(1, True, "speakers")
+    store.value.resume_players = ResumePlayers(
+        "bus", (PlayerRef("org.mpris.MediaPlayer2.fake", ":1.2"),)
+    )
+    store.save()
+    assert Store(store.path).load() == store.value

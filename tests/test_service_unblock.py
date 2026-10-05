@@ -189,6 +189,7 @@ def test_m8_gap_and_continuous_silence(fake_pactl, bluez_server, tmp_path, loss)
             state="connecting",
             origin="self",
             reason="audio_started",
+            held=True,
         )
         spin_until(lambda: len(connects()) == 1)
     finally:

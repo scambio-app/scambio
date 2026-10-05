@@ -218,3 +218,12 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     Primo effetto di `device.profile`, con una tabella in `config.py`.
 57. GM — Approvata la spec 02 con il ritardo di ripresa provvisorio di 2 s e i casi limite della
     decisione 55; misure dell'annuncio e di Q4 al punto 0 della prova reale.
+
+## 2026-10-05 — Spec 02, implementazione (Codex)
+
+58. Codex — Configurazione risolta al caricamento per profilo; stato opzionale MPRIS
+    tipizzato separatamente e validato senza perdere priorità o sink se malformato.
+    Esplorazione esaustiva della policy con programmazione dinamica: si raggruppano
+    prefissi con contesto e obbligo di ripresa uguali, conservando la molteplicità
+    di tutte le 18^6 sequenze. Gli obblighi residui hanno una continuazione di
+    chiusura verificata; nessuna pretesa di liveness con eventi infiniti arbitrari.

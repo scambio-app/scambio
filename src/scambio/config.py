@@ -7,6 +7,7 @@ from dataclasses import dataclass, field, fields
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
+RESUME_DEFAULTS = {"generic": 0, "meta_glasses": 2000}
 
 
 class ConfigInvalid(ValueError):
@@ -27,12 +28,18 @@ class Policy:
     sink_timeout_seconds: int = 5
     sleep_release_timeout_seconds: int = 4
     unblock_silence_seconds: int = 10
+    resume_delay_ms: int = 0
 
 
 @dataclass(frozen=True)
 class Audio:
     ignore_roles: tuple[str, ...] = ("event", "notification", "test")
     ignore_apps: tuple[str, ...] = ()
+    ignore_players: tuple[str, ...] = (
+        "kdeconnect",
+        "plasma-browser-integration",
+        "playerctld",
+    )
 
 
 @dataclass(frozen=True)
@@ -43,6 +50,7 @@ class Backend:
     dbus_margin_seconds: int = 5
     dbus_timeout_seconds: int = 10
     command_timeout_seconds: int = 10
+    player_timeout_ms: int = 1000
 
 
 @dataclass(frozen=True)
@@ -67,10 +75,13 @@ connect_timeout_seconds = 10
 sink_timeout_seconds = 5
 sleep_release_timeout_seconds = 4
 unblock_silence_seconds = 10
+# Default follows device.profile: generic 0, meta_glasses 2000 (provisional).
+# resume_delay_ms = 2000
 
 [audio]
 ignore_roles = ["event", "notification", "test"]
 ignore_apps = []
+ignore_players = ["kdeconnect", "plasma-browser-integration", "playerctld"]
 
 [shortcut]
 preferred = "<Super>g"
@@ -86,6 +97,7 @@ retry_max_seconds = 30
 dbus_margin_seconds = 5
 dbus_timeout_seconds = 10
 command_timeout_seconds = 10
+player_timeout_ms = 1000
 """
 
 
@@ -151,8 +163,9 @@ def parse(data: dict[str, object]) -> Config:
         integer(p, "sink_timeout_seconds", 5, 1, 30),
         integer(p, "sleep_release_timeout_seconds", 4, 1, 10),
         integer(p, "unblock_silence_seconds", 10, 1, 120),
+        integer(p, "resume_delay_ms", RESUME_DEFAULTS[profile], 0, 10000),
     )
-    a = section("audio", {"ignore_roles", "ignore_apps"})
+    a = section("audio", {f.name for f in fields(Audio)})
 
     def strings(key: str, default: tuple[str, ...]) -> tuple[str, ...]:
         value = a.get(key, list(default))
@@ -161,12 +174,20 @@ def parse(data: dict[str, object]) -> Config:
         return tuple(str(v).casefold() for v in value)
 
     audio = Audio(
-        strings("ignore_roles", Audio().ignore_roles), strings("ignore_apps", ())
+        strings("ignore_roles", Audio().ignore_roles),
+        strings("ignore_apps", ()),
+        strings("ignore_players", Audio().ignore_players),
     )
     b = section("backend", {f.name for f in fields(Backend)})
     backend = Backend(
         **{
-            f.name: integer(b, f.name, getattr(Backend(), f.name), 1, 60000)
+            f.name: integer(
+                b,
+                f.name,
+                getattr(Backend(), f.name),
+                100 if f.name == "player_timeout_ms" else 1,
+                5000 if f.name == "player_timeout_ms" else 60000,
+            )
             for f in fields(Backend)
         }
     )

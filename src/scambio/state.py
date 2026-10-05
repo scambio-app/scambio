@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import re
 import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -10,11 +11,50 @@ from pathlib import Path
 LOG = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
+class PlayerRef:
+    name: str
+    owner: str
+
+
+@dataclass(frozen=True)
+class ResumePlayers:
+    bus_id: str
+    players: tuple[PlayerRef, ...]
+
+
+def parse_resume(raw: object) -> ResumePlayers | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise ValueError("expected resume_players object")
+    bus_id, players = raw.get("bus_id"), raw.get("players")
+    if not isinstance(bus_id, str) or not bus_id or not isinstance(players, list):
+        raise ValueError("invalid resume_players bus or players")
+    refs = []
+    for entry in players:
+        if not isinstance(entry, dict):
+            raise ValueError("invalid player entry")
+        name, owner = entry.get("name"), entry.get("owner")
+        if (
+            not isinstance(name, str)
+            or not re.fullmatch(r"org\.mpris\.MediaPlayer2\.[A-Za-z_-][\w.-]*", name)
+            or not isinstance(owner, str)
+            or not re.fullmatch(r":[0-9]+\.[0-9]+", owner)
+        ):
+            raise ValueError("invalid player name or owner")
+        ref = PlayerRef(name, owner)
+        if ref not in refs:
+            refs.append(ref)
+    return ResumePlayers(bus_id, tuple(refs))
+
+
 @dataclass
 class State:
     version: int = 1
     iphone_priority: bool = False
     restore_default_sink: str | None = None
+    resume_players: ResumePlayers | None = None
 
 
 class Store:
@@ -33,6 +73,10 @@ class Store:
             if sink is not None and not isinstance(sink, str):
                 raise ValueError("invalid restore sink")
             self.value = State(1, data["iphone_priority"], sink)
+            try:
+                self.value.resume_players = parse_resume(data.get("resume_players"))
+            except ValueError as exc:
+                LOG.warning("Ignoring malformed resume_players: %s", exc)
         except (OSError, ValueError) as exc:
             LOG.warning("Cannot load state; using defaults: %s", exc)
             self.value = State()

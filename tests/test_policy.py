@@ -22,7 +22,7 @@ def transition(before, after, reason="availability"):
 
 ENTER = cancel("CONNECT", "SINK")
 RELEASE = [
-    *cancel("IDLE", "GRAB_DELAY", "CONNECT", "SINK"),
+    *cancel("IDLE", "GRAB_DELAY", "CONNECT", "SINK", "RESUME"),
     Action("RestoreRouting"),
     Action("Disconnect"),
     start("RELEASE", 10000),
@@ -113,7 +113,7 @@ CASES = [
         Event("Availability", False),
         {"state": "unavailable", "routed": False, "pending": "none"},
         [
-            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE"),
+            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE", "RESUME"),
             Action("RestoreRouting"),
             *SLEEP_RELEASE,
             transition("on_pc", "unavailable"),
@@ -235,8 +235,13 @@ CASES = [
             "origin": "self",
             "last_error": "",
             "reason": "audio_started",
+            "held": True,
         },
-        [*GRAB, transition("released", "connecting", "audio_started")],
+        [
+            Action("PausePlayers", "grab"),
+            *GRAB,
+            transition("released", "connecting", "audio_started"),
+        ],
     ),
     (
         "R5",
@@ -556,8 +561,10 @@ CASES = [
             "reason": "external_disconnect",
         },
         [
-            *cancel("IDLE", "SINK"),
+            *cancel("IDLE", "SINK", "RESUME"),
             Action("RestoreRouting"),
+            Action("PausePlayers", "release"),
+            Action("ForgetPlayers"),
             transition("on_pc", "released", "external_disconnect"),
         ],
     ),
@@ -1010,6 +1017,7 @@ def test_sleep_inhibitor_availability_every_state(state):
         "SINK",
         "RELEASE",
         "SLEEP",
+        "RESUME",
     }
 
 
@@ -1071,8 +1079,10 @@ def test_m8_stream_gap_keeps_block_until_continuous_silence():
     assert step(before, Event("DeviceConnected", False), Policy()) == (
         released,
         [
-            *cancel("IDLE", "SINK"),
+            *cancel("IDLE", "SINK", "RESUME"),
             Action("RestoreRouting"),
+            Action("PausePlayers", "release"),
+            Action("ForgetPlayers"),
             transition("on_pc", "released", "external_disconnect"),
         ],
     )
@@ -1099,8 +1109,18 @@ def test_m8_stream_gap_keeps_block_until_continuous_silence():
         [*cancel("UNBLOCK"), start("GRAB_DELAY", 500)],
     )
     assert step(audible, Event("TimerFired", "GRAB_DELAY"), Policy()) == (
-        replace(audible, state="connecting", origin="self", reason="audio_started"),
-        [*GRAB, transition("released", "connecting", "audio_started")],
+        replace(
+            audible,
+            state="connecting",
+            origin="self",
+            reason="audio_started",
+            held=True,
+        ),
+        [
+            Action("PausePlayers", "grab"),
+            *GRAB,
+            transition("released", "connecting", "audio_started"),
+        ],
     )
 
 
@@ -1124,7 +1144,12 @@ def test_availability_loss_sets_block_from_audio(state, active):
             blocked_until_silence=active,
         ),
         [
-            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE"),
+            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE", "RESUME"),
+            *(
+                [Action("PausePlayers", "release"), Action("ForgetPlayers")]
+                if active and state in {"on_pc", "releasing"}
+                else []
+            ),
             Action("RestoreRouting"),
             *SLEEP_RELEASE,
             transition(state, "unavailable"),
@@ -1139,7 +1164,7 @@ def test_availability_loss_preserves_existing_block_in_other_states(state, block
         state=state, audio_active=not blocked, blocked_until_silence=blocked
     )
     expected = [
-        *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE"),
+        *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE", "RESUME"),
         Action("RestoreRouting"),
     ]
     if state == "released":
@@ -1160,7 +1185,9 @@ def test_bluetooth_off_on_does_not_reconnect_active_audio():
     assert step(before, Event("Availability", False), Policy()) == (
         unavailable,
         [
-            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE"),
+            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE", "RESUME"),
+            Action("PausePlayers", "release"),
+            Action("ForgetPlayers"),
             Action("RestoreRouting"),
             transition("on_pc", "unavailable"),
         ],

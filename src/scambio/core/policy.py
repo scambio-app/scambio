@@ -24,6 +24,11 @@ class Context:
     routed: bool = False
     reason: str = "availability"
     last_error: str = ""
+    held: bool = False
+
+    @property
+    def audio_in_progress(self) -> bool:
+        return self.audio_active or self.held
 
     @property
     def eligible(self) -> bool:
@@ -71,6 +76,7 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
         "SINK": config.sink_timeout_seconds * 1000,
         "SLEEP": config.sleep_release_timeout_seconds * 1000,
         "UNBLOCK": config.unblock_silence_seconds * 1000,
+        "RESUME": config.resume_delay_ms,
     }
 
     def act(name: str, val: str | bool = "") -> None:
@@ -101,18 +107,44 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
                 if c.eligible:
                     start("GRAB_DELAY")
 
+    def block() -> None:
+        nonlocal c
+        c = replace(c, blocked_until_silence=c.audio_in_progress)
+        if c.blocked_until_silence and not c.audio_active:
+            start("UNBLOCK")
+
+    def pause_release() -> None:
+        nonlocal c
+        if c.audio_in_progress:
+            act("PausePlayers", "release")
+            c = replace(c, held=True)
+
+    def error_outcome() -> None:
+        nonlocal c
+        if c.held:
+            act("ForgetPlayers" if c.pending == "release" else "ResumePlayers")
+            c = replace(c, held=False)
+
     def grab(reason: str) -> None:
         nonlocal c
         c = replace(c, last_error="", origin="self", pending="none")
+        if c.audio_in_progress:
+            act("PausePlayers", "grab")
+            c = replace(c, held=True)
         act("Connect")
         start("CONNECT")
         transition("connecting", reason)
 
     def release(reason: str) -> None:
         nonlocal c
-        cancel("IDLE", "GRAB_DELAY", "CONNECT", "SINK")
+        cancel("IDLE", "GRAB_DELAY", "CONNECT", "SINK", "RESUME")
+        if reason in {"locked", "sleep", "switch", "priority"}:
+            pause_release()
         act("RestoreRouting")
-        c = replace(c, routed=False, pending="none")
+        c = replace(c, routed=False)
+        if reason not in {"locked", "sleep", "switch", "priority"}:
+            error_outcome()
+        c = replace(c, pending="none")
         act("Disconnect")
         start("RELEASE")
         transition("releasing", reason)
@@ -130,7 +162,9 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
             if route:
                 act("RouteToDevice")
                 c = replace(c, routed=True)
-            if not c.audio_active:
+            if c.held:
+                start("RESUME")
+            if not c.audio_in_progress:
                 start("IDLE")
             c = replace(c, pending="none", last_error="")
             transition("on_pc", c.reason)
@@ -174,9 +208,15 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
         act("SavePriority", c.priority)
     elif kind == "Availability" and not value:
         if c.state in {"on_pc", "connecting", "releasing"}:
-            c = replace(c, blocked_until_silence=c.audio_active)
-        cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE")
+            block()
+        cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE", "RESUME")
+        if c.state in {"on_pc", "releasing"} and c.audio_in_progress:
+            pause_release()
+            act("ForgetPlayers")
         act("RestoreRouting")
+        if c.state == "connecting":
+            error_outcome()
+        c = replace(c, held=False)
         c = replace(c, routed=False, pending="none")
         if c.sleeping:
             act("ReleaseSleepInhibitor")
@@ -230,11 +270,12 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
                     start("SINK")
             elif value != "org.bluez.Error.InProgress":
                 error("connect_failed")
-                c = replace(c, blocked_until_silence=c.audio_active)
+                block()
                 if c.device_connected:
                     release("connect_failed")
                 else:
                     cancel("CONNECT", "SINK")
+                    error_outcome()
                     transition("released", "connect_failed")
         elif (kind == "DeviceSinkAppeared" and c.device_connected) or (
             kind == "DeviceConnected" and value and c.sink_ready
@@ -248,7 +289,7 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
                 error(code)
             else:
                 error(code)
-                c = replace(c, blocked_until_silence=c.audio_active)
+                block()
                 release(code)
         elif kind == "DeviceConnected" and not value:
             cancel("CONNECT", "SINK")
@@ -256,7 +297,8 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
             if c.origin == "self":
                 reason = "connect_failed"
                 error(reason)
-                c = replace(c, blocked_until_silence=c.audio_active)
+                block()
+                error_outcome()
             transition("released", reason)
         elif wants_release:
             c = replace(c, pending="release", pending_reason=release_reason)
@@ -266,16 +308,22 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
         if kind == "AudioActive":
             if value:
                 cancel("IDLE")
-            else:
+            elif not c.held:
                 start("IDLE")
         elif timer == "IDLE":
             release("idle_timeout")
         elif wants_release:
             release(release_reason)
         elif kind == "DeviceConnected" and not value:
-            cancel("IDLE", "SINK")
+            cancel("IDLE", "SINK", "RESUME")
             act("RestoreRouting")
-            c = replace(c, routed=False, blocked_until_silence=c.audio_active)
+            c = replace(c, routed=False)
+            block()
+            if c.held:
+                error_outcome()
+            elif c.audio_active:
+                act("PausePlayers", "release")
+                act("ForgetPlayers")
             transition("released", "external_disconnect")
         elif kind == "DeviceSinkGone" and c.device_connected:
             c = replace(c, routed=False)
@@ -284,9 +332,17 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
             cancel("SINK")
             act("RouteToDevice")
             c = replace(c, routed=True)
+            if c.held:
+                start("RESUME")
+        elif timer == "RESUME":
+            if c.routed:
+                act("ResumePlayers")
+                c = replace(c, held=False)
+                if not c.audio_active:
+                    start("IDLE")
         elif timer == "SINK":
             error("sink_lost")
-            c = replace(c, blocked_until_silence=c.audio_active)
+            block()
             release("sink_lost")
     elif c.state == "releasing":
         if (
@@ -299,6 +355,9 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
                 if c.pending == "grab" and not c.locked and not c.sleeping:
                     grab("switch")
                 else:
+                    if c.held:
+                        act("ForgetPlayers")
+                        c = replace(c, held=False)
                     transition("released", c.reason)
             else:
                 error("disconnect_failed")
@@ -307,6 +366,9 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
                     act("ReleaseSleepInhibitor")
                     cancel("SLEEP")
                 act("RouteToDevice")
+                if c.held:
+                    act("ForgetPlayers" if c.locked or c.sleeping else "ResumePlayers")
+                    c = replace(c, held=False)
                 if not c.audio_active:
                     start("IDLE")
                 transition("on_pc", "disconnect_failed")
