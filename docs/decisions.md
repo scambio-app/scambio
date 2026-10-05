@@ -176,3 +176,13 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     Il test usa ID GLib cancellabili e avanzamenti deterministici a 2 s, 9,999 s,
     10 s e 500 ms, verificando contesto intero, timer e chiamate Connect registrate
     dal mock. Nessun sonno, polling o orologio aggiunto al runtime.
+
+## 2026-10-05 — Orchestratore (dopo la chiusura della fase 1)
+
+48. GM — Avvio automatico di Scambio al login da subito: `systemctl --user enable
+    scambio.service` (legato a `graphical-session.target`, attivo su Plasma 5.27 di casa).
+    Si disattiva con `systemctl --user disable scambio.service`.
+49. GM — Prossime unità in parallelo: chat di design per il mock UI (tray, menu, notifiche,
+    finestra impostazioni; poi spec 03 tray) e chat di sviluppo per la spec 02 (pausa MPRIS
+    durante lo scambio, annuncio vocale degli occhiali) affidata a Codex. Non si sovrappongono:
+    `design/` è di Claude, il core di Codex.

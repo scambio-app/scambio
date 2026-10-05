@@ -40,6 +40,6 @@ Vedi `docs/decisions.md`, voci 1–29.
 1. ~~Claude scrive la spec 01~~ — approvata da GM il 2026-10-04.
 2. ~~Implementazione Codex e audit di Claude~~ — fatti (audit 2 ok).
 3. ~~Prova reale di GM~~ — fatta il 2026-10-05: **fase 1 chiusa**.
-5. Prossima unità: decidere con l'orchestratore se spec 02 (pausa MPRIS, annuncio vocale degli
-   occhiali) o mock UI + spec 03 (tray), su richiesta di GM che vuole la GUI.
+5. Prossime unità (decisione 49, 2026-10-05): **in parallelo** chat di design (mock UI → spec 03
+   tray) e chat di sviluppo (spec 02 pausa MPRIS). Avvio automatico al login attivo (decisione 48).
 4. Misure aperte: Firefox in pausa (M5), Q4 prima della spec 02.
