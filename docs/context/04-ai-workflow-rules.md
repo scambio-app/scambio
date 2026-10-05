@@ -97,9 +97,11 @@ Claude le promuove.
 4. Milestone? → scrittura nel brain con preview e commit.
 5. Prompt di handoff se serve (§7).
 
-**Graphify.** Indicizza codice e markdown; hook post-commit e post-checkout installati in
-`.git/hooks`. Quando la spec 01 attiverà `core.hooksPath=.githooks`, gli hook di graphify vanno
-spostati lì accanto al pre-commit (altrimenti smettono di girare).
+**Graphify.** Indicizza codice e markdown; hook post-commit e post-checkout in `.githooks/`
+(attivi con `core.hooksPath=.githooks`, spec 01). L'intera cartella `graphify-out/` (grafo,
+report, istantanee datate, etichette, cache) è un derivato locale ricostruito dopo ogni commit:
+**non si versiona** ed è in `.gitignore` (decisione 52, 2026-10-05). Se manca o è vecchia:
+`graphify update .`.
 
 ## 7. Chat di progetto e handoff (GM, 2026-10-04)
 

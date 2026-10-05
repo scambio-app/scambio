@@ -27,8 +27,10 @@ datate con il metodo usato.
 4. **Divieti sul brain:** mai `select_brain`, `create_brain` o altre operazioni sul registro
    (cambierebbero il brain attivo di Kuchl); mai scrivere su `kuchl_brain`.
 5. **Tieni aggiornato:** il grafo si ricostruisce da solo a ogni commit (hook post-commit);
-   dopo un tratto lungo senza commit lancia `graphify update .`. A fine unità: tracker, decisioni,
-   hardware-lab e, alle milestone, il brain (vedi `docs/context/04-ai-workflow-rules.md` §6).
+   dopo un tratto lungo senza commit lancia `graphify update .`. `graphify-out/` è un derivato
+   locale e **non si versiona** (`.gitignore`, decisione 52): non va mai aggiunto a un commit.
+   A fine unità: tracker, decisioni, hardware-lab e, alle milestone, il brain
+   (vedi `docs/context/04-ai-workflow-rules.md` §6).
 
 ## Proprietà dei file (vincolante)
 

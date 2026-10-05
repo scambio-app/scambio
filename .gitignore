@@ -8,6 +8,6 @@ __pycache__/
 build/
 dist/
 *.egg-info/
-graphify-out/cache/
+graphify-out/
 design/ui/*.ui
 .flatpak-builder/

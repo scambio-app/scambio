@@ -186,3 +186,16 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     finestra impostazioni; poi spec 03 tray) e chat di sviluppo per la spec 02 (pausa MPRIS
     durante lo scambio, annuncio vocale degli occhiali) affidata a Codex. Non si sovrappongono:
     `design/` è di Claude, il core di Codex.
+
+## 2026-10-05 — Spec 02, pausa durante lo scambio (chat di sviluppo)
+
+50. GM — Al rilascio con audio in corso sul PC (blocco schermo, sospensione, switch, Priorità
+    iPhone, perdita esterna come astine chiuse o custodia, Bluetooth spento) Scambio mette in
+    pausa i player MPRIS e **non** li riprende: come cuffie tolte su un telefono. Non vale per
+    il rilascio dopo un errore (un errore non lascia mai l'audio in pausa, 02 §6).
+51. GM — Durante la presa l'audio che non si può mettere in pausa (app senza MPRIS: giochi,
+    chiamate nel browser) resta sulle casse finché il dispositivo è pronto; nessun muto.
+52. Claude — `graphify-out/` non si versiona: tutto il contenuto (grafo, report, istantanee
+    datate, etichette, cache) è derivato e si ricostruisce dopo ogni commit, quindi lasciava la
+    repo sempre modificata. Rimosso dall'indice e messo in `.gitignore`; regola in `AGENTS.md` e
+    `04` §6.
