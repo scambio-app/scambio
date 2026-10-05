@@ -227,3 +227,9 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     prefissi con contesto e obbligo di ripresa uguali, conservando la molteplicità
     di tutte le 18^6 sequenze. Gli obblighi residui hanno una continuazione di
     chiusura verificata; nessuna pretesa di liveness con eventi infiniti arbitrari.
+59. Codex — MPRIS: owner e PlaybackStatus letti in parallelo; comandi indirizzati
+    all'owner unico verificato, senza auto-attivazione. GetId è memorizzato per la
+    connessione; ListNames/GetId precedono le RPC ai player (lettura + comando,
+    ciascuna con player_timeout_ms). Ogni Pause riuscita viene persistita subito,
+    così un player lento non ritarda il salvataggio degli altri. Nessun segnale
+    o timer dell'adattatore; cancellazione Gio alla chiusura.
