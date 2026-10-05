@@ -385,6 +385,21 @@ complessivo 4 × da `stop()`, arresto immediato senza voci `grab` né operazioni
 esatti e riga PRESA da `Switch` aggiunta. Percorso a riposo invariato: misura idle non ripetuta
 (motivata nel report). Esito: **ok per la prova reale** (§6.1).
 
+**Prove di Claude sul sistema reale — 2026-10-05 15:29–15:31** (servizio riavviato su
+`5aa3e70`; occhiali fuori casa con GM, quindi irraggiungibili; tono in Firefox con il profilo
+di M9, comandi MPRIS da `systemd-run --user`):
+- **§6.1 punto 9 ok** (due volte): presa → `Paused player …firefox…` nello stesso secondo →
+  `connect_failed` dopo 5 s → `Resumed player`; il tono riparte dalle casse; nessuna nuova presa
+  (anti ping-pong).
+- **§6.1 punto 12 ok**: `systemctl --user kill -s KILL scambio` 1,5 s dopo la pausa;
+  `state.json` conteneva `resume_players` con `bus_id`; systemd riavvia dopo 3 s e il demone
+  riprende Firefox prima di agganciare gli adattatori. Subito dopo parte una nuova presa (l'anti
+  ping-pong non sopravvive al riavvio: accettato), finita con `connect_timeout` e ripresa.
+- Rilievo minore, per la prossima unità che tocca `players.py`: alla prima pausa dopo l'avvio
+  compare il warning «Cannot update resume_players without a session bus identity», perché
+  `pause()` salva la riclassificazione prima di aver letto `GetId`. Innocuo: il salvataggio dopo
+  la pausa riuscita avviene con `bus_id` (verificato in `state.json`).
+
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
 Riletta da me e poi da un agente indipendente contro `AGENTS.md`, `02`, la spec 01 §3.1.5, le
