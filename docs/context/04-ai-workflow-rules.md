@@ -45,7 +45,11 @@ e dal git log.
 7. **Prova reale** (DoD B) — GM con occhiali e iPhone, checklist firmata.
 8. **Chiusura** — tracker aggiornato; alle milestone Claude scrive in `scambio_brain`.
 
-Comando `/goal` minimo:
+Comando `/goal` minimo. **Regola di GM (2026-10-05):** Codex non accetta un `/goal` lungo;
+si manda prima il `/goal` corto (una riga: spec da implementare + criterio di fatto) e subito
+dopo, come secondo messaggio nella stessa sessione, le istruzioni operative (scope, tappe,
+stop, numerazione delle decisioni). Esempio di `/goal` corto (le spec dalla 03 hanno i due
+messaggi pronti in fondo):
 
 ```
 /goal Implementa docs/specs/NN-nome.md seguendo AGENTS.md e docs/context/. Fatto solo quando
