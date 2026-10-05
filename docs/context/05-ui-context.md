@@ -1,7 +1,7 @@
 # 05 — Contesto UI e contratto design ↔ codice
 
 Redatto da Claude il 4 ottobre 2026; completato il 5 ottobre 2026 con il mock approvato da GM
-(tela «Scambio — mock UI», decisioni 70–81). Il design è di Claude (decisione 10): i file stanno
+(tela «Scambio — mock UI», decisioni 70–84). Il design è di Claude (decisione 10): i file stanno
 in `design/` e Codex li collega senza modificarli. Le parti marcate **bozza (spec 04)** danno la
 direzione della finestra e diventano definitive con la spec 04.
 
@@ -241,7 +241,9 @@ mancante in un catalogo è un errore di test.
 Famiglie di chiavi: `tray-*` (menu e tooltip), `notify-*` (notifiche), `cli-*` (riga di
 comando, sostituiscono i msgid inglesi della decisione 27; gli errori D-Bus noti hanno una chiave
 propria, `cli-dbus-error` resta per quelli imprevisti), `session-inhibit-reason` (motivo
-dell'inibitore di logind), `settings-*` (finestra, spec 04). Stati, codici d'errore e i valori
+dell'inibitore di logind), `config-*` (commenti del modello di `config.toml`, nella lingua del
+momento in cui il demone crea il file, decisione 84; una chiave per ogni chiave di configurazione
+commentata, più `config-header` e `config-backend-header`), `settings-*` (finestra, spec 04). Stati, codici d'errore e i valori
 stampati da `scambio status/switch/priority` restano stringhe stabili non tradotte.
 
 ### 5.10 Finestra impostazioni — bozza (spec 04)

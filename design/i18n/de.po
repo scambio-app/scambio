@@ -304,3 +304,58 @@ msgstr "Diese Hilfe anzeigen und beenden"
 msgid "session-inhibit-reason"
 msgstr "Gerät vor dem Standby an das Telefon zurückgeben"
 
+#. Commenti del modello di config.toml (decisione 84), nella lingua del momento in cui il file viene creato.
+msgid "config-header"
+msgstr "Scambio-Konfiguration. Nur bereits gekoppelte Geräte. Nach einer Änderung: systemctl --user reload scambio"
+
+msgid "config-device-address"
+msgstr "Bluetooth-Adresse des Geräts (XX:XX:XX:XX:XX:XX)"
+
+msgid "config-device-profile"
+msgstr "Geräteprofil: generic oder meta_glasses"
+
+msgid "config-policy-grab-delay"
+msgstr "Millisekunden Audio, bevor das Gerät übernommen wird"
+
+msgid "config-policy-release-idle"
+msgstr "Sekunden Stille, bevor es an das Telefon zurückgeht"
+
+msgid "config-policy-connect-timeout"
+msgstr "Maximale Sekunden zum Verbinden oder Trennen"
+
+msgid "config-policy-sink-timeout"
+msgstr "Maximale Sekunden, bis sein Audioausgang erscheint"
+
+msgid "config-policy-sleep-timeout"
+msgstr "Sekunden für die Rückgabe vor dem Standby"
+
+msgid "config-policy-unblock"
+msgstr "Sekunden Stille nach einem Fehler, bevor es selbst erneut versucht"
+
+msgid "config-policy-resume-delay"
+msgstr "Wartezeit vor dem Fortsetzen der Wiedergabe nach der Übernahme; der Standard hängt vom Profil ab (generic 0, meta_glasses 2000)"
+
+msgid "config-audio-ignore-roles"
+msgstr "Audio-Rollen, die das Gerät nicht zum PC holen"
+
+msgid "config-audio-ignore-apps"
+msgstr "Apps (Name oder Programmdatei), die das Gerät nicht zum PC holen"
+
+msgid "config-audio-ignore-players"
+msgstr "MPRIS-Player, die nie pausiert werden"
+
+msgid "config-shortcut-preferred"
+msgstr "Tastenkürzel für den intelligenten Wechsel"
+
+msgid "config-ui-language"
+msgstr "Sprache: auto, it, en oder de"
+
+msgid "config-ui-tray"
+msgstr "Symbol im Systembereich"
+
+msgid "config-ui-notifications"
+msgstr "Desktop-Benachrichtigungen"
+
+msgid "config-backend-header"
+msgstr "Optionale technische Zeiten; die Standardwerte stammen aus Messungen"
+

@@ -1,6 +1,6 @@
 # Spec 03 — Tray e notifiche
 
-Stato: bozza · Autore: Claude · Data: 2026-10-05
+Stato: approvata (GM, 2026-10-05) · Autore: Claude · Data: 2026-10-05
 
 ## 1. Obiettivo
 
@@ -23,7 +23,7 @@ Scambio» ferma il demone (`systemctl --user is-active scambio` → `inactive`).
 
 - Prodotto: 6–7 (Priorità iPhone, switch intelligente), 9–10 (una sola app, design di Claude),
   14 (it/en/de), 27 e 29b (testi CLI e inibitore tradotti con questa spec), 48 (avvio al login).
-- Di questa spec: **70–83** in `docs/decisions.md`.
+- Di questa spec: **70–84** in `docs/decisions.md` (la 82 è superata dalla 84).
 - Contratto: `docs/context/05-ui-context.md` §3–§5 (**fonte dei nomi e delle regole di
   dettaglio**: questa spec non li ripete tutti). Mock approvato da GM il 2026-10-05.
 - API del demone: spec 01 §3.2.1, invariata dalla spec 02 (02 §3.2.1).
@@ -124,8 +124,25 @@ OpenURI, niente rinotifica di un errore ancora attivo e non visto. **Nessun time
   un `-h/--help` con `cli-help-help`; errori D-Bus noti (`DeviceUnavailable`, `ConfigInvalid`,
   `RestartRequired`) → `cli-error-*`; gli altri → `cli-dbus-error` con `{error}` = nome D-Bus.
   Restano in inglese le parole proprie di `argparse` («usage:», «options:», i suoi errori di
-  sintassi): decisione 83, da approvare.
-- Commenti del modello di `config.toml`: restano in inglese (decisione 82, da approvare).
+  sintassi): decisione 83, approvata da GM.
+- **Modello di `config.toml`** (decisione 84): i commenti si scrivono con le chiavi `config-*`
+  (05 §5.9) nella lingua risolta al momento della creazione (`auto` dall'ambiente, perché il file
+  non esiste ancora): `config-header` in testa, `config-backend-header` sopra `[backend]`
+  (le sue chiavi restano senza commento), e un commento per ogni altra chiave secondo la mappa:
+  `device.address` → `config-device-address`, `device.profile` → `config-device-profile`,
+  `policy.grab_delay_ms` → `config-policy-grab-delay`, `policy.release_idle_seconds` →
+  `config-policy-release-idle`, `policy.connect_timeout_seconds` → `config-policy-connect-timeout`,
+  `policy.sink_timeout_seconds` → `config-policy-sink-timeout`,
+  `policy.sleep_release_timeout_seconds` → `config-policy-sleep-timeout`,
+  `policy.unblock_silence_seconds` → `config-policy-unblock`, `policy.resume_delay_ms` (riga
+  commentata) → `config-policy-resume-delay`, `audio.ignore_roles` →
+  `config-audio-ignore-roles`, `audio.ignore_apps` → `config-audio-ignore-apps`,
+  `audio.ignore_players` → `config-audio-ignore-players`, `shortcut.preferred` →
+  `config-shortcut-preferred`, `ui.language` → `config-ui-language`, `ui.tray` →
+  `config-ui-tray`, `ui.notifications` → `config-ui-notifications`. Il file esistente non si
+  riscrive mai; il modello resta TOML valido in ogni lingua (test). Una chiave fuori da
+  `[backend]` aggiunta in futuro senza la sua chiave `config-*` è un errore di test (la chiede
+  il report).
 
 #### 3.1.7 Uscita (`Quit`, decisione 79)
 
@@ -231,8 +248,7 @@ nome d'icona, nessun parametro delle notifiche. `design/ui/settings-window.blp` 
 - Widget Plasma, Impostazioni rapide GNOME, Flatpak ed esportazione delle icone (fase 5+).
 - Testi generici «telefono» al posto di «iPhone» (decisione 73, prima della release pubblica).
 - Animazioni, conti alla rovescia che si aggiornano da soli.
-- Traduzione dei commenti del modello di `config.toml` (decisione 82) e delle parole di
-  `argparse` (decisione 83).
+- Traduzione delle parole proprie di `argparse` (decisione 83).
 - Qualunque modifica alla policy o agli adattatori oltre a `Quit()`, all'aggancio
   `apply_config`, alle chiavi `ui.*` e al motivo dell'inibitore tradotto.
 
@@ -245,14 +261,14 @@ nome d'icona, nessun parametro delle notifiche. `design/ui/settings-window.blp` 
 
 ## 6. Checklist di done
 
-- [ ] Decisioni 70–83 in `docs/decisions.md` e 02 §4 aggiornato (Claude, prima del `/goal`).
+- [x] Decisioni 70–84 in `docs/decisions.md` e 02 §4 aggiornato (Claude, prima del `/goal`).
 - [ ] Ogni regola di §3.1 e di 05 §5.3–§5.6 ha un test (§3.2.5).
 - [ ] `make check` verde (con `make i18n`); nessun test saltato.
 - [ ] Nessun polling né timer nella UI; misura CPU/RSS a riposo (10 min) prima e dopo, nel report;
       RSS ≤ 40 MB.
 - [ ] Nessun valore personale hardcodato; `ui.tray`, `ui.notifications` nel modello di config.
-- [ ] Nessun testo visibile, nome d'icona o parametro di notifica nel codice; CLI e motivo
-      dell'inibitore con chiavi.
+- [ ] Nessun testo visibile, nome d'icona o parametro di notifica nel codice; CLI, motivo
+      dell'inibitore e commenti del modello di configurazione con chiavi.
 - [ ] `design/` non modificato; richieste di design elencate nel report.
 - [ ] Nessun file scritto fuori da `~/.config/scambio/` e `~/.local/share/scambio/`.
 - [ ] Prove automatiche con `ui.tray = false` e `ui.notifications = false`.
@@ -315,15 +331,13 @@ Cosa resta, e cosa correggerei se emergesse:
 3. **«Riprova» non c'è dopo un rilascio fallito**: uno switch accenderebbe la Priorità iPhone
    senza che tu l'abbia chiesto. Resta il menu.
 4. **Dimensione**: unità media, divisa in tre tappe con un commit verde ciascuna.
-5. **Da approvare** (toccano l'invariante «ogni testo it/en/de» o la 29b):
-   a. decisione 82 — i commenti del modello di `config.toml` restano in inglese (file tecnico,
-      come il codice);
-   b. decisione 83 — le parole proprie di `argparse` («usage:», «options:», errori di sintassi)
-      restano in inglese; tutto il resto della CLI è tradotto.
+5. **Decisi da GM all'approvazione**: le parole proprie di `argparse` restano in inglese
+   (decisione 83); i commenti del modello di `config.toml` si traducono (decisione 84, chiavi
+   `config-*` già nei cataloghi).
 
 ## 9. Domande aperte
 
-Nessuna bloccante oltre ai punti 5a–5b di §8. Restano Q1 (licenza), Q5 (portal su Plasma 5.27,
+Nessuna bloccante. Restano Q1 (licenza), Q5 (portal su Plasma 5.27,
 spec 04).
 
 ## Comando `/goal`
@@ -335,7 +349,7 @@ della Checklist di done (§6) è soddisfatta con evidenza e `make check` è verd
 §4 non si tocca; design/ non si modifica (lo carichi e basta: richieste di design nel report);
 mai Bluetooth, notifiche o bus di sessione reali nei test; le tue decisioni tecniche partono
 dal numero 90. Lavora in tre tappe con un commit verde ciascuna: (a) paths + i18n + CLI e
-inibitore tradotti + make i18n; (b) presentation + client + notifiche; (c) tray SNI/dbusmenu +
+inibitore e modello di config tradotti + make i18n; (b) presentation + client + notifiche; (c) tray SNI/dbusmenu +
 Quit() + apply_config + misura a riposo prima/dopo + report. Stop: se la spec contraddice
 AGENTS.md o 05, o manca una decisione di prodotto, fermati e scrivilo nel report.
 ```

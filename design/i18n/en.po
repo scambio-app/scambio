@@ -304,3 +304,58 @@ msgstr "Show this help and exit"
 msgid "session-inhibit-reason"
 msgstr "Hand the device back to the phone before suspend"
 
+#. Commenti del modello di config.toml (decisione 84), nella lingua del momento in cui il file viene creato.
+msgid "config-header"
+msgstr "Scambio configuration. Paired devices only. After a change: systemctl --user reload scambio"
+
+msgid "config-device-address"
+msgstr "Bluetooth address of the device (XX:XX:XX:XX:XX:XX)"
+
+msgid "config-device-profile"
+msgstr "Device profile: generic or meta_glasses"
+
+msgid "config-policy-grab-delay"
+msgstr "Milliseconds of audio before taking the device"
+
+msgid "config-policy-release-idle"
+msgstr "Seconds of silence before handing it back to the phone"
+
+msgid "config-policy-connect-timeout"
+msgstr "Maximum seconds to connect or disconnect it"
+
+msgid "config-policy-sink-timeout"
+msgstr "Maximum seconds for its audio output to appear"
+
+msgid "config-policy-sleep-timeout"
+msgstr "Seconds allowed for the hand-back before suspend"
+
+msgid "config-policy-unblock"
+msgstr "Seconds of silence after an error before trying again by itself"
+
+msgid "config-policy-resume-delay"
+msgstr "Wait before resuming playback after taking the device; the default depends on the profile (generic 0, meta_glasses 2000)"
+
+msgid "config-audio-ignore-roles"
+msgstr "Audio roles that don’t move the device to the PC"
+
+msgid "config-audio-ignore-apps"
+msgstr "Apps (name or binary) that don’t move the device to the PC"
+
+msgid "config-audio-ignore-players"
+msgstr "MPRIS players never to pause"
+
+msgid "config-shortcut-preferred"
+msgstr "Smart switch shortcut"
+
+msgid "config-ui-language"
+msgstr "Language: auto, it, en or de"
+
+msgid "config-ui-tray"
+msgstr "Icon in the system tray"
+
+msgid "config-ui-notifications"
+msgstr "Desktop notifications"
+
+msgid "config-backend-header"
+msgstr "Optional technical timings; defaults come from measurements"
+

@@ -304,3 +304,58 @@ msgstr ""
 msgid "session-inhibit-reason"
 msgstr ""
 
+#. Commenti del modello di config.toml (decisione 84), nella lingua del momento in cui il file viene creato.
+msgid "config-header"
+msgstr ""
+
+msgid "config-device-address"
+msgstr ""
+
+msgid "config-device-profile"
+msgstr ""
+
+msgid "config-policy-grab-delay"
+msgstr ""
+
+msgid "config-policy-release-idle"
+msgstr ""
+
+msgid "config-policy-connect-timeout"
+msgstr ""
+
+msgid "config-policy-sink-timeout"
+msgstr ""
+
+msgid "config-policy-sleep-timeout"
+msgstr ""
+
+msgid "config-policy-unblock"
+msgstr ""
+
+msgid "config-policy-resume-delay"
+msgstr ""
+
+msgid "config-audio-ignore-roles"
+msgstr ""
+
+msgid "config-audio-ignore-apps"
+msgstr ""
+
+msgid "config-audio-ignore-players"
+msgstr ""
+
+msgid "config-shortcut-preferred"
+msgstr ""
+
+msgid "config-ui-language"
+msgstr ""
+
+msgid "config-ui-tray"
+msgstr ""
+
+msgid "config-ui-notifications"
+msgstr ""
+
+msgid "config-backend-header"
+msgstr ""
+

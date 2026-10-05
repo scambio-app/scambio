@@ -323,3 +323,7 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
 83. Claude (da approvare da GM) — Nella CLI restano in inglese solo le parole proprie di
     `argparse` («usage:», «options:», errori di sintassi); tutti gli altri testi hanno chiavi
     it/en/de (precisa la 29b).
+84. GM — All'approvazione della spec 03 (2026-10-05): approvata la 83 (parole di `argparse` in
+    inglese); **respinta la 82**: i commenti del modello di `config.toml` si traducono, con le
+    chiavi `config-*` di `design/i18n/` nella lingua del momento in cui il file viene creato.
+    Le decisioni tecniche di Codex per la spec 03 partono da 90.

@@ -304,3 +304,58 @@ msgstr "Mostra questo aiuto ed esce"
 msgid "session-inhibit-reason"
 msgstr "Lascia il dispositivo al telefono prima della sospensione"
 
+#. Commenti del modello di config.toml (decisione 84), nella lingua del momento in cui il file viene creato.
+msgid "config-header"
+msgstr "Configurazione di Scambio. Solo dispositivi già accoppiati. Dopo una modifica: systemctl --user reload scambio"
+
+msgid "config-device-address"
+msgstr "Indirizzo Bluetooth del dispositivo (XX:XX:XX:XX:XX:XX)"
+
+msgid "config-device-profile"
+msgstr "Profilo del dispositivo: generic oppure meta_glasses"
+
+msgid "config-policy-grab-delay"
+msgstr "Millisecondi di audio prima di prendere il dispositivo"
+
+msgid "config-policy-release-idle"
+msgstr "Secondi di silenzio prima di lasciarlo al telefono"
+
+msgid "config-policy-connect-timeout"
+msgstr "Secondi massimi per collegarlo o scollegarlo"
+
+msgid "config-policy-sink-timeout"
+msgstr "Secondi massimi perché compaia la sua uscita audio"
+
+msgid "config-policy-sleep-timeout"
+msgstr "Secondi concessi al rilascio prima della sospensione"
+
+msgid "config-policy-unblock"
+msgstr "Secondi di silenzio dopo un errore prima di riprovare da solo"
+
+msgid "config-policy-resume-delay"
+msgstr "Attesa prima di riprendere la riproduzione dopo la presa; il default dipende dal profilo (generic 0, meta_glasses 2000)"
+
+msgid "config-audio-ignore-roles"
+msgstr "Ruoli audio che non fanno passare il dispositivo al PC"
+
+msgid "config-audio-ignore-apps"
+msgstr "App (nome o binario) che non fanno passare il dispositivo al PC"
+
+msgid "config-audio-ignore-players"
+msgstr "Player MPRIS da non mettere mai in pausa"
+
+msgid "config-shortcut-preferred"
+msgstr "Scorciatoia dello switch intelligente"
+
+msgid "config-ui-language"
+msgstr "Lingua: auto, it, en oppure de"
+
+msgid "config-ui-tray"
+msgstr "Icona nella barra di sistema"
+
+msgid "config-ui-notifications"
+msgstr "Notifiche del desktop"
+
+msgid "config-backend-header"
+msgstr "Tempi tecnici facoltativi; i default vengono dalle misure"
+
