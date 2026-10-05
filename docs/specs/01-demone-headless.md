@@ -1,6 +1,6 @@
 # Spec 01 — Demone headless
 
-Stato: consegnata, prova reale parziale (correzione anti ping-pong in corso) · Autore: Claude · Data: 2026-10-04
+Stato: verificata (prova reale di GM conclusa il 2026-10-05) · Autore: Claude · Data: 2026-10-04
 
 ## 1. Obiettivo
 
@@ -487,7 +487,8 @@ i loro test; (c) servizio D-Bus, CLI, unit systemd, integrazione.
 - [ ] `docs/verification/01/report.md` scritto; ulteriori decisioni tecniche in
       `docs/decisions.md` (dalla 30).
 - [ ] Checklist di prova reale (§6.1) copiata nel report con i comandi esatti.
-- [ ] Prova reale eseguita da GM: … · Firma: GM, data.
+- [x] Prova reale eseguita da GM: punti 1–7, 9–18 ok (14 e 16 dopo la correzione), 8 non
+      applicabile su `casa` · GM, 2026-10-05.
 
 ### 6.1 Checklist di prova reale per GM (occhiali + iPhone)
 
@@ -572,7 +573,10 @@ Ok: 1–7, 9–13, 15, 17 (presa con 0,5 s percepita «molto più veloce»). **8
 riacceso, con il video in corso, Scambio ha ritentato la presa dopo 0,5–2,6 s. Il buco di stream
 creato da Chrome quando cambia l'uscita azzerava l'anti ping-pong (G1), e G8 non trattava il
 Bluetooth spento come perdita esterna. Correzione nella spec: timer `UNBLOCK` (G1, G1b) e G8
-(decisione 45); default di `grab_delay_ms` a 500 (decisione 44). Da ripetere: 14 e 16 dopo la correzione (`057f3d6`, audit di Claude ok, 237 test).
+(decisione 45); default di `grab_delay_ms` a 500 (decisione 44). **14 bis e 16 bis ok** dopo la correzione (`057f3d6`, audit di Claude ok, 237 test): astine chiuse e
+Bluetooth spento/acceso con il video in corso, nessuna presa automatica di Scambio. Le connessioni
+manuali dall'applet con gli occhiali sull'iPhone hanno dato collegamento senza audio (profili
+rifiutati dagli occhiali, `sink_timeout`): comportamento degli occhiali, gestito da C7/O8.
 **18 ok** (Claude, 2026-10-05 08:40–08:50, sistema reale, nessuna transizione nella finestra):
 demone 0 tick di CPU in 600 s (0,0 %), RSS 24 132 KiB stabile; `pactl subscribe` 0 tick
 (0,0 %), RSS 5 472 KiB stabile.

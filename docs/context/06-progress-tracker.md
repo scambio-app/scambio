@@ -14,7 +14,7 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 | Fase | Contenuto | Stato |
 |---|---|---|
 | 0 | Fondazioni documentali e misure iniziali | ✅ chiusa |
-| 1 | Spec 01 — demone headless: tooling, config, BlueZ, eventi audio, sessione, macchina a stati, instradamento, API D-Bus, CLI `switch/status/priority`, servizio utente | consegnata e auditata 2026-10-04 (192 test) → prova reale GM |
+| 1 | Spec 01 — demone headless: tooling, config, BlueZ, eventi audio, sessione, macchina a stati, instradamento, API D-Bus, CLI `switch/status/priority`, servizio utente | ✅ verificata 2026-10-05 (237 test, prova reale GM ok; sospensione n/a su casa) |
 | 2 | Spec 02 — pausa/ripresa durante presa e rilascio (MPRIS + muto dello stream); l'instradamento e il rilascio a tempo sono già nella spec 01 | da scrivere |
 | 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | da fare |
 | 4 | Spec 04 — scorciatoia globale (portal) + finestra impostazioni | da fare |
@@ -39,5 +39,7 @@ Vedi `docs/decisions.md`, voci 1–29.
 
 1. ~~Claude scrive la spec 01~~ — approvata da GM il 2026-10-04.
 2. ~~Implementazione Codex e audit di Claude~~ — fatti (audit 2 ok).
-3. Prova reale di GM (§6.1 della spec 01), poi firma e chiusura della fase 1.
+3. ~~Prova reale di GM~~ — fatta il 2026-10-05: **fase 1 chiusa**.
+5. Prossima unità: decidere con l'orchestratore se spec 02 (pausa MPRIS, annuncio vocale degli
+   occhiali) o mock UI + spec 03 (tray), su richiesta di GM che vuole la GUI.
 4. Misure aperte: Firefox in pausa (M5), Q4 prima della spec 02.
