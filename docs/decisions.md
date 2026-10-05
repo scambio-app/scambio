@@ -160,3 +160,19 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     `policy.unblock_silence_seconds` (default 10 s) di silenzio continuo, non al primo istante
     senza stream; il Bluetooth spento mentre il dispositivo è sul PC conta come perdita esterna.
     Motivo: Chrome ricrea lo stream quando cambia l'uscita, e il buco veniva letto come silenzio.
+
+## 2026-10-05 — Correzioni dopo la prova reale spec 01 (Codex)
+
+46. Codex — UNBLOCK usa l'esecutore dei timer già esistente: G1 avvia/riarma
+    la scadenza solo con audio inattivo e blocco presente, la ripresa dell'audio
+    la cancella; G1b azzera solo il blocco, senza presa immediata. RILASCIO e G8
+    conservano il timer. Restano valide le guardie dell'esecutore sui callback
+    cancellati o sostituiti, verificate anche con tempo controllato nei test.
+    Il nuovo campo è aggiunto in coda a Policy, conservando l'ordine dei campi
+    precedenti; file di configurazione esistenti e servizio in esecuzione non
+    vengono modificati. Il default 500 ms vale dove manca un valore esplicito.
+47. Codex — Regressioni del servizio con BlueZ dbusmock e finto pactl reali
+    come processi su bus privati; solo il pianificatore della policy è iniettato.
+    Il test usa ID GLib cancellabili e avanzamenti deterministici a 2 s, 9,999 s,
+    10 s e 500 ms, verificando contesto intero, timer e chiamate Connect registrate
+    dal mock. Nessun sonno, polling o orologio aggiunto al runtime.

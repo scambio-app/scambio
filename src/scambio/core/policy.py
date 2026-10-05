@@ -70,6 +70,7 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
         "RELEASE": config.connect_timeout_seconds * 1000,
         "SINK": config.sink_timeout_seconds * 1000,
         "SLEEP": config.sleep_release_timeout_seconds * 1000,
+        "UNBLOCK": config.unblock_silence_seconds * 1000,
     }
 
     def act(name: str, val: str | bool = "") -> None:
@@ -135,11 +136,14 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
             transition("on_pc", c.reason)
 
     if kind == "AudioActive":
-        c = replace(
-            c,
-            audio_active=bool(value),
-            blocked_until_silence=c.blocked_until_silence if value else False,
-        )
+        c = replace(c, audio_active=bool(value))
+        if value:
+            cancel("UNBLOCK")
+        elif c.blocked_until_silence:
+            start("UNBLOCK")
+    elif kind == "TimerFired" and value == "UNBLOCK":
+        c = replace(c, blocked_until_silence=False)
+        return c, actions
     elif kind == "DeviceConnected":
         c = replace(c, device_connected=bool(value))
     elif kind in {"DeviceSinkAppeared", "DeviceSinkGone"}:
@@ -169,6 +173,8 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
         )
         act("SavePriority", c.priority)
     elif kind == "Availability" and not value:
+        if c.state in {"on_pc", "connecting", "releasing"}:
+            c = replace(c, blocked_until_silence=c.audio_active)
         cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE")
         act("RestoreRouting")
         c = replace(c, routed=False, pending="none")

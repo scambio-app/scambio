@@ -21,11 +21,12 @@ class Device:
 
 @dataclass(frozen=True)
 class Policy:
-    grab_delay_ms: int = 1000
+    grab_delay_ms: int = 500
     release_idle_seconds: int = 120
     connect_timeout_seconds: int = 10
     sink_timeout_seconds: int = 5
     sleep_release_timeout_seconds: int = 4
+    unblock_silence_seconds: int = 10
 
 
 @dataclass(frozen=True)
@@ -60,11 +61,12 @@ address = "" # Bluetooth address, XX:XX:XX:XX:XX:XX
 profile = "generic" # generic or meta_glasses
 
 [policy]
-grab_delay_ms = 1000
+grab_delay_ms = 500
 release_idle_seconds = 120
 connect_timeout_seconds = 10
 sink_timeout_seconds = 5
 sleep_release_timeout_seconds = 4
+unblock_silence_seconds = 10
 
 [audio]
 ignore_roles = ["event", "notification", "test"]
@@ -143,11 +145,12 @@ def parse(data: dict[str, object]) -> Config:
         raise ConfigInvalid("profile: unknown device profile")
     p = section("policy", {f.name for f in fields(Policy)})
     policy = Policy(
-        integer(p, "grab_delay_ms", 1000, 0, 10000),
+        integer(p, "grab_delay_ms", 500, 0, 10000),
         integer(p, "release_idle_seconds", 120, 10, 3600),
         integer(p, "connect_timeout_seconds", 10, 2, 60),
         integer(p, "sink_timeout_seconds", 5, 1, 30),
         integer(p, "sleep_release_timeout_seconds", 4, 1, 10),
+        integer(p, "unblock_silence_seconds", 10, 1, 120),
     )
     a = section("audio", {"ignore_roles", "ignore_apps"})
 

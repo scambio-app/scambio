@@ -44,7 +44,7 @@ def properties():
 def daemon(fake_pactl, bluez_server, tmp_path):
     (tmp_path / "config.toml").write_text(
         TEMPLATE.replace('address = ""', f'address = "{ADDRESS}"')
-        .replace("grab_delay_ms = 1000", "grab_delay_ms = 0")
+        .replace("grab_delay_ms = 500", "grab_delay_ms = 0")
         .replace("release_idle_seconds = 120", "release_idle_seconds = 10")
     )
     log = (tmp_path / "daemon.log").open("w")
@@ -159,7 +159,7 @@ def test_full_cycle_accelerated(fake_pactl, bluez_server, tmp_path):
     config_file = tmp_path / "config.toml"
     config_file.write_text(
         TEMPLATE.replace('address = ""', f'address = "{ADDRESS}"')
-        .replace("grab_delay_ms = 1000", "grab_delay_ms = 0")
+        .replace("grab_delay_ms = 500", "grab_delay_ms = 0")
         .replace("release_idle_seconds = 120", "release_idle_seconds = 10")
     )
     config = load(config_file)

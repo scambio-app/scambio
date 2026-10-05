@@ -73,3 +73,40 @@ def test_state_roundtrip_and_corruption(tmp_path):
     for broken in ["{", "[]", '{"version":2}', '{"version":1,"iphone_priority":1}']:
         store.path.write_text(broken)
         assert store.load() == State()
+
+
+def test_policy_defaults_and_existing_config(tmp_path):
+    import tomllib
+
+    from scambio.config import Policy
+
+    path = tmp_path / "config.toml"
+    config = load(path)
+    generated = tomllib.loads(path.read_text())["policy"]
+    assert config.policy == parse({}).policy == Policy()
+    assert config.policy.grab_delay_ms == generated["grab_delay_ms"] == 500
+    assert (
+        config.policy.unblock_silence_seconds
+        == generated["unblock_silence_seconds"]
+        == 10
+    )
+    # An explicit previous value still belongs to the user; no file migration.
+    path.write_text("[policy]\ngrab_delay_ms = 1000\n")
+    before = path.read_bytes()
+    assert load(path).policy == replace(Policy(), grab_delay_ms=1000)
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("seconds", [1, 10, 120])
+def test_unblock_silence_valid(seconds):
+    from scambio.config import Policy
+
+    assert parse({"policy": {"unblock_silence_seconds": seconds}}).policy == replace(
+        Policy(), unblock_silence_seconds=seconds
+    )
+
+
+@pytest.mark.parametrize("seconds", [0, -1, 121, True, False, 1.5, "10", None])
+def test_unblock_silence_invalid(seconds):
+    with pytest.raises(ConfigInvalid, match="unblock_silence_seconds"):
+        parse({"policy": {"unblock_silence_seconds": seconds}})

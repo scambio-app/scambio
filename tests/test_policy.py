@@ -36,7 +36,14 @@ CASES = [
         "G1",
         {"blocked_until_silence": True, "audio_active": True},
         Event("AudioActive", False),
-        {"audio_active": False, "blocked_until_silence": False},
+        {"audio_active": False},
+        [start("UNBLOCK", 10000)],
+    ),
+    (
+        "G1b",
+        {"blocked_until_silence": True},
+        Event("TimerFired", "UNBLOCK"),
+        {"blocked_until_silence": False},
         [],
     ),
     ("G2", {}, Event("DeviceSinkAppeared", "bt"), {"sink_ready": True}, []),
@@ -159,7 +166,7 @@ CASES = [
         [
             *cancel("RELEASE"),
             transition("releasing", "released"),
-            start("GRAB_DELAY", 1000),
+            start("GRAB_DELAY", 500),
         ],
     ),
     (
@@ -185,14 +192,14 @@ CASES = [
         {"state": "released"},
         Event("AudioActive", True),
         {"audio_active": True},
-        [start("GRAB_DELAY", 1000)],
+        [*cancel("UNBLOCK"), start("GRAB_DELAY", 500)],
     ),
     (
         "R2",
         {"state": "released", "audio_active": True, "blocked_until_silence": True},
         Event("AudioActive", False),
-        {"audio_active": False, "blocked_until_silence": False},
-        cancel("GRAB_DELAY"),
+        {"audio_active": False},
+        [start("UNBLOCK", 10000), *cancel("GRAB_DELAY")],
     ),
     (
         "R2-priority",
@@ -452,7 +459,7 @@ CASES = [
         [
             *ENTER,
             transition("connecting", "released", "external_disconnect"),
-            start("GRAB_DELAY", 1000),
+            start("GRAB_DELAY", 500),
         ],
     ),
     (
@@ -487,7 +494,7 @@ CASES = [
         {"state": "on_pc"},
         Event("AudioActive", True),
         {"audio_active": True},
-        cancel("IDLE"),
+        cancel("UNBLOCK", "IDLE"),
     ),
     (
         "O3",
@@ -727,7 +734,7 @@ def test_rules(rule, values, event, changes, actions):
 def test_sleeping_exits_release_inhibitor(rule):
     _, values, event, changes, actions = next(case for case in CASES if case[0] == rule)
     # G10 releases after the transition; sleeping forbids GRAB_DELAY.
-    expected = [action for action in actions if action != start("GRAB_DELAY", 1000)]
+    expected = [action for action in actions if action != start("GRAB_DELAY", 500)]
     assert_step(
         {**values, "sleeping": True}, event, changes, [*expected, *SLEEP_RELEASE]
     )
@@ -890,8 +897,14 @@ def test_failure_blocks_until_silence(event):
     if c.state == "releasing":
         c, _ = step(c, Event("DisconnectResult"), Policy())
     assert not step(c, Event("TimerFired", "GRAB_DELAY"), Policy())[1]
-    c, _ = step(c, Event("AudioActive", False), Policy())
-    assert not c.blocked_until_silence
+    before = c
+    c, actions = step(c, Event("AudioActive", False), Policy())
+    assert c == replace(before, audio_active=False)
+    assert actions == [start("UNBLOCK", 10000), *cancel("GRAB_DELAY")]
+    before = c
+    c, actions = step(c, Event("TimerFired", "UNBLOCK"), Policy())
+    assert c == replace(before, blocked_until_silence=False)
+    assert actions == []
     c, actions = step(c, Event("AudioActive", True), Policy())
     assert any(a.value == "GRAB_DELAY" for a in actions)
 
@@ -998,3 +1011,207 @@ def test_sleep_inhibitor_availability_every_state(state):
         "RELEASE",
         "SLEEP",
     }
+
+
+@pytest.mark.parametrize(
+    "state", ["released", "connecting", "on_pc", "releasing", "unavailable"]
+)
+@pytest.mark.parametrize("blocked", [False, True])
+def test_unblock_expiry_all_states(state, blocked):
+    before = Context(
+        state=state,
+        blocked_until_silence=blocked,
+        pending="release",
+        pending_reason="locked",
+        locked=True,
+        sleeping=True,
+        priority=True,
+        last_error="sink_lost",
+    )
+    assert step(before, Event("TimerFired", "UNBLOCK"), Policy()) == (
+        replace(before, blocked_until_silence=False),
+        [],
+    )
+
+
+@pytest.mark.parametrize("seconds", [1, 10, 120])
+def test_unblock_timer_duration_and_cancellation(seconds):
+    before = Context(state="released", audio_active=True, blocked_until_silence=True)
+    silent = replace(before, audio_active=False)
+    assert step(
+        before, Event("AudioActive", False), Policy(unblock_silence_seconds=seconds)
+    ) == (silent, [start("UNBLOCK", seconds * 1000), *cancel("GRAB_DELAY")])
+    assert step(silent, Event("AudioActive", True), Policy()) == (
+        before,
+        cancel("UNBLOCK"),
+    )
+    unblocked = replace(silent, blocked_until_silence=False)
+    assert step(unblocked, Event("AudioActive", False), Policy()) == (
+        unblocked,
+        cancel("GRAB_DELAY"),
+    )
+
+
+def test_m8_stream_gap_keeps_block_until_continuous_silence():
+    before = Context(
+        state="on_pc",
+        audio_active=True,
+        device_connected=True,
+        sink_ready=True,
+        routed=True,
+    )
+    released = replace(
+        before,
+        state="released",
+        device_connected=False,
+        routed=False,
+        blocked_until_silence=True,
+        reason="external_disconnect",
+    )
+    assert step(before, Event("DeviceConnected", False), Policy()) == (
+        released,
+        [
+            *cancel("IDLE", "SINK"),
+            Action("RestoreRouting"),
+            transition("on_pc", "released", "external_disconnect"),
+        ],
+    )
+    silent = replace(released, audio_active=False)
+    assert step(released, Event("AudioActive", False), Policy()) == (
+        silent,
+        [start("UNBLOCK", 10000), *cancel("GRAB_DELAY")],
+    )
+    # At 2 s the executor has not emitted the 10 s deadline (integration below).
+    assert step(silent, Event("AudioActive", True), Policy()) == (
+        released,
+        cancel("UNBLOCK"),
+    )
+    assert step(released, Event("TimerFired", "GRAB_DELAY"), Policy()) == (released, [])
+    assert step(released, Event("AudioActive", False), Policy()) == (
+        silent,
+        [start("UNBLOCK", 10000), *cancel("GRAB_DELAY")],
+    )
+    cleared = replace(silent, blocked_until_silence=False)
+    assert step(silent, Event("TimerFired", "UNBLOCK"), Policy()) == (cleared, [])
+    audible = replace(cleared, audio_active=True)
+    assert step(cleared, Event("AudioActive", True), Policy()) == (
+        audible,
+        [*cancel("UNBLOCK"), start("GRAB_DELAY", 500)],
+    )
+    assert step(audible, Event("TimerFired", "GRAB_DELAY"), Policy()) == (
+        replace(audible, state="connecting", origin="self", reason="audio_started"),
+        [*GRAB, transition("released", "connecting", "audio_started")],
+    )
+
+
+@pytest.mark.parametrize("state", ["on_pc", "connecting", "releasing"])
+@pytest.mark.parametrize("active", [False, True])
+def test_availability_loss_sets_block_from_audio(state, active):
+    before = Context(
+        state=state,
+        audio_active=active,
+        blocked_until_silence=not active,
+        routed=True,
+        pending="grab",
+        sleeping=True,
+    )
+    assert step(before, Event("Availability", False), Policy()) == (
+        replace(
+            before,
+            state="unavailable",
+            routed=False,
+            pending="none",
+            blocked_until_silence=active,
+        ),
+        [
+            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE"),
+            Action("RestoreRouting"),
+            *SLEEP_RELEASE,
+            transition(state, "unavailable"),
+        ],
+    )
+
+
+@pytest.mark.parametrize("state", ["released", "unavailable"])
+@pytest.mark.parametrize("blocked", [False, True])
+def test_availability_loss_preserves_existing_block_in_other_states(state, blocked):
+    before = Context(
+        state=state, audio_active=not blocked, blocked_until_silence=blocked
+    )
+    expected = [
+        *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE"),
+        Action("RestoreRouting"),
+    ]
+    if state == "released":
+        expected.append(transition("released", "unavailable"))
+    assert step(before, Event("Availability", False), Policy()) == (
+        replace(before, state="unavailable"),
+        expected,
+    )
+
+
+def test_bluetooth_off_on_does_not_reconnect_active_audio():
+    before = Context(
+        state="on_pc", audio_active=True, device_connected=True, routed=True
+    )
+    unavailable = replace(
+        before, state="unavailable", blocked_until_silence=True, routed=False
+    )
+    assert step(before, Event("Availability", False), Policy()) == (
+        unavailable,
+        [
+            *cancel("GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE"),
+            Action("RestoreRouting"),
+            transition("on_pc", "unavailable"),
+        ],
+    )
+    # If Connected is still cached, U1 may adopt it but never calls Connect.
+    assert step(unavailable, Event("Availability", True), Policy()) == (
+        replace(unavailable, state="connecting"),
+        [start("SINK", 5000), transition("unavailable", "connecting")],
+    )
+    disconnected = replace(unavailable, device_connected=False)
+    assert step(unavailable, Event("DeviceConnected", False), Policy()) == (
+        disconnected,
+        [],
+    )
+    released = replace(disconnected, state="released")
+    assert step(disconnected, Event("Availability", True), Policy()) == (
+        released,
+        [transition("unavailable", "released")],
+    )
+    assert step(released, Event("AudioActive", True), Policy()) == (
+        released,
+        cancel("UNBLOCK"),
+    )
+    assert step(released, Event("TimerFired", "GRAB_DELAY"), Policy()) == (released, [])
+
+
+@pytest.mark.parametrize(
+    "event,changes,prefix,reason",
+    [
+        (Event("Locked", True), {"locked": True}, [], "locked"),
+        (Event("Sleep", True), {"sleeping": True}, [start("SLEEP", 4000)], "sleep"),
+        (Event("Switch"), {"priority": True}, [Action("SavePriority", True)], "switch"),
+        (
+            Event("SetPriority", True),
+            {"priority": True},
+            [Action("SavePriority", True)],
+            "priority",
+        ),
+        (Event("TimerFired", "IDLE"), {}, [], "idle_timeout"),
+    ],
+)
+def test_release_keeps_unblock_timer(event, changes, prefix, reason):
+    before = Context(
+        state="on_pc", audio_active=True, blocked_until_silence=True, routed=True
+    )
+    silent = replace(before, audio_active=False)
+    assert step(before, Event("AudioActive", False), Policy()) == (
+        silent,
+        [start("UNBLOCK", 10000), start("IDLE", 120000)],
+    )
+    assert step(silent, event, Policy()) == (
+        replace(silent, **changes, state="releasing", reason=reason, routed=False),
+        [*prefix, *RELEASE, transition("on_pc", "releasing", reason)],
+    )
