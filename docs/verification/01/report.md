@@ -1,15 +1,18 @@
 # Spec 01 — Report di consegna
 
-Data: 2026-10-04 · Codex · branch `main` · base iniziale `99927b5`, audit `938f8a5`.
+Data iniziale: 2026-10-04 · aggiornato 2026-10-05 · Codex · branch `main`.
+Basi: `99927b5` (consegna), `938f8a5` (audit 1), `132ad40` (prova reale).
 
 ## Obiettivo ed esito
 
 Implementato §3 della spec 01: demone headless, policy pura, adattatori Gio,
 API D-Bus, CLI e unit utente systemd. Consegnate tutte e tre le tappe tecniche,
-ciascuna con `make check` verde. **DoD B e chiusura complessiva restano pendenti**:
-la prova reale 1–18 e la firma sono riservate a GM e non sono state simulate.
-Le undici osservazioni di Audit 1 sono corrette/verificate: evidenza e commit
-nella sezione «Correzioni dopo audit 1»; resta la revisione di Claude sulle correzioni.
+ciascuna con `make check` verde. Audit 2 positivo registrato da Claude in
+`3488d1b`. La prova reale del 4–5 ottobre ha individuato i difetti ai punti 14
+e 16: correzioni consegnate in `057f3d6`, con **237 test verdi**. **Restano il
+riesame delle correzioni, la ripetizione di 14/16 e la firma conclusiva DoD B**.
+Gli esiti umani sono riportati dalla spec, non simulati da Codex; dettaglio
+nella sezione «Correzioni dopo la prova reale».
 
 Questo report sostituisce quello di stop committato in `7a22ab0`. Lo stop era
 fondato sulla mancanza delle misure del blocco schermo e del cambio profilo;
@@ -22,7 +25,7 @@ trattate come blocchi ulteriori, secondo le istruzioni di GM/Claude.
 - Configurazione TOML validata, modello creato solo se assente, chiavi sconosciute
   segnalate e ignorate; priorità e destinazione da ripristinare in JSON atomico.
 - Policy senza Gio, orologio o I/O, con stati released/connecting/on_pc/releasing/
-  unavailable, sei timer, anti ping-pong, doppio switch e rilascio per lock/sleep.
+  unavailable, sette timer, anti ping-pong, doppio switch e rilascio per lock/sleep.
 - BlueZ asincrono sul solo dispositivo configurato, ObjectManager e segnali,
   riaggancio dopo perdita del proprietario e scarto dei callback obsoleti.
 - Audio tramite sottoprocessi Gio: parser incrementale UTF-8/JSON concatenato,
@@ -137,9 +140,11 @@ Lo strumento è terminato con exit 0; i due PID misurati non esistono più in
 /proc dopo il cleanup. Il campione comprende il demone Python/Gio con
 trasporti simulati; non misura Bluetooth/audio di sistema.
 
-**GM eseguirà la misura reale al punto 18** della checklist: CPU/RSS del finto
-pactl non sono una misura dell'audio/Bluetooth di sistema. Nessuna prova reale
-viene dichiarata fatta.
+Il campione sopra riguarda il codice dell'audit 1: non è stato ripetuto per
+questa correzione. CPU/RSS del finto pactl non misurano l'audio/Bluetooth di
+sistema. §7 della spec in `132ad40` dichiara il punto 18 reale misurato da
+Claude; i valori numerici non risultano allegati a questo report. Occorre
+che Claude aggiunga l'evidenza: Codex non ha ispezionato il servizio reale.
 
 ## Checklist §6
 
@@ -147,14 +152,14 @@ viene dichiarata fatta.
 |---|---|
 | Tooling da repo pulito e hook che rifiuta il rosso | Fatto, evidenza sopra |
 | Regole della policy e adattatori con finti | Fatto, casi nominati e suite sopra |
-| make check verde, nessun test saltato | Fatto, 192 test dopo Audit 1 |
+| make check verde, nessun test saltato | Fatto, 237 test dopo la prova reale |
 | Nessun polling, CPU/RSS su finti per 10 minuti | Vedi misura sopra; prova reale riservata a GM |
 | Configurazione della spec, nessun dato personale hardcodato | Fatto; MAC sintetici nei test, indirizzo runtime da config |
 | Nessun testo it/de nell'app, msgid CLI elencati | Fatto; lista sotto |
 | design/ non modificato, richieste esplicitate | Fatto; nessuna richiesta |
-| Report e decisioni tecniche dalla 30 | Fatto; decisioni 30–43, nuove voci 39–43 per Audit 1 |
+| Report e decisioni tecniche dalla 30 | Fatto; voci tecniche 30–43 e 46–47; prodotto 44–45 da Claude/GM |
 | Checklist reale copiata con comandi | Fatto, §6.1 sotto |
-| Prova reale GM e firma | **Non fatta**, punti 1–18 pendenti |
+| Prova reale GM e firma | Parziale: 14/16 da ripetere, 8 non applicabile su casa, firma finale pendente; dettaglio sotto |
 
 ## Scostamenti e scelte tecniche
 
@@ -175,8 +180,9 @@ scorciatoie, pairing, attivazione D-Bus o packaging distributivo introdotti.
 
 Le evidenze automatiche provano il comportamento con i finti, non il dispositivo
 reale. CPU/RSS del finto pactl non equivalgono a pactl di sistema. M1–M7 sono
-fonti documentali lette, non misure ripetute da Codex. Restano la prova reale di
-GM (in particolare sospensione e punto 18), riesame di Claude e firma DoD B.
+fonti documentali lette, non misure ripetute da Codex. Anche M8 è una fonte
+documentale. Restano riesame, ripetizione GM dei punti 14/16 e firma DoD B;
+la sospensione è dichiarata non applicabile su casa dalla spec aggiornata.
 
 Nessuna domanda di prodotto bloccante emersa. Nessuna richiesta per `design/`.
 Tracker, contesto, spec e hardware-lab non modificati: Claude aggiornerà tracker
@@ -255,13 +261,105 @@ assenza di azioni extra e ordine di cancellazioni, timer, effetti e segnali.
   eseguito; nessun push. Uninstall è esercitato solo tramite funzione importata,
   con tutte le chiamate esterne intercettate.
 
-**Evidenza e assunzioni:** i risultati sopra provano gli scenari simulati,
-non tempi e reazioni dell'hardware. La prova reale GM 1–18 resta interamente
-pendente, inclusa CPU/RSS al punto 18. Nessun punto dell'audit è lasciato senza
+**Evidenza e assunzioni all'audit 1:** i risultati sopra provano gli scenari
+simulati, non tempi e reazioni dell'hardware. Allora la prova GM 1–18 era
+interamente pendente; lo stato aggiornato è nella sezione seguente. Nessun punto dell'audit è lasciato senza
 correzione o verifica; il riesame architetturale di Claude non è simulato.
 Le decisioni tecniche 39–43 sono reversibili; la 41 supera esplicitamente la
 precedente cancellazione dello stato in errore della voce 35. Nessun nuovo
 contratto D-Bus, dipendenza runtime, testo UI o comportamento fuori scope.
+
+## Correzioni dopo la prova reale
+
+2026-10-05 · base `132ad40` · implementazione e test: **`057f3d6`**.
+Questo aggiornamento supera le indicazioni storiche di «prova reale non eseguita»
+presenti nella prima consegna; non sostituisce il report di stop `7a22ab0` già
+superato dalla consegna iniziale e dalle misure M6/M7.
+
+### Obiettivo e modifiche
+
+Risolti nello scope §3 i due percorsi di ripresa automatica segnalati da GM:
+assenza breve dello stream dopo scollegamento esterno e Bluetooth spento/acceso
+con audio attivo. Implementate le decisioni 44–45 senza modificare API D-Bus,
+adattatori, configurazione personale o servizio utente in esecuzione.
+
+- G1 conserva il blocco e avvia UNBLOCK solo con audio inattivo e blocco presente;
+  AudioActive(true) cancella UNBLOCK. G1b azzera soltanto il blocco allo scadere.
+- G8 assegna `blocked_until_silence = audio_active` se lo stato precedente era
+  on_pc, connecting o releasing. Negli altri stati conserva il blocco.
+- UNBLOCK non viene cancellato da RILASCIO o G8. Usa l'esecutore esistente,
+  inclusa la protezione dai callback cancellati e sostituiti, senza polling.
+- `policy.unblock_silence_seconds`: default 10, intero 1–120; presente anche nel
+  modello generato. `policy.grab_delay_ms`: default 500 nel dataclass, nel parser
+  e nel modello. Un valore esplicito esistente, incluso 1000, resta rispettato;
+  non viene migrato o riscritto il file di GM.
+- Decisioni tecniche 46–47: riuso dell'esecutore e test con tempo controllato.
+
+### Evidenza automatica
+
+| Richiesta | Test/evidenza | Esito |
+|---|---|---|
+| G1/G1b e soglia configurabile | `test_rules[G1/G1b/R1/R2/O2]`, `test_unblock_timer_duration_and_cancellation`, `test_unblock_expiry_all_states` | Azioni ordinate e contesto intero esatti; G1b in tutti e cinque gli stati, con/senza blocco; durate 1/10/120 s |
+| Scenario M8 | `test_m8_stream_gap_keeps_block_until_continuous_silence` | Il buco non azzera il blocco; la scadenza sì; ripresa con GRAB_DELAY di 500 ms |
+| Bluetooth spento/acceso | `test_bluetooth_off_on_does_not_reconnect_active_audio`, `test_availability_loss_sets_block_from_audio`, `test_availability_loss_preserves_existing_block_in_other_states` | Nessun Connect; G8 assegna il blocco solo nei tre stati prescritti, con audio attivo/inattivo |
+| Conservazione UNBLOCK | `test_release_keeps_unblock_timer` e confronti esatti G8 | Nessuna CancelTimer(UNBLOCK) nelle uscite per lock, sleep, switch, priorità o IDLE, né in G8 |
+| Nuova chiave e default | `test_policy_defaults_and_existing_config`, `test_unblock_silence_valid`, `test_unblock_silence_invalid` | Modello e parser coerenti; estremi inclusi; rifiutati fuori range, booleani, decimali, stringhe e null; file esistente invariato |
+| Integrazione del servizio | `test_service_unblock.py::test_m8_gap_and_continuous_silence[case/bluetooth]` | BlueZ dbusmock + finto pactl: nessun Connect dopo 2 s di buco; blocco presente a 9,999 s e assente a 10 s di nuovo silenzio; nessuna presa fino a nuova riproduzione + 500 ms; callback obsoleto ignorato anche con nuovo UNBLOCK attivo |
+
+Eseguiti:
+
+- `.venv/bin/pytest -q tests/test_policy.py tests/test_config_state.py`:
+  **174 passed in 0.14 s**.
+- `.venv/bin/pytest -q tests/test_service_unblock.py tests/test_service.py`:
+  **21 passed in 8.15 s**.
+- `make check`: **237 passed in 29.12 s**, zero skip; formattazione di 28 file,
+  lint verde, mypy senza errori su 14 sorgenti. Pre-commit di `057f3d6`:
+  **237 passed in 29.23 s**, senza `--no-verify`.
+- Prova negativa in copia temporanea di `132ad40` con i nuovi test M8, Bluetooth,
+  G1b, default e i due scenari di integrazione: **6 failed in 0.85 s**, exit 1
+  atteso. Falliscono rispettivamente sul blocco cancellato/mancante, G1b
+  assente e default 1000; gli stessi casi sono verdi sul codice corretto.
+  Nessun checkout della branch né contatto col servizio reale.
+- `git diff --check` verde; il commit di implementazione non contiene file
+  protetti. Ricerca con graphify query/affected/path e brain agvm-scambio in sola
+  lettura (solo memoria della milestone 0, non usata come fonte per M8).
+
+### Prova umana, limiti e cose ancora da fare
+
+**Fonte documentale, non verifica ripetuta da Codex:** §7 della spec, commit
+`132ad40`, riporta ok 1–7, 9–13, 15, 17; punto 8 non applicabile su casa per
+sospensione disabilitata da GM; 14/16 da ripetere; 18 misurato da Claude.
+Il report presente non conteneva numeri della misura reale 18: restano da
+allegare da Claude. `idle.json` resta il campione su finti dell'audit 1,
+non una nuova misura dopo questa modifica.
+
+**Assunzioni:** il buco di stream di M8 è una causa dedotta dai tempi, come
+specificato in hardware-lab; i test riproducono la sequenza richiesta con un
+buco di 2 s, non provano direttamente cosa fa Chrome. Le scadenze del servizio
+sono avanzate dal test: 2 s e 10 s sono tempi della policy, non attese a muro.
+Resta necessaria la ripetizione reale dei punti 14/16 con le correzioni caricate
+quando GM deciderà; questa sessione non ha riavviato, ricaricato, interrogato o
+fermato il servizio utente. Nessun systemctl, Bluetooth/pactl o bus reale usato.
+
+**Scostamenti:** nessuno dalla richiesta corrente. L'istruzione esplicita e la
+decisione 44 fissano 500 ms; il riepilogo `02-architecture.md` §4 conserva ancora
+1000 e va riallineato da Claude, insieme ai riferimenti a sei timer e 1 s rimasti
+nella spec. Nessuna modifica autonoma ai documenti protetti. Nessuna richiesta
+per `design/` o domanda di prodotto bloccante.
+
+Durante il lavoro è comparsa una modifica esterna non committata a
+`docs/hardware-lab.md` (occhiali tolti dal viso, successiva mancata presa per
+sei minuti, causa ancora da chiarire). È stata letta e preservata, non inclusa
+nei commit di Codex; l'indagine resta a Claude/GM fuori da questa correzione.
+Anche gli artefatti graphify preesistenti/rigenerati restano fuori dai commit.
+
+**File toccati in questa correzione:** `src/scambio/config.py`,
+`src/scambio/core/policy.py`, `tests/test_config_state.py`, `tests/test_policy.py`,
+`tests/test_service.py`, nuovo `tests/test_service_unblock.py`,
+`docs/decisions.md`, `docs/verification/01/report.md`.
+Commit su main, nessun push, trailer Codex su implementazione e report. Il commit
+di questo aggiornamento si identifica con
+`git log -1 --format=fuller -- docs/verification/01/report.md`.
 
 ## Msgid CLI
 
@@ -311,12 +409,13 @@ contratto D-Bus, dipendenza runtime, testo UI o comportamento fuori scope.
 - `tests/test_config_state.py`
 - `tests/test_policy.py`
 - `tests/test_service.py`
+- `tests/test_service_unblock.py`
 - `tools/install_user.py`
 - `tools/measure_idle.py`
 - `docs/verification/01/report.md`
 - `docs/verification/01/idle.json`
 
-## Checklist reale per GM: NON ESEGUITA
+## Checklist reale per GM: esecuzione parziale documentata in §7 della spec
 
 Comandi copiati dalla spec, **non lanciati** durante questa sessione. La venv
 fornisce `scambio` in `.venv/bin`: GM può usare `source .venv/bin/activate` prima
@@ -324,7 +423,11 @@ dei comandi. Alla prima installazione, il modello viene creato dal primo avvio;
 configurare l'indirizzo e riavviare prima del punto 1. La voce 3 contiene ancora
 l'annotazione storica «non misurata finora», superata da M7.
 
-Firma GM: **pendente** · data: **pendente** · punti 1–18: **da eseguire**.
+Firma conclusiva GM: **pendente**. Prova del 4–5 ottobre documentata da Claude:
+**ok 1–7, 9–13, 15, 17**; **8 non applicabile** su casa; **14/16 da ripetere**
+dopo questa correzione; **18 dichiarato misurato**, valori da allegare.
+La tabella seguente conserva i comandi originali della checklist; per il
+ritardo di presa vale ora il default 500 ms (decisione 44).
 
 ### 6.1 Checklist di prova reale per GM (occhiali + iPhone)
 
