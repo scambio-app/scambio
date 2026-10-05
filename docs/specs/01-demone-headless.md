@@ -572,8 +572,10 @@ Ok: 1–7, 9–13, 15, 17 (presa con 0,5 s percepita «molto più veloce»). **8
 riacceso, con il video in corso, Scambio ha ritentato la presa dopo 0,5–2,6 s. Il buco di stream
 creato da Chrome quando cambia l'uscita azzerava l'anti ping-pong (G1), e G8 non trattava il
 Bluetooth spento come perdita esterna. Correzione nella spec: timer `UNBLOCK` (G1, G1b) e G8
-(decisione 45); default di `grab_delay_ms` a 500 (decisione 44). Da ripetere: 14 e 16. 18
-(CPU/RSS reali) misurato da Claude: vedi report.
+(decisione 45); default di `grab_delay_ms` a 500 (decisione 44). Da ripetere: 14 e 16 dopo la correzione (`057f3d6`, audit di Claude ok, 237 test).
+**18 ok** (Claude, 2026-10-05 08:40–08:50, sistema reale, nessuna transizione nella finestra):
+demone 0 tick di CPU in 600 s (0,0 %), RSS 24 132 KiB stabile; `pactl subscribe` 0 tick
+(0,0 %), RSS 5 472 KiB stabile.
 
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
