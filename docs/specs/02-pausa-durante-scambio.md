@@ -1,6 +1,6 @@
 # Spec 02 — Pausa durante lo scambio
 
-Stato: approvata (GM, 2026-10-05) · Autore: Claude · Data: 2026-10-05
+Stato: verificata (prova reale di GM conclusa il 2026-10-05) · Autore: Claude · Data: 2026-10-05
 
 ## 1. Obiettivo
 
@@ -325,19 +325,19 @@ c'è già).
 Ordine consigliato, un commit verde per tappa: (a) config, stato, policy con i test (compreso
 l'esaustivo); (b) adattatore MPRIS; (c) esecutore, ciclo di vita, integrazione, report.
 
-- [ ] Ogni regola nuova o modificata di §3.1.4 ha un test unitario con confronto esatto; test
+- [x] Ogni regola nuova o modificata di §3.1.4 ha un test unitario con confronto esatto; test
       esaustivo sugli invarianti verde; i test della spec 01 restano verdi (cambiati solo dove
       §3.1.4 cambia il risultato atteso, elencati nel report).
-- [ ] Adattatore MPRIS, esecutore e ciclo di vita provati con dbusmock come in §3.2.4.
-- [ ] `make check` verde; nessun test saltato.
-- [ ] Nessun polling, nessuna sottoscrizione nuova; unico timer nuovo `RESUME`; misura
+- [x] Adattatore MPRIS, esecutore e ciclo di vita provati con dbusmock come in §3.2.4.
+- [x] `make check` verde; nessun test saltato.
+- [x] Nessun polling, nessuna sottoscrizione nuova; unico timer nuovo `RESUME`; misura
       CPU/RSS a riposo (10 min, finti) nel report.
-- [ ] Nessun valore personale hardcodato; chiavi di §3.2.2 nel modello di configurazione.
-- [ ] API D-Bus invariata (XML di introspezione identico).
-- [ ] `design/`, `docs/context/`, `docs/specs/`, `docs/hardware-lab.md` non modificati.
-- [ ] `docs/verification/02/report.md` scritto con la checklist §6.1 e i comandi esatti;
+- [x] Nessun valore personale hardcodato; chiavi di §3.2.2 nel modello di configurazione.
+- [x] API D-Bus invariata (XML di introspezione identico).
+- [x] `design/`, `docs/context/`, `docs/specs/`, `docs/hardware-lab.md` non modificati.
+- [x] `docs/verification/02/report.md` scritto con la checklist §6.1 e i comandi esatti;
       decisioni tecniche in `docs/decisions.md` solo se servono (58–69).
-- [ ] Prova reale eseguita da GM: … · GM, data.
+- [x] Prova reale eseguita da GM: punti 0 (annuncio, M11), 1, 2, 4, 6, 8, 10, 11, 13 ok; 9 e 12 eseguiti da Claude sul sistema reale; 3 (Elisa) saltato; 5 non eseguito (GM: superfluo); Q4 chiusa senza misura (decisione 67) · GM, 2026-10-05.
 
 ### 6.1 Checklist di prova reale per GM (occhiali + iPhone)
 
@@ -406,6 +406,21 @@ di M9, comandi MPRIS da `systemd-run --user`):
   compare il warning «Cannot update resume_players without a session bus identity», perché
   `pause()` salva la riclassificazione prima di aver letto `GetId`. Innocuo: il salvataggio dopo
   la pausa riuscita avviene con `bus_id` (verificato in `state.json`).
+
+**Prova reale di GM — 2026-10-05 sera** (occhiali + iPhone, journal letto da Claude; M11, M12).
+Punto 0: annuncio presente 3 volte su 3, audio del PC udibile ≈ 1,0–1,3 s dopo il sink: il
+ritardo di 2000 ms resta definitivo; Q4 chiusa senza misura (decisione 67). Ok: 1 (Chrome, «va
+da dio»), 2 (Firefox, dalla seconda presa: la prima riproduzione in una finestra nuova non è
+ancora un player MPRIS, limite noto), 4, 6, 8, 10, 11. Saltati 3 (Elisa) e 5 (blocco durante la
+presa: GM lo giudica superfluo; coperto dai test di riga C9 e dall'esaustivo). **13 fallito**:
+doppio switch → ripresa sulla Scarlett e adozione esterna, perché BlueZ risponde a
+`Disconnect()` prima di `Connected=false` (M12). Correzione nella spec (decisione 68).
+
+**Audit 3 — 2026-10-05** su `545da48`: L1 ignora `DisconnectResult(ok)` con il dispositivo
+ancora collegato e lascia attivo `RELEASE`; test di riga L1/L2 e regressione del doppio switch
+in policy e servizio dbusmock; `make check` verde rieseguito da Claude (418 test, 0 saltati);
+file protetti invariati. **13 bis ok** (GM, 21:21): rilascio con pausa, presa con `switch`
+1,9 s dopo, ripresa di Firefox negli occhiali 2 s dopo `on_pc`.
 
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 

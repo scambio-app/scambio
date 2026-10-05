@@ -223,6 +223,7 @@ Claude dopo i passi.
 | Riapertura delle astine con il video ripreso a mano | nuova presa solo dopo 11 s di silenzio (anti ping-pong) |
 | `paplay` (senza MPRIS) | presa senza pausa (decisione 51) |
 | **Doppio switch** (`scambio switch; scambio switch`) con video negli occhiali | **difetto**: `DisconnectResult(ok)` arriva **prima** di `Connected=false`; L1 riparte subito con la presa, il `Connected=false` ritardato viene letto come presa fallita (C8, `connect_failed` nello stesso millisecondo), Firefox riprende **sulla Scarlett**; 3,5 s dopo la `Connect` ancora in corso riesce e Scambio adotta gli occhiali come presa esterna (R5), quindi il video passa negli occhiali senza pausa |
+| Doppio switch dopo la correzione 68 (`545da48`) | `DisconnectResult(ok)` ignorato finché `Connected=false`; presa 1,9 s dopo il rilascio, ripresa negli occhiali: ok |
 | Chiamata GSM (Q4) | non misurata: GM la considera equivalente a WhatsApp (M2) e a casa non ha rete (decisione 67) |
 
 ## Conseguenze per il design
