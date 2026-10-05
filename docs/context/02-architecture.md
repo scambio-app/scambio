@@ -67,18 +67,20 @@ quadro. Stati definitivi: `released`, `connecting`, `on_pc`, `releasing`, `unava
 | `releasing` | scollegamento in corso |
 | `unavailable` | Bluetooth spento, dispositivo assente o non configurato |
 
-Variabile ortogonale persistente: Priorità iPhone. La pausa/ripresa degli stream durante la
-presa si aggiunge con la spec 02.
+Variabile ortogonale persistente: Priorità iPhone. Pausa e ripresa dei player MPRIS durante
+presa e rilascio: spec 02 §3.1.4 (contesto `held`, timer `RESUME`, decisioni 50–56, 68).
 
 ## 4. Configurazione (chiavi iniziali)
 
 Elenco completo con tipi, default e vincoli in `docs/specs/01-demone-headless.md` §3.2.3:
-`device.address`, `device.profile`, `policy.grab_delay_ms = 1000`,
+`device.address`, `device.profile`, `policy.grab_delay_ms = 500` (decisione 44),
 `policy.release_idle_seconds = 120`, `policy.connect_timeout_seconds = 10`,
 `policy.sink_timeout_seconds = 5`, `policy.sleep_release_timeout_seconds = 4`,
 `audio.ignore_roles`, `audio.ignore_apps`, `shortcut.preferred = "<Super>g"`,
 `ui.language = "auto"`, `ui.tray = true`, `ui.notifications = true` (spec 03, decisione 80;
-dettagli in `05-ui-context.md` §5.8).
+dettagli in `05-ui-context.md` §5.8). Dalla spec 02 (§3.2.2): `policy.resume_delay_ms` (default
+dal profilo: `generic` 0, `meta_glasses` 2000), `audio.ignore_players`,
+`backend.player_timeout_ms = 1000`.
 
 La Priorità iPhone non è configurazione ma stato persistente in
 `~/.local/share/scambio/state.json` (decisione 23).
@@ -112,5 +114,7 @@ stato aggiornato.
 - 2026-10-04 — nome D-Bus e app-id `app.scambio.Scambio` (decisione 17).
 - 2026-10-04 — spec 01: meccanismo audio, instradamento, stato persistente, sessione,
   macchina a stati, interfaccia `app.scambio.Scambio1` (decisioni 18–28).
+- 2026-10-05 — spec 02: adattatore MPRIS `players.py`, pausa/ripresa nella policy, chiavi nuove,
+  `resume_players` in `state.json` (decisioni 50–56, 58–66, 68).
 - 2026-10-05 — spec 03: UI nel processo del demone, presentazione da `design/`, chiavi `ui.*`,
   metodo `Quit()` (decisioni 74–81).
