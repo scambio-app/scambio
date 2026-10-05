@@ -18,14 +18,30 @@ def exact(c, event, changes, actions):
     assert step(c, event, CFG) == (replace(c, **changes), actions)
 
 
+@pytest.mark.parametrize(
+    "event,connected",
+    [
+        (Event("DisconnectResult"), False),
+        (Event("DeviceConnected", False), True),
+        (Event("TimerFired", "RELEASE"), False),
+        (Event("DisconnectResult", "failed"), False),
+    ],
+)
 @pytest.mark.parametrize("active,held", [(False, False), (True, False), (False, True)])
-def test_grab(active, held):
-    c = Context(state="releasing", pending="grab", audio_active=active, held=held)
+def test_grab(active, held, event, connected):
+    c = Context(
+        state="releasing",
+        pending="grab",
+        audio_active=active,
+        held=held,
+        device_connected=connected,
+    )
     exact(
         c,
-        Event("DisconnectResult"),
+        event,
         dict(
             state="connecting",
+            device_connected=False,
             pending="none",
             origin="self",
             reason="switch",
@@ -216,7 +232,10 @@ def test_resume_late(state):
 @pytest.mark.parametrize(
     "locked,sleeping,active", list(product([False, True], repeat=3))
 )
-def test_l2(locked, sleeping, active):
+@pytest.mark.parametrize(
+    "event", [Event("DisconnectResult", "failed"), Event("TimerFired", "RELEASE")]
+)
+def test_l2(locked, sleeping, active, event):
     c = Context(
         state="releasing",
         held=True,
@@ -226,9 +245,11 @@ def test_l2(locked, sleeping, active):
         sleeping=sleeping,
         audio_active=active,
     )
+    if event.kind == "TimerFired":
+        exact(c, Event("DisconnectResult"), {}, [])
     exact(
         c,
-        Event("DisconnectResult", "failed"),
+        event,
         dict(
             state="on_pc",
             held=False,
@@ -249,12 +270,21 @@ def test_l2(locked, sleeping, active):
     )
 
 
-def test_l1_forgets():
-    c = Context(state="releasing", held=True)
+@pytest.mark.parametrize(
+    "event,connected",
+    [
+        (Event("DisconnectResult"), False),
+        (Event("DeviceConnected", False), True),
+        (Event("TimerFired", "RELEASE"), False),
+        (Event("DisconnectResult", "failed"), False),
+    ],
+)
+def test_l1_forgets(event, connected):
+    c = Context(state="releasing", held=True, device_connected=connected)
     exact(
         c,
-        Event("DisconnectResult"),
-        dict(state="released", held=False),
+        event,
+        dict(state="released", held=False, device_connected=False),
         [*cancel("RELEASE"), A("ForgetPlayers"), transition("releasing", "released")],
     )
 
@@ -319,10 +349,11 @@ def test_switch_during_grab_and_double_switch_release():
         ],
     )
     c, _ = step(c, Event("Switch"), CFG)
+    exact(c, Event("DisconnectResult"), {}, [])
     before = c
-    c, actions = step(c, Event("DisconnectResult"), CFG)
+    c, actions = step(c, Event("DeviceConnected", False), CFG)
     assert (c, actions) == (
-        replace(before, state="connecting", pending="none"),
+        replace(before, state="connecting", pending="none", device_connected=False),
         [
             *cancel("RELEASE"),
             A("PausePlayers", "grab"),
@@ -411,3 +442,77 @@ def test_exhaustive_six_events():
                 following[nxt, debt] += count
         frontier = following
     assert sum(frontier.values()) == len(events) ** 6 == 34_012_224
+
+
+@pytest.mark.parametrize("held,pending", list(product([False, True], ["none", "grab"])))
+def test_disconnect_success_waits_while_connected(held, pending):
+    c = Context(state="releasing", device_connected=True, held=held, pending=pending)
+    exact(c, Event("DisconnectResult"), {}, [])
+
+
+def test_double_switch_waits_for_disconnect_signal():
+    c = Context(
+        state="on_pc",
+        device_connected=True,
+        sink_ready=True,
+        routed=True,
+        audio_active=True,
+        origin="self",
+    )
+    trace = [
+        (
+            Event("Switch"),
+            dict(
+                state="releasing",
+                priority=True,
+                held=True,
+                routed=False,
+                reason="switch",
+            ),
+            [
+                A("SavePriority", True),
+                *RELEASE[:5],
+                A("PausePlayers", "release"),
+                *RELEASE[5:],
+                transition("on_pc", "releasing", "switch"),
+            ],
+        ),
+        (Event("AudioActive", False), dict(audio_active=False), []),
+        (
+            Event("Switch"),
+            dict(priority=False, pending="grab"),
+            [A("SavePriority", False)],
+        ),
+        (Event("DisconnectResult"), {}, []),
+        (Event("DeviceSinkGone"), dict(sink_ready=False), []),
+        (
+            Event("DeviceConnected", False),
+            dict(state="connecting", pending="none", device_connected=False),
+            [
+                *cancel("RELEASE"),
+                A("PausePlayers", "grab"),
+                *GRAB,
+                transition("releasing", "connecting", "switch"),
+            ],
+        ),
+        (Event("ConnectResult"), {}, [*cancel("CONNECT"), start("SINK", 5000)]),
+        (Event("DeviceConnected", True), dict(device_connected=True), []),
+        (
+            Event("DeviceSinkAppeared"),
+            dict(state="on_pc", sink_ready=True, routed=True),
+            [
+                *ENTER,
+                A("RouteToDevice"),
+                start("RESUME", 2000),
+                transition("connecting", "on_pc", "switch"),
+            ],
+        ),
+        (
+            Event("TimerFired", "RESUME"),
+            dict(held=False),
+            [A("ResumePlayers"), start("IDLE", 120000)],
+        ),
+    ]
+    for event, changes, actions in trace:
+        exact(c, event, changes, actions)
+        c = replace(c, **changes)

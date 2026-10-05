@@ -345,13 +345,16 @@ def step(ctx: Context, event: Event, config: Policy) -> tuple[Context, list[Acti
             block()
             release("sink_lost")
     elif c.state == "releasing":
+        # BlueZ may acknowledge Disconnect before publishing Connected=false (M12).
+        if kind == "DisconnectResult" and value == "" and c.device_connected:
+            return c, actions
         if (
             kind == "DisconnectResult"
             or timer == "RELEASE"
             or (kind == "DeviceConnected" and not value)
         ):
             cancel("RELEASE")
-            if (kind == "DisconnectResult" and value == "") or not c.device_connected:
+            if not c.device_connected:
                 if c.pending == "grab" and not c.locked and not c.sleeping:
                     grab("switch")
                 else:

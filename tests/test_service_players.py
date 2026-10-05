@@ -157,7 +157,10 @@ def test_release_during_resume_stays_paused(executor, player_factory, event):
         assert ports.calls == ["inhibitor"]
     spin_until(lambda: "restore" in ports.calls)
     ports.finish()
+    before, release_timer = s.ctx, s.timers["RELEASE"]
     s.event(Event("DisconnectResult"))
+    assert s.ctx == before and s.timers["RELEASE"] == release_timer
+    s.event(Event("DeviceConnected", False))
     spin_until(lambda: not held(s))
     assert p.calls() == ["Pause"] and s.store.value.resume_players is None
 
@@ -553,3 +556,168 @@ def test_stop_starts_resume_budget_after_current_operation(executor, monkeypatch
     assert done == [True] and removed == [1, 2]
     assert s.players_done == s.players_added == 2
     assert not s.player_busy
+
+
+def test_double_switch_with_early_disconnect_reply(
+    bluez_server, fake_pactl, tmp_path, player_factory, monkeypatch
+):
+    import dbus
+    import dbusmock
+    from helpers import SINK
+
+    from scambio.core.audio import Audio
+    from scambio.core.bluez import DEVICE, BlueZ
+    from scambio.core.session import Session
+
+    device = dbusmock.BusType.SYSTEM.get_connection().get_object(
+        "org.bluez", bluez_server[1]
+    )
+    device.UpdateProperties(
+        DEVICE, {"Connected": dbus.Boolean(True)}, dbus_interface=dbusmock.MOCK_IFACE
+    )
+    # Replies are immediate; the test emits the property changes independently.
+    for method in ("Disconnect", "Connect"):
+        device.AddMethod(
+            DEVICE, method, "", "", "pass", dbus_interface=dbusmock.MOCK_IFACE
+        )
+    fake_pactl.add_sink()
+    fake_pactl.update(
+        {"streams": [{"index": 7, "sink": 2, "corked": False, "properties": {}}]}
+    )
+    p = player_factory("double_switch")
+    bus, system = gio_bus(Gio.BusType.SESSION), gio_bus(Gio.BusType.SYSTEM)
+    config = Config(device=Device(ADDRESS), policy=Policy(resume_delay_ms=50))
+    store = Store(tmp_path / "state.json")
+    bluetooth_events = []
+
+    def factory(emit):
+        def bluetooth_event(event):
+            bluetooth_events.append(event)
+            emit(event)
+
+        return (
+            BlueZ(system, config, bluetooth_event),
+            Audio(config, store, emit, fake_pactl.command),
+            Session(system, bus, config, emit),
+        )
+
+    s = Service(bus, config, store, tmp_path / "config.toml", factory)
+    actions, play_destinations = [], []
+    execute, call = s._execute, s.players._call
+
+    def observed_action(action, release_barrier=0):
+        actions.append(action)
+        execute(action, release_barrier)
+
+    def observed_call(name, path, interface, method, params, done, *args, **kwargs):
+        if method == "Play":
+            play_destinations.append((s.ctx.state, fake_pactl.read()["default"]))
+        call(name, path, interface, method, params, done, *args, **kwargs)
+
+    monkeypatch.setattr(s, "_execute", observed_action)
+    monkeypatch.setattr(s.players, "_call", observed_call)
+
+    def device_calls():
+        return [
+            str(c[1])
+            for c in device.GetCalls(dbus_interface=dbusmock.MOCK_IFACE)
+            if str(c[1]) in {"Disconnect", "Connect"}
+        ]
+
+    try:
+        assert s.start()
+        spin_until(lambda: s.ctx.state == "on_pc" and not s.audio.routing_busy)
+        assert fake_pactl.read()["default"] == SINK
+        assert p.calls() == [] and s.ctx.audio_active
+        bluetooth_events.clear()
+        actions.clear()
+        s.event(Event("Switch"))
+        release_timer = s.timers["RELEASE"]
+        s.event(Event("Switch"))
+        spin_until(lambda: Event("DisconnectResult") in bluetooth_events)
+        assert bluetooth_events == [Event("DisconnectResult")]
+        assert (s.ctx.state, s.ctx.pending, s.ctx.device_connected, s.ctx.held) == (
+            "releasing",
+            "grab",
+            True,
+            True,
+        )
+        assert s.timers["RELEASE"] == release_timer
+        assert s.ctx.last_error == "" and not s.ctx.blocked_until_silence
+        assert device_calls() == ["Disconnect"] and p.calls() == ["Pause"]
+        assert store.value.resume_players is None
+
+        fake_pactl.update({"streams": [], "sinks": fake_pactl.read()["sinks"][:1]})
+        fake_pactl.event()
+        spin_until(lambda: not s.ctx.audio_active and not s.ctx.sink_ready)
+        device.UpdateProperties(
+            DEVICE,
+            {"Connected": dbus.Boolean(False)},
+            dbus_interface=dbusmock.MOCK_IFACE,
+        )
+        spin_until(lambda: Event("ConnectResult") in bluetooth_events)
+        spin_until(lambda: store.value.resume_players is not None)
+        assert bluetooth_events == [
+            Event("DisconnectResult"),
+            Event("DeviceConnected", False),
+            Event("ConnectResult"),
+        ]
+        assert (s.ctx.state, s.ctx.pending, s.ctx.origin, s.ctx.held) == (
+            "connecting",
+            "none",
+            "self",
+            True,
+        )
+        assert "RELEASE" not in s.timers
+        assert s.ctx.last_error == "" and not s.ctx.blocked_until_silence
+        assert device_calls() == ["Disconnect", "Connect"]
+        assert p.calls() == ["Pause"] and play_destinations == []
+
+        device.UpdateProperties(
+            DEVICE,
+            {"Connected": dbus.Boolean(True)},
+            dbus_interface=dbusmock.MOCK_IFACE,
+        )
+        fake_pactl.add_sink()
+        fake_pactl.event()
+        spin_until(lambda: not held(s) and p.calls() == ["Pause", "Play"])
+        assert (s.ctx.state, s.ctx.origin, s.ctx.reason, s.ctx.last_error) == (
+            "on_pc",
+            "self",
+            "switch",
+            "",
+        )
+        assert not s.ctx.held and not s.ctx.blocked_until_silence
+        assert store.value.resume_players is None
+        assert device_calls() == ["Disconnect", "Connect"]
+        assert play_destinations == [("on_pc", SINK)]
+        assert [
+            a
+            for a in actions
+            if a.kind
+            in {
+                "PausePlayers",
+                "ResumePlayers",
+                "ForgetPlayers",
+                "Connect",
+                "Disconnect",
+                "RouteToDevice",
+                "RestoreRouting",
+                "EmitTransition",
+                "EmitError",
+            }
+        ] == [
+            A("PausePlayers", "release"),
+            A("RestoreRouting"),
+            A("Disconnect"),
+            A("EmitTransition", transition=("on_pc", "releasing", "switch")),
+            A("PausePlayers", "grab"),
+            A("Connect"),
+            A("EmitTransition", transition=("releasing", "connecting", "switch")),
+            A("RouteToDevice"),
+            A("EmitTransition", transition=("connecting", "on_pc", "switch")),
+            A("ResumePlayers"),
+        ]
+    finally:
+        s.close()
+        drain()

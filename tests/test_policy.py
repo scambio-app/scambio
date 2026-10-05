@@ -612,6 +612,13 @@ CASES = [
         [*cancel("RELEASE"), transition("releasing", "released")],
     ),
     (
+        "L1-wait-connected",
+        {"state": "releasing", "device_connected": True, "pending": "grab"},
+        Event("DisconnectResult"),
+        {},
+        [],
+    ),
+    (
         "L1-disconnected",
         {"state": "releasing", "device_connected": True},
         Event("DeviceConnected", False),
@@ -629,6 +636,25 @@ CASES = [
         "L2",
         {"state": "releasing", "device_connected": True, "pending": "grab"},
         Event("DisconnectResult", "failed"),
+        {
+            "state": "on_pc",
+            "pending": "none",
+            "routed": True,
+            "reason": "disconnect_failed",
+            "last_error": "disconnect_failed",
+        },
+        [
+            *cancel("RELEASE"),
+            Action("EmitError", "disconnect_failed"),
+            Action("RouteToDevice"),
+            start("IDLE", 120000),
+            transition("releasing", "on_pc", "disconnect_failed"),
+        ],
+    ),
+    (
+        "L2-timeout",
+        {"state": "releasing", "device_connected": True, "pending": "grab"},
+        Event("TimerFired", "RELEASE"),
         {
             "state": "on_pc",
             "pending": "none",
@@ -924,11 +950,24 @@ def test_release_completion_branches(event, connected):
     c = Context(
         state="releasing", device_connected=connected, sleeping=True, pending="grab"
     )
-    c, actions = step(c, event, Policy())
-    assert c.state == ("on_pc" if connected else "released")
-    assert c.pending == "none"
-    assert any(a.kind == "ReleaseSleepInhibitor" for a in actions)
-    assert not any(a.kind == "Connect" for a in actions)
+    changes = dict(state="on_pc" if connected else "released", pending="none")
+    if connected:
+        changes.update(
+            routed=True, reason="disconnect_failed", last_error="disconnect_failed"
+        )
+    assert step(c, event, Policy()) == (
+        replace(c, **changes),
+        [
+            *cancel("RELEASE"),
+            Action("EmitError", "disconnect_failed"),
+            *SLEEP_RELEASE,
+            Action("RouteToDevice"),
+            start("IDLE", 120000),
+            transition("releasing", "on_pc", "disconnect_failed"),
+        ]
+        if connected
+        else [*cancel("RELEASE"), transition("releasing", "released"), *SLEEP_RELEASE],
+    )
 
 
 def test_pending_grab_and_configured_timers():
