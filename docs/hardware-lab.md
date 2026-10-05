@@ -177,6 +177,8 @@ sempre. La spec 02 usa solo la pausa MPRIS (decisione 51). Residuo della misura:
 
 ## 2026-10-05 — M11: icone del tray via `IconThemePath` su Plasma 5.27 (Claude, senza GM)
 
+Nota (orchestratore, 2026-10-05): numero M11 assegnato due volte da due chat parallele; per distinguerle si citano come **M11-icone** e **M11-annuncio**. Prossimo numero libero: M13.
+
 Metodo: script usa e getta fuori dalla repo (`/tmp/sniprobe`) che esporta un
 `org.kde.StatusNotifierItem` minimo con `IconThemePath` = `design/icons` e cambia `IconName`
 ogni 4 s sui sei stati; screenshot con `spectacle -b -n -f`, ritagliati sul tray. Tema
@@ -239,3 +241,19 @@ Claude dopo i passi.
 - Latenza della prima uscita audio in HFP (apertura del link SCO).
 - Passaggio automatico a HFP quando un'app apre il microfono (autoswitch di WirePlumber).
 - Se l'annuncio vocale si può disattivare dall'app Meta AI (durata misurata in M11).
+
+## 2026-10-05 — M13: portal GlobalShortcuts su casa (Q5, orchestratore, senza GM)
+
+Metodo: `busctl --user introspect org.freedesktop.portal.Desktop /org/freedesktop/portal/desktop`,
+proprietà `version`, file `/usr/share/xdg-desktop-portal/portals/*.portal`.
+
+| Misura | Esito |
+|---|---|
+| Interfaccia `org.freedesktop.portal.GlobalShortcuts` esposta | sì, `version` = 1 |
+| Backend che la implementa | `kde.portal` (xdg-desktop-portal-kde 5.27.11) |
+| Frontend | xdg-desktop-portal 1.18.4 |
+
+Conclusione: la via portal per la scorciatoia della spec 04 è disponibile su casa. Resta da provare
+nel funzionamento reale (CreateSession → BindShortcuts → dialogo KDE → segnale `Activated`): va
+nella spec 04 come prima prova, con riserva CLI se fallisce. GNOME non misurato.
+

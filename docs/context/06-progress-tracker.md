@@ -33,7 +33,7 @@ Vedi `docs/decisions.md`, voci 1–29.
 | ~~Q2~~ | ~~Dominio `scambio.app`~~ — **chiusa 2026-10-04**: acquistato da GM (decisione 17) | — | — |
 | ~~Q3~~ | ~~Riconnessione spontanea~~ — **chiusa 2026-10-04** (M3): mai verso il PC | — | — |
 | ~~Q4~~ | ~~Chiamata GSM~~ — **chiusa 2026-10-05** senza misura: uguale a WhatsApp (decisione 67) | — | — |
-| Q5 | Supporto reale del portal GlobalShortcuts su Plasma 5.27 | misura | prima della spec 04 |
+| Q5 | Portal GlobalShortcuts: **interfaccia presente v1 su casa (M13, 2026-10-05)**; resta la prova funzionale (bind + Activated) dentro la spec 04 | spec 04 | prima della spec 04 |
 
 ## 5. Prossimi passi
 
