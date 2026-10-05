@@ -6,7 +6,7 @@ from collections import deque
 from collections.abc import Callable, Sequence
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from gi.repository import Gio, GLib
 
@@ -15,8 +15,16 @@ from scambio.api import BUS_NAME, INTERFACE, PATH, introspection_xml
 from scambio.config import Config, ConfigInvalid, config_path, load
 from scambio.core.audio import Audio
 from scambio.core.bluez import BlueZ
+from scambio.core.players import Players
 from scambio.core.policy import Action, Context, Event, step
-from scambio.core.ports import AudioPort, BluetoothPort, Emit, SessionPort
+from scambio.core.ports import (
+    AudioPort,
+    BluetoothPort,
+    Done,
+    Emit,
+    PlayersPort,
+    SessionPort,
+)
 from scambio.core.session import Session
 from scambio.state import Store
 
@@ -51,11 +59,20 @@ class Service:
         config_file: Path,
         factory: Factory,
         timer: Schedule = schedule,
+        players: PlayersPort | None = None,
     ) -> None:
         self.bus, self.config, self.store = bus, config, store
         self.config_file, self.schedule = config_file, timer
         self.ctx = Context(priority=store.value.iphone_priority)
         self.bluez, self.audio, self.session = factory(self.event)
+        self.players = players if players is not None else Players(bus, config, store)
+        self.player_queue: deque[tuple[int, Callable[[Done], None]]] = deque()
+        self.route_queue: deque[tuple[int, Callable[[Done], None]]] = deque()
+        self.players_added = self.players_done = 0
+        self.routes_added = self.routes_done = 0
+        self.player_busy = self.route_busy = self.pumping = False
+        self.stopping = False
+        self.stop_source = 0
         self.timers: dict[str, int] = {}
         self.idle_release_at = 0
         self.name = ""
@@ -96,18 +113,26 @@ class Service:
         self._publish()
         if not self.config.device.address:
             self._error("device_not_configured", "Configure device.address")
-        self.session.start()
-        self.bluez.start()
-        self.audio.start()
+
+        def recover(done: Done) -> None:
+            def recovered() -> None:
+                if not self.stopping and not self.closed:
+                    self.session.start()
+                    self.bluez.start()
+                    self.audio.start()
+                done()
+
+            self.players.recover(recovered)
+
+        self._queue_player(recover)
         return True
 
     def event(self, event: Event) -> None:
-        if self.closed:
+        if self.closed or self.stopping:
             return
         if not self.initialized and event.kind in {"Switch", "SetPriority"}:
             self.ctx, actions = step(self.ctx, event, self.config.policy)
-            for action in actions:
-                self._execute(action)
+            self._actions(actions)
             self._publish()
             return
         if not self.initialized:
@@ -141,8 +166,7 @@ class Service:
                     self.ctx, actions = step(self.ctx, current, self.config.policy)
                     if before == self.ctx and not actions:
                         LOG.debug("Ignored event %s in %s", current, self.ctx.state)
-                    for action in actions:
-                        self._execute(action)
+                    self._actions(actions)
                 self._publish()
         finally:
             self.processing = False
@@ -166,7 +190,69 @@ class Service:
                 self.event(self.initial[key])
         self.initial.clear()
 
-    def _execute(self, action: Action) -> None:
+    def _actions(self, actions: list[Action]) -> None:
+        release_barrier = 0
+        for action in actions:
+            self._execute(action, release_barrier)
+            if action.kind == "PausePlayers" and action.value == "release":
+                release_barrier = self.players_added
+
+    def _queue_player(
+        self, operation: Callable[[Done], None], route_gate: int = 0
+    ) -> None:
+        self.players_added += 1
+        self.player_queue.append((route_gate, operation))
+        self._pump()
+
+    def _queue_route(self, operation: Callable[[Done], None], player_gate: int) -> None:
+        self.routes_added += 1
+        self.route_queue.append((player_gate, operation))
+        self._pump()
+
+    def _pump(self) -> None:
+        if self.pumping or self.closed:
+            return
+        self.pumping = True
+        try:
+            while not self.closed:
+                dispatched = False
+                if (
+                    not self.player_busy
+                    and self.player_queue
+                    and (self.stopping or self.player_queue[0][0] <= self.routes_done)
+                ):
+                    _, operation = self.player_queue.popleft()
+                    self.player_busy = True
+                    dispatched = True
+
+                    def players_finished() -> None:
+                        self.player_busy = False
+                        self.players_done += 1
+                        self._pump()
+
+                    operation(players_finished)
+                if (
+                    not self.stopping
+                    and not self.route_busy
+                    and self.route_queue
+                    and self.route_queue[0][0] <= self.players_done
+                ):
+                    _, operation = self.route_queue.popleft()
+                    self.route_busy = True
+                    dispatched = True
+
+                    def route_finished() -> None:
+                        self.route_busy = False
+                        self.routes_done += 1
+                        self._pump()
+
+                    operation(route_finished)
+                if not dispatched:
+                    break
+        finally:
+            self.pumping = False
+
+    def _execute(self, action: Action, release_barrier: int = 0) -> None:
         kind, value = action.kind, str(action.value)
         if kind == "Connect":
             self.disconnect_pending = False
@@ -176,8 +262,24 @@ class Service:
                 self.disconnect_pending = True
             else:
                 self.bluez.disconnect()
+        elif kind == "PausePlayers":
+            pause_kind: Literal["grab", "release"] = (
+                "grab" if value == "grab" else "release"
+            )
+            self._queue_player(lambda done: self.players.pause(pause_kind, done))
+        elif kind == "ResumePlayers":
+
+            def resume(done: Done) -> None:
+                if self.stopping:
+                    done()  # Shutdown decides which entries may resume.
+                else:
+                    self.players.resume(done)
+
+            self._queue_player(resume, self.routes_added)
+        elif kind == "ForgetPlayers":
+            self._queue_player(self.players.forget)
         elif kind == "RouteToDevice":
-            self.audio.route(lambda: None)
+            self._queue_route(self.audio.route, 0)
         elif kind == "RestoreRouting":
             self.restore_pending += 1
 
@@ -185,10 +287,21 @@ class Service:
                 self.restore_pending -= 1
                 if not self.restore_pending and self.disconnect_pending:
                     self.disconnect_pending = False
-                    if not self.closed and self.ctx.state == "releasing":
+                    if (
+                        not self.closed
+                        and not self.stopping
+                        and self.ctx.state == "releasing"
+                    ):
                         self.bluez.disconnect()
 
-            self.audio.restore(restored)
+            def restore(done: Done) -> None:
+                def finish() -> None:
+                    restored()
+                    done()
+
+                self.audio.restore(finish)
+
+            self._queue_route(restore, release_barrier)
         elif kind == "StartTimer":
             self._cancel_timer(value)
             if value == "IDLE":
@@ -315,10 +428,46 @@ class Service:
         self.bluez.reload(config)
         self.session.reload(config)
         self.audio.reload(config)
+        self.players.reload(config)
         self._publish()
 
+    def stop(self, done: Done) -> None:
+        if self.stopping or self.closed:
+            return
+        self.stopping = True
+        for name in tuple(self.timers):
+            self._cancel_timer(name)
+        finished = False
+
+        def finish() -> None:
+            nonlocal finished
+            if finished:
+                return
+            finished = True
+            self.close()
+            done()
+
+        def deadline() -> bool:
+            self.stop_source = 0
+            finish()
+            return False
+
+        self.stop_source = int(
+            GLib.timeout_add(2 * self.config.backend.player_timeout_ms, deadline)
+        )
+        # Pending pauses must settle before deciding which entries belong to a grab.
+        self._queue_player(lambda completed: self.players.shutdown(finish))
+
     def close(self) -> None:
+        if self.closed:
+            return
         self.closed = True
+        if self.stop_source:
+            GLib.source_remove(self.stop_source)
+            self.stop_source = 0
+        self.player_queue.clear()
+        self.route_queue.clear()
+        self.players.close()
         for name in tuple(self.timers):
             self._cancel_timer(name)
         for source in self.signals:
@@ -380,7 +529,7 @@ def run(
         return 1
 
     def stop() -> bool:
-        loop.quit()
+        service.stop(loop.quit)
         return True
 
     def reload_config() -> bool:

@@ -233,3 +233,25 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     ciascuna con player_timeout_ms). Ogni Pause riuscita viene persistita subito,
     così un player lento non ritarda il salvataggio degli altri. Nessun segnale
     o timer dell'adattatore; cancellazione Gio alla chiusura.
+60. Codex — Due code FIFO nell'esecutore (player e instradamento), con contatori di
+    completamento e dipendenze solo verso operazioni precedenti: la pausa di rilascio
+    sblocca RestoreRouting, la ripresa aspetta tutti gli instradamenti precedenti.
+    Connect e i timer della policy restano indipendenti. All'arresto si drena il
+    prefisso dei player prima di distinguere grab/release; un watchdog di ciclo di
+    vita a 2 × player_timeout_ms chiude Gio e il loop se il prefisso non termina.
+    È distinto dall'unico nuovo timer della policy, RESUME, ed esiste solo in stop.
+61. Codex — Precisazione della 59: discovery (ListNames/GetId) e letture dei player
+    condividono una scadenza monotona di player_timeout_ms; alle RPC di lettura
+    successive si passa solo il budget residuo. Il comando dispone al massimo di
+    un secondo player_timeout_ms. Nessun timer dell'adattatore: la scadenza si
+    applica ai timeout Gio, anche nel recupero all'avvio. Le scritture atomiche e
+    l'esecuzione dei callback restano soggette alla latenza del sistema.
+62. Codex — Harness automatici e misura idle usano app.scambio.Test esclusivamente
+    su bus dbusmock privati; CLI di prova isolata prima dell'import del client.
+    Nome e XML pubblici di produzione invariati. La misura registra anche SHA-256
+    dei sorgenti caricati e il numero di RPC MPRIS ai finti fra i due campioni.
+63. Codex — Durante stop, le riprese ordinarie ancora accodate diventano no-op e
+    non aspettano più il routing; resta shutdown a riprendere solo le voci grab.
+    Le pause/forget già richieste si drenano entro il watchdog, senza avviare
+    nuovi instradamenti. Evita di riprendere voci release dopo SIGTERM quando un
+    ResumePlayers di L2 aspettava ancora RouteToDevice; regressione sui due kind.

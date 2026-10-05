@@ -1,0 +1,43 @@
+{
+  "source_sha256": {
+    "src/scambio/config.py": "77525852ac403eb57e00dbc94418ccf8e34450b6102989f2bd859bc756787f20",
+    "src/scambio/state.py": "4b5633e718c725a60e544d5bdc6fb88b826b1300311df254d9f1edc0283e06e1",
+    "src/scambio/core/policy.py": "bd3ad44665eb7ed901456dc87e189c51da9867957c6503fd5f9dc7351fb7765d",
+    "src/scambio/core/players.py": "1ae228d8af9b8828b487e1707dc8c0896b1eacb46fc1fbd9f3fd2ddc2a185179",
+    "src/scambio/core/service.py": "bd91201efc8766a87589f2ca9089a32414094b0fe38440d152aa1cd17b54de11",
+    "tests/fixtures/run_daemon.py": "a10a3a31882b3294dc9834048f2059217e14eb662dbd7192a7299e61b30b1729"
+  },
+  "environment": "private dbusmock system/session buses; bluez5/logind/ScreenSaver/MPRIS; fake pactl; app.scambio.Test",
+  "started_utc": "2026-10-05T12:27:02.384914+00:00",
+  "elapsed_seconds": 600.0995681860368,
+  "processes": {
+    "daemon": {
+      "pid": 3848045,
+      "before": {
+        "cpu_seconds": 0.06,
+        "rss_kib": 23084
+      },
+      "after": {
+        "cpu_seconds": 0.06,
+        "rss_kib": 23084
+      },
+      "cpu_percent_interval": 0.0
+    },
+    "fake_pactl": {
+      "pid": 3848051,
+      "before": {
+        "cpu_seconds": 0.0,
+        "rss_kib": 11612
+      },
+      "after": {
+        "cpu_seconds": 0.0,
+        "rss_kib": 11612
+      },
+      "cpu_percent_interval": 0.0
+    }
+  },
+  "pactl_calls_during_idle": 0,
+  "mpris_calls_during_idle": 0,
+  "state_after": "released",
+  "real_measurement": "Pending GM spec 02 checklist 6.1"
+}

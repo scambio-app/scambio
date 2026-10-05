@@ -239,3 +239,44 @@ def test_empty(adapter):
     complete(adapter.resume)
     complete(adapter.forget)
     assert not adapter.held
+
+
+def test_discovery_shares_read_deadline(adapter, player_factory, monkeypatch, caplog):
+    from gi.repository import GLib
+
+    p = player_factory("slow_read")
+    p.obj.AddMethod(
+        "org.freedesktop.DBus.Properties",
+        "Get",
+        "ss",
+        "v",
+        'import time; time.sleep(0.07); ret = dbus.String("Playing")',
+        dbus_interface=dbusmock.MOCK_IFACE,
+    )
+    original = adapter._daemon
+
+    def delayed(method, params, done, timeout_ms=None):
+        if method == "ListNames":
+
+            def reply(value, error):
+                GLib.timeout_add(70, lambda: (done(value, error), False)[1])
+
+            original(method, params, reply, timeout_ms)
+        else:
+            original(method, params, done, timeout_ms)
+
+    monkeypatch.setattr(adapter, "_daemon", delayed)
+    complete(adapter.pause, "grab")
+    assert not adapter.held
+    assert "MPRIS Get failed" in caplog.text
+    drain(150)
+    assert p.calls() == []
+
+
+def test_close_cancels_pending_calls(adapter, player_factory):
+    p = player_factory("closed")
+    done = []
+    adapter.pause("grab", lambda: done.append(True))
+    adapter.close()
+    drain(150)
+    assert not done and not adapter.clients and p.calls() == []

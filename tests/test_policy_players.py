@@ -336,7 +336,7 @@ def test_exhaustive_six_events():
             Event("Availability", False),
         ]
     )
-    frontier = {(Context(state="released", audio_active=True), False): 1}
+    frontier = {(Context(state="released", audio_active=True), "none"): 1}
     for _ in range(6):
         following = defaultdict(int)
         for (c, owed), count in frontier.items():
@@ -345,13 +345,20 @@ def test_exhaustive_six_events():
                 debt = owed
                 for action in actions:
                     if action == A("PausePlayers", "grab"):
-                        debt = True
+                        if debt == "release":
+                            assert c.state == "releasing" and nxt.state == "connecting"
+                        debt = "grab"
+                    elif action == A("PausePlayers", "release"):
+                        debt = "release"
                     elif action.kind in {"ResumePlayers", "ForgetPlayers"}:
-                        debt = False
+                        if action.kind == "ResumePlayers" and debt == "release":
+                            assert c.state == "releasing" and nxt.state == "on_pc"
+                            assert not (c.locked or c.sleeping)
+                        debt = "none"
                 assert nxt.state not in {"released", "unavailable"} or not nxt.held
-                assert not debt or nxt.held
+                assert debt == "none" or nxt.held
                 # Every unresolved grab has a finite cleanup path, even on failure.
-                if debt:
+                if debt != "none":
                     end, cleanup = step(nxt, Event("Availability", False), CFG)
                     assert not end.held
                     assert any(

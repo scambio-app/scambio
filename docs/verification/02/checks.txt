@@ -1,0 +1,30 @@
+.venv/bin/ruff format --check src tests tools
+33 files already formatted
+.venv/bin/ruff check src tests tools
+All checks passed!
+.venv/bin/mypy
+Success: no issues found in 15 source files
+.venv/bin/pytest
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0
+rootdir: ~/development/scambio
+configfile: pyproject.toml
+testpaths: tests
+collected 357 items
+
+tests/test_adapters.py ....................                              [  5%]
+tests/test_audio_recovery.py ..................                          [ 10%]
+tests/test_config_state.py ......................................        [ 21%]
+tests/test_install_user.py ..                                            [ 21%]
+tests/test_players.py ................                                   [ 26%]
+tests/test_policy.py ................................................... [ 40%]
+........................................................................ [ 60%]
+.....................                                                    [ 66%]
+tests/test_policy_players.py ........................................... [ 78%]
+................................                                         [ 87%]
+tests/test_service.py ...................                                [ 92%]
+tests/test_service_players.py .....................                      [ 98%]
+tests/test_service_unblock.py ..                                         [ 99%]
+tests/test_session_recovery.py ..                                        [100%]
+
+============================= 357 passed in 40.64s =============================

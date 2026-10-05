@@ -1,5 +1,7 @@
 """Measure 10 idle minutes on two newly created private buses and fake pactl."""
 
+import argparse
+import hashlib
 import json
 import os
 import subprocess
@@ -14,12 +16,15 @@ import dbus
 import dbusmock
 from gi.repository import GLib
 
-from scambio.api import BUS_NAME, INTERFACE, PATH
+from scambio.api import INTERFACE, PATH
 from scambio.config import TEMPLATE
+
+BUS_NAME = "app.scambio.Test"
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tests"))
 from helpers import ADDRESS, FakePactl, bluez_mock, spin_until  # noqa: E402
+from test_players import FakePlayer  # noqa: E402
 
 
 def usage(pid):
@@ -31,7 +36,22 @@ def usage(pid):
 
 
 def main():
-    output = REPO / "docs/verification/01/idle.json"
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--output", type=Path, default=REPO / "docs/verification/01/idle.json"
+    )
+    output = parser.parse_args().output
+    source_hashes = {
+        name: hashlib.sha256((REPO / name).read_bytes()).hexdigest()
+        for name in (
+            "src/scambio/config.py",
+            "src/scambio/state.py",
+            "src/scambio/core/policy.py",
+            "src/scambio/core/players.py",
+            "src/scambio/core/service.py",
+            "tests/fixtures/run_daemon.py",
+        )
+    }
     with ExitStack() as stack:
         root = Path(
             stack.enter_context(tempfile.TemporaryDirectory(prefix="scambio-idle-"))
@@ -78,6 +98,8 @@ def main():
             "ret = False",
             dbus_interface=dbusmock.MOCK_IFACE,
         )
+        player = FakePlayer("idle", "Paused")
+        stack.callback(player.close)
         fake = FakePactl(root / "pulse")
         stack.callback(fake.close)
         (root / "config.toml").write_text(
@@ -120,6 +142,9 @@ def main():
         }
         before = {name: usage(pid) for name, pid in ids.items()}
         calls_before = len(fake.calls())
+        player_calls_before = len(
+            player.obj.GetCalls(dbus_interface=dbusmock.MOCK_IFACE)
+        )
         start = time.monotonic()
         started = datetime.now(UTC).isoformat()
         print(f"Idle measurement started {started}; daemon={process.pid}", flush=True)
@@ -128,9 +153,10 @@ def main():
         elapsed = time.monotonic() - start
         after = {name: usage(pid) for name, pid in ids.items()}
         result = {
+            "source_sha256": source_hashes,
             "environment": (
                 "private dbusmock system/session buses; "
-                "bluez5/logind/ScreenSaver; fake pactl"
+                "bluez5/logind/ScreenSaver/MPRIS; fake pactl; app.scambio.Test"
             ),
             "started_utc": started,
             "elapsed_seconds": elapsed,
@@ -146,8 +172,12 @@ def main():
                 for name in ids
             },
             "pactl_calls_during_idle": len(fake.calls()) - calls_before,
+            "mpris_calls_during_idle": len(
+                player.obj.GetCalls(dbus_interface=dbusmock.MOCK_IFACE)
+            )
+            - player_calls_before,
             "state_after": str(properties()["State"]),
-            "real_measurement": "Pending GM checklist item 18",
+            "real_measurement": "Pending GM spec 02 checklist 6.1",
         }
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(result, indent=2) + "\n")

@@ -39,8 +39,11 @@ class Players:
         method: str,
         params: GLib.Variant | None,
         done: Callable[[Any, str], None],
+        timeout_ms: int | None = None,
     ) -> None:
-        client = BusClient(self.bus, name, self.config.backend.player_timeout_ms)
+        client = BusClient(
+            self.bus, name, timeout_ms or self.config.backend.player_timeout_ms
+        )
         self.clients.add(client)
 
         def finish(reply: Any, error: str) -> None:
@@ -53,9 +56,15 @@ class Players:
         client.call(path, interface, method, params, finish)
 
     def _daemon(
-        self, method: str, params: GLib.Variant | None, done: Callable[[Any, str], None]
+        self,
+        method: str,
+        params: GLib.Variant | None,
+        done: Callable[[Any, str], None],
+        timeout_ms: int | None = None,
     ) -> None:
-        self._call(DBUS, "/org/freedesktop/DBus", DBUS, method, params, done)
+        self._call(
+            DBUS, "/org/freedesktop/DBus", DBUS, method, params, done, timeout_ms
+        )
 
     def _identity(self, done: Done) -> None:
         if self.bus_id:
@@ -81,8 +90,17 @@ class Players:
             LOG.warning("Cannot save held players: %s", exc)
 
     def _read(
-        self, name: str, owner: str | None, done: Callable[[str, str], None]
+        self,
+        name: str,
+        owner: str | None,
+        done: Callable[[str, str], None],
+        deadline: int,
     ) -> None:
+        remaining = (deadline - GLib.get_monotonic_time() + 999) // 1000
+        if remaining <= 0:
+            LOG.warning("MPRIS read deadline expired for %s", name)
+            done("", "")
+            return
         # Read owner and status concurrently. Commands target the unique owner,
         # never a replacement that acquires the well-known name in the meantime.
         values: dict[str, str] = {}
@@ -96,6 +114,7 @@ class Players:
             "GetNameOwner",
             GLib.Variant("(s)", (name,)),
             lambda reply, err: received("owner", reply, err),
+            remaining,
         )
         self._call(
             owner or name,
@@ -104,12 +123,20 @@ class Players:
             "Get",
             GLib.Variant("(ss)", (PLAYER, "PlaybackStatus")),
             lambda reply, err: received("status", reply, err),
+            remaining,
+        )
+
+    def _read_deadline(self) -> int:
+        return (
+            int(GLib.get_monotonic_time())
+            + self.config.backend.player_timeout_ms * 1000
         )
 
     def pause(self, kind: Kind, done: Done) -> None:
+        deadline = self._read_deadline()
         self.held = dict.fromkeys(self.held, kind)
         self._save()
-        # Bus metadata is cheap and read alongside discovery, outside player RPCs.
+        # Discovery shares the read budget; no additional watchdog or idle work.
         discovery: dict[str, object] = {}
 
         def ready() -> None:
@@ -151,7 +178,7 @@ class Players:
                 self._call(owner, PATH, PLAYER, "Pause", None, paused)
 
             for name in candidates:
-                self._read(name, None, partial(read, name))
+                self._read(name, None, partial(read, name), deadline)
 
         def names(reply: Any, error: str) -> None:
             discovery["names"] = [] if error else reply[0]
@@ -164,7 +191,8 @@ class Players:
         self._identity(identified)
         self._daemon("ListNames", None, names)
 
-    def resume(self, done: Done) -> None:
+    def resume(self, done: Done, *, deadline: int | None = None) -> None:
+        deadline = deadline if deadline is not None else self._read_deadline()
         pending = len(self.held)
         if not pending:
             self.forget(done)
@@ -189,7 +217,7 @@ class Players:
             self._call(ref.owner, PATH, PLAYER, "Play", None, played)
 
         for ref in tuple(self.held):
-            self._read(ref.name, ref.owner, partial(read, ref))
+            self._read(ref.name, ref.owner, partial(read, ref), deadline)
 
     def forget(self, done: Done) -> None:
         self.held.clear()
@@ -197,6 +225,7 @@ class Players:
         done()
 
     def recover(self, done: Done) -> None:
+        deadline = self._read_deadline()
         saved = self.store.value.resume_players
         if saved is None:
             done()
@@ -205,7 +234,7 @@ class Players:
         def identified() -> None:
             if saved.bus_id == self.bus_id:
                 self.held = dict.fromkeys(saved.players, "grab")
-                self.resume(done)
+                self.resume(done, deadline=deadline)
             else:
                 self.forget(done)
 

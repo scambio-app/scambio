@@ -17,6 +17,9 @@ def pytest_sessionstart(session):
         bus.start()
         _BUSES.append((key, bus))
     assert_private_buses()
+    import scambio.api
+
+    scambio.api.BUS_NAME = "app.scambio.Test"
 
 
 def assert_private_buses():

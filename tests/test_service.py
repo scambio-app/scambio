@@ -24,7 +24,7 @@ from scambio.state import Store
 
 def client(*args):
     return subprocess.run(
-        [sys.executable, "-m", "scambio.cli", *args],
+        [sys.executable, str(Path(__file__).parent / "fixtures/run_cli.py"), *args],
         capture_output=True,
         text=True,
         timeout=5,
@@ -250,7 +250,7 @@ def test_systemd_render_only():
     spec.loader.exec_module(module)
     text = module.render(path.parents[1])
     assert "@REPO@" not in text
-    assert "Type=dbus" in text and "BusName=" + BUS_NAME in text
+    assert "Type=dbus" in text and "BusName=app.scambio.Scambio" in text
     assert "ExecReload=/bin/kill -HUP $MAINPID" in text
 
 

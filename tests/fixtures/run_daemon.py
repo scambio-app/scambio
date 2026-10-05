@@ -7,7 +7,10 @@ from pathlib import Path
 
 from gi.repository import GLib
 
-from scambio.core.service import run, schedule
+import scambio.api
+
+scambio.api.BUS_NAME = "app.scambio.Test"
+from scambio.core.service import run, schedule  # noqa: E402
 
 for key in ("DBUS_SYSTEM_BUS_ADDRESS", "DBUS_SESSION_BUS_ADDRESS"):
     assert "dbusmock_data_" in os.environ[key], f"Unsafe bus: {key}"
