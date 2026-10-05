@@ -280,3 +280,46 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     valida le risposte come stringa, tupla di nomi o risultato vuoto; niente Any
     né assert nell'adattatore. Gli errori ai player indicano il nome MPRIS noto,
     anche per GetNameOwner; il payload remoto non finisce nel log.
+
+## 2026-10-05 — Mock UI e spec 03 (chat di design; numeri 70–89 riservati)
+
+70. GM — Notifiche solo per l'essenziale: errori e Priorità iPhone cambiata da fuori dalla UI
+    (scorciatoia, CLI). Prese e rilasci automatici restano silenziosi: lo stato lo dice l'icona.
+71. GM — Clic sinistro sull'icona del tray = apre lo stesso menu del destro (`ItemIsMenu`); lo
+    switch rapido resta la scorciatoia.
+72. GM — Icone del tray, variante B del mock: occhiali + emblema di dove sono (telefono, monitor,
+    lucchetto per la Priorità iPhone); lenti piene quando sono sul PC.
+73. GM — Nei testi resta «iPhone» (anche «Priorità iPhone»); il passaggio a «telefono» per gli
+    utenti Android si fa prima della release pubblica, cambiando solo i cataloghi.
+74. Claude — Tray e notifiche girano nel processo del demone, solo con Gio (nessun GTK), e parlano
+    col servizio tramite un proxy D-Bus sul suo stesso nome, con chiamate solo asincrone. La
+    configurazione della UI arriva con `apply_config` dopo un `Reload` riuscito (stesso processo,
+    non è stato del demone). La finestra (spec 04) è un processo separato su richiesta. Motivo:
+    zero processi e memoria in più per la parte sempre attiva.
+75. Claude — La presentazione è dati di design: `design/ui/tray.json` (regole stato → icona e
+    testi, voci del menu, notifiche) caricato e validato a runtime; testi con chiavi gettext
+    simboliche (`msgid` = chiave), `en.po` obbligatorio. Motivo: il design resta di Claude senza
+    toccare il codice.
+76. Claude — Icone con il prefisso dell'app-id (`app.scambio.Scambio-<stato>-symbolic`, pronte
+    per l'export Flatpak) in `design/icons/hicolor/scalable/status/`, passate al tray con
+    `IconThemePath`; icona delle notifiche per percorso assoluto. Nessun file installato fuori
+    da `~/.config/scambio/` e `~/.local/share/scambio/`. La cartella è quella misurata in M11.
+77. Claude — Nessun timer nella UI: niente animazioni; minuti al rilascio calcolati all'apertura
+    del menu, ora assoluta nel tooltip; correlazioni delle notifiche per ordine dei messaggi
+    D-Bus (il servizio emette `Transition` prima di `PropertiesChanged` e `PropertiesChanged`
+    prima della risposta ai metodi).
+78. Claude — Riga di stato del menu senza icona (dbusmenu cerca le icone nel tema di sistema);
+    errore «attivo» con icona d'errore e `NeedsAttention` finché l'utente non lo vede (menu
+    aperto o notifica) o finché `LastError` torna vuoto.
+79. Claude — «Esci da Scambio» chiama il nuovo metodo `Quit()`: arresto ordinato come `SIGTERM`,
+    uscita 0, systemd non lo riavvia fino al prossimo login.
+80. Claude — Nuove chiavi `ui.tray` e `ui.notifications` (default `true`); `ui.language` ha
+    effetto su tray, notifiche, CLI e motivo dell'inibitore.
+81. Claude — «Impostazioni…» resta nascosta nel menu fino alla spec 04. «Riprova» non c'è dopo
+    un rilascio fallito (uno switch accenderebbe la Priorità iPhone); `audio_backend_down` si
+    notifica solo all'avvio (a runtime è un riavvio di PipeWire, che si recupera da solo).
+82. Claude (da approvare da GM) — I commenti del modello di `config.toml` restano in inglese:
+    file tecnico come il codice (precisa la 29b).
+83. Claude (da approvare da GM) — Nella CLI restano in inglese solo le parole proprie di
+    `argparse` («usage:», «options:», errori di sintassi); tutti gli altri testi hanno chiavi
+    it/en/de (precisa la 29b).

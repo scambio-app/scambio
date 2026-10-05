@@ -38,10 +38,15 @@ src/scambio/
     shortcuts.py       portal GlobalShortcuts
     profiles/          profilo generico + profilo occhiali Meta
     extensions.py      punto di estensione per moduli premium
-  ui/
-    tray.py            StatusNotifierItem + menu
-    window.py          finestra impostazioni (carica design/ui)
-    notify.py          notifiche
+  i18n.py              lingua e testi (chiavi gettext di design/i18n), usato da UI, CLI e core
+  paths.py             dove stanno design/ e i cataloghi compilati
+  ui/                  tray e notifiche nel processo del demone, solo Gio (spec 03, decisione 74)
+    client.py          proxy dell'API D-Bus del demone
+    presentation.py    puro: design/ui/tray.json → icona, testi, menu
+    actions.py         GAction app.switch, app.toggle-priority, app.quit
+    tray.py            StatusNotifierItem + dbusmenu
+    notify.py          notifiche + portal OpenURI
+    window.py          finestra impostazioni, processo separato (spec 04)
 ```
 
 Regola di dipendenza: `ui/` e `cli.py` dipendono solo dall'API D-Bus del demone (anche se girano
@@ -72,7 +77,8 @@ Elenco completo con tipi, default e vincoli in `docs/specs/01-demone-headless.md
 `policy.release_idle_seconds = 120`, `policy.connect_timeout_seconds = 10`,
 `policy.sink_timeout_seconds = 5`, `policy.sleep_release_timeout_seconds = 4`,
 `audio.ignore_roles`, `audio.ignore_apps`, `shortcut.preferred = "<Super>g"`,
-`ui.language = "auto"`.
+`ui.language = "auto"`, `ui.tray = true`, `ui.notifications = true` (spec 03, decisione 80;
+dettagli in `05-ui-context.md` §5.8).
 
 La Priorità iPhone non è configurazione ma stato persistente in
 `~/.local/share/scambio/state.json` (decisione 23).
@@ -106,3 +112,5 @@ stato aggiornato.
 - 2026-10-04 — nome D-Bus e app-id `app.scambio.Scambio` (decisione 17).
 - 2026-10-04 — spec 01: meccanismo audio, instradamento, stato persistente, sessione,
   macchina a stati, interfaccia `app.scambio.Scambio1` (decisioni 18–28).
+- 2026-10-05 — spec 03: UI nel processo del demone, presentazione da `design/`, chiavi `ui.*`,
+  metodo `Quit()` (decisioni 74–81).

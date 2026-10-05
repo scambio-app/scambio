@@ -1,0 +1,306 @@
+# Scambio — testi dell'interfaccia (english).
+# Proprietà di Claude (design/). Chiavi simboliche: msgid = chiave del contratto
+# in docs/context/05-ui-context.md; en.po è obbligatorio come gli altri.
+# Segnaposto: {device}, {minutes}, {time}, {error} (str.format).
+msgid ""
+msgstr ""
+"Project-Id-Version: scambio 0.1\n"
+"PO-Revision-Date: 2026-10-05 13:30+0200\n"
+"Last-Translator: Claude (design di Scambio)\n"
+"Language-Team: Scambio\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Al posto di {device} quando BlueZ non dà un nome. Minuscolo: il codice rende maiuscola la prima lettera della frase.
+msgid "tray-device-fallback"
+msgstr "the device"
+
+#. Prima riga del menu e del tooltip.
+#. segnaposto: {device}
+msgid "tray-header-released"
+msgstr "{device} — free for the iPhone"
+
+#. segnaposto: {device}
+msgid "tray-header-priority"
+msgstr "{device} — reserved for the iPhone"
+
+#. segnaposto: {device}
+msgid "tray-header-connecting"
+msgstr "{device} — moving to the PC…"
+
+#. segnaposto: {device}
+msgid "tray-header-on-pc"
+msgstr "{device} — on the PC"
+
+#. segnaposto: {device}
+msgid "tray-header-releasing"
+msgstr "{device} — going back to the iPhone…"
+
+#. segnaposto: {device}
+msgid "tray-header-unavailable"
+msgstr "{device} — unavailable"
+
+msgid "tray-header-not-configured"
+msgstr "No device configured"
+
+#. Seconda riga del menu e del tooltip.
+msgid "tray-detail-released"
+msgstr "Moves to the PC when audio starts"
+
+msgid "tray-detail-priority"
+msgstr "The PC won’t take it automatically"
+
+msgid "tray-detail-busy"
+msgstr "A few seconds…"
+
+msgid "tray-detail-playing"
+msgstr "PC audio playing"
+
+#. Menu: minuti arrotondati per eccesso, calcolati all’apertura.
+#. segnaposto: {minutes}
+msgid "tray-detail-idle"
+msgstr "Back to the iPhone in {minutes} min"
+
+msgid "tray-detail-idle-soon"
+msgstr "Back to the iPhone in under a minute"
+
+#. Tooltip: ora assoluta HH:MM, così non invecchia.
+#. segnaposto: {time}
+msgid "tray-detail-idle-at"
+msgstr "Back to the iPhone at {time}"
+
+msgid "tray-detail-on-pc"
+msgstr "PC audio on the device"
+
+msgid "tray-detail-unavailable"
+msgstr "Bluetooth off or device out of range"
+
+msgid "tray-detail-not-configured"
+msgstr "Set the address in ~/.config/scambio/config.toml"
+
+#. Mostrato finché l’errore non è visto (05 §5.4).
+msgid "tray-detail-error-connect"
+msgstr "Last switch failed: is it on and nearby?"
+
+msgid "tray-detail-error-sink"
+msgstr "Audio lost: back on the PC speakers"
+
+msgid "tray-detail-error-release"
+msgstr "Hand-back failed: it stays on the PC"
+
+msgid "tray-detail-error-config"
+msgstr "Invalid configuration: using the previous one"
+
+msgid "tray-action-to-pc"
+msgstr "Move to PC"
+
+msgid "tray-action-to-phone"
+msgstr "Hand back to the iPhone"
+
+msgid "tray-action-priority"
+msgstr "iPhone priority"
+
+msgid "tray-action-settings"
+msgstr "Settings…"
+
+msgid "tray-action-quit"
+msgstr "Quit Scambio"
+
+#. segnaposto: {device}
+msgid "notify-grab-failed-title"
+msgstr "{device} not reachable"
+
+msgid "notify-grab-failed-body"
+msgstr "Couldn’t move it to the PC. Is it on and nearby?"
+
+#. segnaposto: {device}
+msgid "notify-sink-lost-title"
+msgstr "{device}: audio unavailable"
+
+msgid "notify-sink-lost-body"
+msgstr "Audio is back on the PC speakers."
+
+#. segnaposto: {device}
+msgid "notify-release-failed-title"
+msgstr "{device} stays on the PC"
+
+msgid "notify-release-failed-body"
+msgstr "Couldn’t hand it back to the iPhone."
+
+#. segnaposto: {device}
+msgid "notify-unavailable-title"
+msgstr "{device} unavailable"
+
+msgid "notify-unavailable-body"
+msgstr "Bluetooth off or device out of range."
+
+msgid "notify-not-configured-title"
+msgstr "Scambio has no device"
+
+msgid "notify-not-configured-body"
+msgstr "Set the Bluetooth address in the configuration file."
+
+msgid "notify-config-invalid-title"
+msgstr "Invalid configuration"
+
+msgid "notify-config-invalid-body"
+msgstr "Scambio keeps using the previous one. Details in the system log."
+
+msgid "notify-audio-down-title"
+msgstr "Scambio can’t detect PC audio"
+
+msgid "notify-audio-down-body"
+msgstr "Without it there is no automatic switching; the manual switch works. Check pactl (package pulseaudio-utils)."
+
+#. Switch partito fuori dal tray (scorciatoia, CLI).
+#. segnaposto: {device}
+msgid "notify-switch-to-phone-title"
+msgstr "{device} handed back to the iPhone"
+
+msgid "notify-switch-to-phone-body"
+msgstr "iPhone priority on: the PC won’t take it back by itself."
+
+#. segnaposto: {device}
+msgid "notify-switch-to-pc-title"
+msgstr "{device} on the PC"
+
+msgid "notify-switch-to-pc-body"
+msgstr "iPhone priority off."
+
+#. Priorità cambiata fuori dal tray senza switch (es. scambio priority on).
+msgid "notify-priority-on-title"
+msgstr "iPhone priority on"
+
+#. segnaposto: {device}
+msgid "notify-priority-on-body"
+msgstr "The PC won’t take {device} automatically."
+
+msgid "notify-priority-off-title"
+msgstr "iPhone priority off"
+
+#. segnaposto: {device}
+msgid "notify-priority-off-body"
+msgstr "The PC takes {device} when audio starts."
+
+msgid "notify-action-retry"
+msgstr "Try again"
+
+msgid "notify-action-undo"
+msgstr "Undo"
+
+msgid "notify-action-open-config"
+msgstr "Open file"
+
+#. Finestra impostazioni (spec 04, bozza).
+msgid "settings-priority-subtitle"
+msgstr "The PC won’t take the device automatically"
+
+msgid "settings-group-device"
+msgstr "Device"
+
+msgid "settings-device-title"
+msgstr "Device"
+
+msgid "settings-group-release"
+msgstr "Back to the iPhone"
+
+msgid "settings-release-title"
+msgstr "After a silence of (minutes)"
+
+msgid "settings-release-subtitle"
+msgstr "Also right away on screen lock and suspend"
+
+msgid "settings-group-shortcut"
+msgstr "Shortcut"
+
+msgid "settings-shortcut-title"
+msgstr "Smart switch"
+
+msgid "settings-shortcut-subtitle"
+msgstr "Moves the device and turns iPhone priority on or off"
+
+msgid "settings-shortcut-change"
+msgstr "Change…"
+
+msgid "settings-group-general"
+msgstr "General"
+
+msgid "settings-autostart"
+msgstr "Start at login"
+
+msgid "settings-tray"
+msgstr "Icon in the system tray"
+
+msgid "settings-language"
+msgstr "Language"
+
+msgid "settings-language-auto"
+msgstr "Automatic"
+
+msgid "settings-advanced-title"
+msgstr "Advanced"
+
+msgid "settings-advanced-subtitle"
+msgstr "Grab delay, timeouts, ignored apps"
+
+msgid "settings-grab-delay-title"
+msgstr "Grab delay (seconds)"
+
+msgid "settings-grab-delay-subtitle"
+msgstr "How long audio must play before taking the device"
+
+msgid "settings-ignored-apps-title"
+msgstr "Ignored apps"
+
+msgid "settings-ignored-apps-subtitle"
+msgstr "Their audio doesn’t move the device to the PC"
+
+#. Riga di comando (decisioni 27 e 29b). Stati e codici restano stringhe stabili non tradotte.
+msgid "cli-description"
+msgstr "Switch Bluetooth audio between PC and phone"
+
+msgid "cli-daemon-help"
+msgstr "Run the daemon"
+
+msgid "cli-debug-help"
+msgstr "Enable debug logging"
+
+msgid "cli-status-help"
+msgstr "Show daemon status"
+
+msgid "cli-json-help"
+msgstr "Output JSON"
+
+msgid "cli-switch-help"
+msgstr "Move the device between PC and iPhone"
+
+msgid "cli-priority-help"
+msgstr "Show or change iPhone priority"
+
+msgid "cli-not-running"
+msgstr "Scambio is not running; start it with systemctl --user start scambio"
+
+#. Solo per errori D-Bus non previsti; {error} è il nome tecnico dell’errore.
+#. segnaposto: {error}
+msgid "cli-dbus-error"
+msgstr "D-Bus error: {error}"
+
+msgid "cli-error-device-unavailable"
+msgstr "Device unavailable: Bluetooth off or out of range"
+
+msgid "cli-error-config-invalid"
+msgstr "Invalid configuration: using the previous one"
+
+msgid "cli-error-restart-required"
+msgstr "Device address changed: restart with systemctl --user restart scambio"
+
+msgid "cli-help-help"
+msgstr "Show this help and exit"
+
+#. Motivo dell’inibitore di logind (systemd-inhibit --list).
+msgid "session-inhibit-reason"
+msgstr "Hand the device back to the phone before suspend"
+

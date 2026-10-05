@@ -1,0 +1,306 @@
+# Scambio — testi dell'interfaccia (deutsch).
+# Proprietà di Claude (design/). Chiavi simboliche: msgid = chiave del contratto
+# in docs/context/05-ui-context.md; en.po è obbligatorio come gli altri.
+# Segnaposto: {device}, {minutes}, {time}, {error} (str.format).
+msgid ""
+msgstr ""
+"Project-Id-Version: scambio 0.1\n"
+"PO-Revision-Date: 2026-10-05 13:30+0200\n"
+"Last-Translator: Claude (design di Scambio)\n"
+"Language-Team: Scambio\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Al posto di {device} quando BlueZ non dà un nome. Minuscolo: il codice rende maiuscola la prima lettera della frase.
+msgid "tray-device-fallback"
+msgstr "das Gerät"
+
+#. Prima riga del menu e del tooltip.
+#. segnaposto: {device}
+msgid "tray-header-released"
+msgstr "{device} — frei für das iPhone"
+
+#. segnaposto: {device}
+msgid "tray-header-priority"
+msgstr "{device} — für das iPhone reserviert"
+
+#. segnaposto: {device}
+msgid "tray-header-connecting"
+msgstr "{device} — wechselt zum PC…"
+
+#. segnaposto: {device}
+msgid "tray-header-on-pc"
+msgstr "{device} — am PC"
+
+#. segnaposto: {device}
+msgid "tray-header-releasing"
+msgstr "{device} — zurück zum iPhone…"
+
+#. segnaposto: {device}
+msgid "tray-header-unavailable"
+msgstr "{device} — nicht verfügbar"
+
+msgid "tray-header-not-configured"
+msgstr "Kein Gerät eingerichtet"
+
+#. Seconda riga del menu e del tooltip.
+msgid "tray-detail-released"
+msgstr "Wechselt zum PC, sobald Audio startet"
+
+msgid "tray-detail-priority"
+msgstr "Der PC übernimmt es nicht automatisch"
+
+msgid "tray-detail-busy"
+msgstr "Einen Moment…"
+
+msgid "tray-detail-playing"
+msgstr "PC-Audio läuft"
+
+#. Menu: minuti arrotondati per eccesso, calcolati all’apertura.
+#. segnaposto: {minutes}
+msgid "tray-detail-idle"
+msgstr "In {minutes} Min. zurück zum iPhone"
+
+msgid "tray-detail-idle-soon"
+msgstr "In weniger als einer Minute zurück zum iPhone"
+
+#. Tooltip: ora assoluta HH:MM, così non invecchia.
+#. segnaposto: {time}
+msgid "tray-detail-idle-at"
+msgstr "Um {time} zurück zum iPhone"
+
+msgid "tray-detail-on-pc"
+msgstr "PC-Audio über das Gerät"
+
+msgid "tray-detail-unavailable"
+msgstr "Bluetooth aus oder Gerät außer Reichweite"
+
+msgid "tray-detail-not-configured"
+msgstr "Adresse in ~/.config/scambio/config.toml eintragen"
+
+#. Mostrato finché l’errore non è visto (05 §5.4).
+msgid "tray-detail-error-connect"
+msgstr "Letzter Wechsel fehlgeschlagen: eingeschaltet und in der Nähe?"
+
+msgid "tray-detail-error-sink"
+msgstr "Audio verloren: wieder über die PC-Lautsprecher"
+
+msgid "tray-detail-error-release"
+msgstr "Rückgabe fehlgeschlagen: bleibt am PC"
+
+msgid "tray-detail-error-config"
+msgstr "Ungültige Konfiguration: vorherige wird verwendet"
+
+msgid "tray-action-to-pc"
+msgstr "Zum PC holen"
+
+msgid "tray-action-to-phone"
+msgstr "Dem iPhone überlassen"
+
+msgid "tray-action-priority"
+msgstr "iPhone-Vorrang"
+
+msgid "tray-action-settings"
+msgstr "Einstellungen…"
+
+msgid "tray-action-quit"
+msgstr "Scambio beenden"
+
+#. segnaposto: {device}
+msgid "notify-grab-failed-title"
+msgstr "{device} nicht erreichbar"
+
+msgid "notify-grab-failed-body"
+msgstr "Wechsel zum PC fehlgeschlagen. Ist es eingeschaltet und in der Nähe?"
+
+#. segnaposto: {device}
+msgid "notify-sink-lost-title"
+msgstr "{device}: Audio nicht verfügbar"
+
+msgid "notify-sink-lost-body"
+msgstr "Der Ton läuft wieder über die PC-Lautsprecher."
+
+#. segnaposto: {device}
+msgid "notify-release-failed-title"
+msgstr "{device} bleibt am PC"
+
+msgid "notify-release-failed-body"
+msgstr "Rückgabe an das iPhone fehlgeschlagen."
+
+#. segnaposto: {device}
+msgid "notify-unavailable-title"
+msgstr "{device} nicht verfügbar"
+
+msgid "notify-unavailable-body"
+msgstr "Bluetooth aus oder Gerät außer Reichweite."
+
+msgid "notify-not-configured-title"
+msgstr "Scambio hat kein Gerät"
+
+msgid "notify-not-configured-body"
+msgstr "Bluetooth-Adresse in der Konfigurationsdatei eintragen."
+
+msgid "notify-config-invalid-title"
+msgstr "Ungültige Konfiguration"
+
+msgid "notify-config-invalid-body"
+msgstr "Scambio verwendet weiter die vorherige. Details im Systemprotokoll."
+
+msgid "notify-audio-down-title"
+msgstr "Scambio erkennt kein PC-Audio"
+
+msgid "notify-audio-down-body"
+msgstr "Ohne sie kein automatischer Wechsel; der manuelle Wechsel funktioniert. pactl prüfen (Paket pulseaudio-utils)."
+
+#. Switch partito fuori dal tray (scorciatoia, CLI).
+#. segnaposto: {device}
+msgid "notify-switch-to-phone-title"
+msgstr "{device} dem iPhone überlassen"
+
+msgid "notify-switch-to-phone-body"
+msgstr "iPhone-Vorrang an: Der PC holt es nicht selbst zurück."
+
+#. segnaposto: {device}
+msgid "notify-switch-to-pc-title"
+msgstr "{device} am PC"
+
+msgid "notify-switch-to-pc-body"
+msgstr "iPhone-Vorrang aus."
+
+#. Priorità cambiata fuori dal tray senza switch (es. scambio priority on).
+msgid "notify-priority-on-title"
+msgstr "iPhone-Vorrang an"
+
+#. segnaposto: {device}
+msgid "notify-priority-on-body"
+msgstr "Der PC übernimmt {device} nicht automatisch."
+
+msgid "notify-priority-off-title"
+msgstr "iPhone-Vorrang aus"
+
+#. segnaposto: {device}
+msgid "notify-priority-off-body"
+msgstr "Der PC übernimmt {device}, sobald Audio startet."
+
+msgid "notify-action-retry"
+msgstr "Erneut versuchen"
+
+msgid "notify-action-undo"
+msgstr "Rückgängig"
+
+msgid "notify-action-open-config"
+msgstr "Datei öffnen"
+
+#. Finestra impostazioni (spec 04, bozza).
+msgid "settings-priority-subtitle"
+msgstr "Der PC übernimmt das Gerät nicht automatisch"
+
+msgid "settings-group-device"
+msgstr "Gerät"
+
+msgid "settings-device-title"
+msgstr "Gerät"
+
+msgid "settings-group-release"
+msgstr "Zurück zum iPhone"
+
+msgid "settings-release-title"
+msgstr "Nach einer Stille von (Minuten)"
+
+msgid "settings-release-subtitle"
+msgstr "Auch sofort bei Bildschirmsperre und Standby"
+
+msgid "settings-group-shortcut"
+msgstr "Tastenkürzel"
+
+msgid "settings-shortcut-title"
+msgstr "Intelligenter Wechsel"
+
+msgid "settings-shortcut-subtitle"
+msgstr "Wechselt das Gerät und schaltet den iPhone-Vorrang ein oder aus"
+
+msgid "settings-shortcut-change"
+msgstr "Ändern…"
+
+msgid "settings-group-general"
+msgstr "Allgemein"
+
+msgid "settings-autostart"
+msgstr "Bei der Anmeldung starten"
+
+msgid "settings-tray"
+msgstr "Symbol im Systembereich"
+
+msgid "settings-language"
+msgstr "Sprache"
+
+msgid "settings-language-auto"
+msgstr "Automatisch"
+
+msgid "settings-advanced-title"
+msgstr "Erweitert"
+
+msgid "settings-advanced-subtitle"
+msgstr "Übernahmeverzögerung, Zeitlimits, ignorierte Apps"
+
+msgid "settings-grab-delay-title"
+msgstr "Übernahmeverzögerung (Sekunden)"
+
+msgid "settings-grab-delay-subtitle"
+msgstr "Wie lange Audio laufen muss, bevor das Gerät übernommen wird"
+
+msgid "settings-ignored-apps-title"
+msgstr "Ignorierte Apps"
+
+msgid "settings-ignored-apps-subtitle"
+msgstr "Ihr Audio holt das Gerät nicht zum PC"
+
+#. Riga di comando (decisioni 27 e 29b). Stati e codici restano stringhe stabili non tradotte.
+msgid "cli-description"
+msgstr "Bluetooth-Audio zwischen PC und Telefon wechseln"
+
+msgid "cli-daemon-help"
+msgstr "Dienst starten"
+
+msgid "cli-debug-help"
+msgstr "Ausführliches Protokoll (Debug)"
+
+msgid "cli-status-help"
+msgstr "Status des Dienstes anzeigen"
+
+msgid "cli-json-help"
+msgstr "Ausgabe als JSON"
+
+msgid "cli-switch-help"
+msgstr "Gerät zwischen PC und iPhone wechseln"
+
+msgid "cli-priority-help"
+msgstr "iPhone-Vorrang anzeigen oder ändern"
+
+msgid "cli-not-running"
+msgstr "Scambio läuft nicht: mit systemctl --user start scambio starten"
+
+#. Solo per errori D-Bus non previsti; {error} è il nome tecnico dell’errore.
+#. segnaposto: {error}
+msgid "cli-dbus-error"
+msgstr "D-Bus-Fehler: {error}"
+
+msgid "cli-error-device-unavailable"
+msgstr "Gerät nicht verfügbar: Bluetooth aus oder außer Reichweite"
+
+msgid "cli-error-config-invalid"
+msgstr "Ungültige Konfiguration: vorherige wird verwendet"
+
+msgid "cli-error-restart-required"
+msgstr "Geräteadresse geändert: mit systemctl --user restart scambio neu starten"
+
+msgid "cli-help-help"
+msgstr "Diese Hilfe anzeigen und beenden"
+
+#. Motivo dell’inibitore di logind (systemd-inhibit --list).
+msgid "session-inhibit-reason"
+msgstr "Gerät vor dem Standby an das Telefon zurückgeben"
+

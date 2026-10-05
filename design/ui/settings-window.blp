@@ -1,0 +1,153 @@
+// Finestra impostazioni di Scambio — BOZZA per la spec 04 (direzione approvata col mock del
+// 2026-10-05). Gli ID e le azioni sono nel contratto di docs/context/05-ui-context.md §5.10;
+// valgono come definitivi solo quando la spec 04 li conferma.
+// Testi: chiavi gettext del dominio "scambio" (design/i18n/*.po).
+using Gtk 4.0;
+using Adw 1;
+
+translation-domain "scambio";
+
+template $ScambioSettingsWindow : Adw.ApplicationWindow {
+  title: "Scambio";
+  default-width: 640;
+  default-height: 860;
+  width-request: 360;
+  height-request: 400;
+
+  content: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      [end]
+      MenuButton primary_menu_button {
+        icon-name: "open-menu-symbolic";
+        primary: true;
+      }
+    }
+
+    content: Adw.PreferencesPage settings_page {
+      Adw.PreferencesGroup status_group {
+        Adw.ActionRow status_row {
+          styles ["scambio-hero"]
+          // titolo e sottotitolo dal codice (chiavi tray-header-* / tray-detail-*)
+
+          [prefix]
+          Image status_icon {
+            icon-name: "app.scambio.Scambio-released-symbolic";
+            pixel-size: 34;
+            styles ["scambio-hero-icon"]
+          }
+
+          [suffix]
+          Button switch_button {
+            label: _("tray-action-to-phone");
+            action-name: "app.switch";
+            valign: center;
+            styles ["suggested-action", "pill"]
+          }
+        }
+
+        Adw.SwitchRow priority_row {
+          title: _("tray-action-priority");
+          subtitle: _("settings-priority-subtitle");
+          action-name: "app.toggle-priority";
+        }
+      }
+
+      Adw.PreferencesGroup device_group {
+        title: _("settings-group-device");
+
+        Adw.ComboRow device_row {
+          title: _("settings-device-title");
+        }
+      }
+
+      Adw.PreferencesGroup release_group {
+        title: _("settings-group-release");
+
+        Adw.SpinRow release_idle_row {
+          title: _("settings-release-title");
+          subtitle: _("settings-release-subtitle");
+          adjustment: Adjustment release_idle_adjustment {
+            lower: 1;
+            upper: 60;
+            step-increment: 1;
+            page-increment: 5;
+            value: 2;
+          };
+        }
+      }
+
+      Adw.PreferencesGroup shortcut_group {
+        title: _("settings-group-shortcut");
+
+        Adw.ActionRow shortcut_row {
+          title: _("settings-shortcut-title");
+          subtitle: _("settings-shortcut-subtitle");
+
+          [suffix]
+          ShortcutLabel shortcut_label {
+            accelerator: "<Super>g";
+            valign: center;
+          }
+
+          [suffix]
+          Button shortcut_change_button {
+            label: _("settings-shortcut-change");
+            action-name: "app.change-shortcut";
+            valign: center;
+          }
+        }
+      }
+
+      Adw.PreferencesGroup general_group {
+        title: _("settings-group-general");
+
+        Adw.SwitchRow autostart_row {
+          title: _("settings-autostart");
+        }
+
+        Adw.SwitchRow tray_row {
+          title: _("settings-tray");
+        }
+
+        Adw.ComboRow language_row {
+          title: _("settings-language");
+          model: StringList {
+            strings [_("settings-language-auto"), "Italiano", "English", "Deutsch"]
+          };
+        }
+
+        Adw.ExpanderRow advanced_row {
+          title: _("settings-advanced-title");
+          subtitle: _("settings-advanced-subtitle");
+
+          Adw.SpinRow grab_delay_row {
+            title: _("settings-grab-delay-title");
+            subtitle: _("settings-grab-delay-subtitle");
+            digits: 1;
+            adjustment: Adjustment grab_delay_adjustment {
+              lower: 0;
+              upper: 10;
+              step-increment: 0.1;
+              page-increment: 1;
+              value: 0.5;
+            };
+          }
+
+          Adw.ActionRow ignored_apps_row {
+            title: _("settings-ignored-apps-title");
+            subtitle: _("settings-ignored-apps-subtitle");
+            activatable: true;
+          }
+        }
+      }
+
+      Adw.PreferencesGroup footer_group {
+        Label version_label {
+          label: "Scambio";
+          styles ["dim-label", "caption"]
+        }
+      }
+    };
+  };
+}

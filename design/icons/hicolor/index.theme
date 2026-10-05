@@ -1,0 +1,25 @@
+[Icon Theme]
+Name=Hicolor
+Comment=Scambio icons (searched only through IconThemePath)
+Directories=scalable/apps,scalable/status,symbolic/apps
+
+[scalable/apps]
+Size=128
+MinSize=16
+MaxSize=512
+Type=Scalable
+Context=Applications
+
+[symbolic/apps]
+Size=16
+MinSize=8
+MaxSize=512
+Type=Scalable
+Context=Applications
+
+[scalable/status]
+Size=16
+MinSize=8
+MaxSize=512
+Type=Scalable
+Context=Status

@@ -1,0 +1,306 @@
+# Scambio — testi dell'interfaccia (modello).
+# Proprietà di Claude (design/). Chiavi simboliche: msgid = chiave del contratto
+# in docs/context/05-ui-context.md; en.po è obbligatorio come gli altri.
+# Segnaposto: {device}, {minutes}, {time}, {error} (str.format).
+msgid ""
+msgstr ""
+"Project-Id-Version: scambio 0.1\n"
+"PO-Revision-Date: 2026-10-05 13:30+0200\n"
+"Last-Translator: Claude (design di Scambio)\n"
+"Language-Team: Scambio\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Al posto di {device} quando BlueZ non dà un nome. Minuscolo: il codice rende maiuscola la prima lettera della frase.
+msgid "tray-device-fallback"
+msgstr ""
+
+#. Prima riga del menu e del tooltip.
+#. segnaposto: {device}
+msgid "tray-header-released"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "tray-header-priority"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "tray-header-connecting"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "tray-header-on-pc"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "tray-header-releasing"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "tray-header-unavailable"
+msgstr ""
+
+msgid "tray-header-not-configured"
+msgstr ""
+
+#. Seconda riga del menu e del tooltip.
+msgid "tray-detail-released"
+msgstr ""
+
+msgid "tray-detail-priority"
+msgstr ""
+
+msgid "tray-detail-busy"
+msgstr ""
+
+msgid "tray-detail-playing"
+msgstr ""
+
+#. Menu: minuti arrotondati per eccesso, calcolati all’apertura.
+#. segnaposto: {minutes}
+msgid "tray-detail-idle"
+msgstr ""
+
+msgid "tray-detail-idle-soon"
+msgstr ""
+
+#. Tooltip: ora assoluta HH:MM, così non invecchia.
+#. segnaposto: {time}
+msgid "tray-detail-idle-at"
+msgstr ""
+
+msgid "tray-detail-on-pc"
+msgstr ""
+
+msgid "tray-detail-unavailable"
+msgstr ""
+
+msgid "tray-detail-not-configured"
+msgstr ""
+
+#. Mostrato finché l’errore non è visto (05 §5.4).
+msgid "tray-detail-error-connect"
+msgstr ""
+
+msgid "tray-detail-error-sink"
+msgstr ""
+
+msgid "tray-detail-error-release"
+msgstr ""
+
+msgid "tray-detail-error-config"
+msgstr ""
+
+msgid "tray-action-to-pc"
+msgstr ""
+
+msgid "tray-action-to-phone"
+msgstr ""
+
+msgid "tray-action-priority"
+msgstr ""
+
+msgid "tray-action-settings"
+msgstr ""
+
+msgid "tray-action-quit"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "notify-grab-failed-title"
+msgstr ""
+
+msgid "notify-grab-failed-body"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "notify-sink-lost-title"
+msgstr ""
+
+msgid "notify-sink-lost-body"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "notify-release-failed-title"
+msgstr ""
+
+msgid "notify-release-failed-body"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "notify-unavailable-title"
+msgstr ""
+
+msgid "notify-unavailable-body"
+msgstr ""
+
+msgid "notify-not-configured-title"
+msgstr ""
+
+msgid "notify-not-configured-body"
+msgstr ""
+
+msgid "notify-config-invalid-title"
+msgstr ""
+
+msgid "notify-config-invalid-body"
+msgstr ""
+
+msgid "notify-audio-down-title"
+msgstr ""
+
+msgid "notify-audio-down-body"
+msgstr ""
+
+#. Switch partito fuori dal tray (scorciatoia, CLI).
+#. segnaposto: {device}
+msgid "notify-switch-to-phone-title"
+msgstr ""
+
+msgid "notify-switch-to-phone-body"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "notify-switch-to-pc-title"
+msgstr ""
+
+msgid "notify-switch-to-pc-body"
+msgstr ""
+
+#. Priorità cambiata fuori dal tray senza switch (es. scambio priority on).
+msgid "notify-priority-on-title"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "notify-priority-on-body"
+msgstr ""
+
+msgid "notify-priority-off-title"
+msgstr ""
+
+#. segnaposto: {device}
+msgid "notify-priority-off-body"
+msgstr ""
+
+msgid "notify-action-retry"
+msgstr ""
+
+msgid "notify-action-undo"
+msgstr ""
+
+msgid "notify-action-open-config"
+msgstr ""
+
+#. Finestra impostazioni (spec 04, bozza).
+msgid "settings-priority-subtitle"
+msgstr ""
+
+msgid "settings-group-device"
+msgstr ""
+
+msgid "settings-device-title"
+msgstr ""
+
+msgid "settings-group-release"
+msgstr ""
+
+msgid "settings-release-title"
+msgstr ""
+
+msgid "settings-release-subtitle"
+msgstr ""
+
+msgid "settings-group-shortcut"
+msgstr ""
+
+msgid "settings-shortcut-title"
+msgstr ""
+
+msgid "settings-shortcut-subtitle"
+msgstr ""
+
+msgid "settings-shortcut-change"
+msgstr ""
+
+msgid "settings-group-general"
+msgstr ""
+
+msgid "settings-autostart"
+msgstr ""
+
+msgid "settings-tray"
+msgstr ""
+
+msgid "settings-language"
+msgstr ""
+
+msgid "settings-language-auto"
+msgstr ""
+
+msgid "settings-advanced-title"
+msgstr ""
+
+msgid "settings-advanced-subtitle"
+msgstr ""
+
+msgid "settings-grab-delay-title"
+msgstr ""
+
+msgid "settings-grab-delay-subtitle"
+msgstr ""
+
+msgid "settings-ignored-apps-title"
+msgstr ""
+
+msgid "settings-ignored-apps-subtitle"
+msgstr ""
+
+#. Riga di comando (decisioni 27 e 29b). Stati e codici restano stringhe stabili non tradotte.
+msgid "cli-description"
+msgstr ""
+
+msgid "cli-daemon-help"
+msgstr ""
+
+msgid "cli-debug-help"
+msgstr ""
+
+msgid "cli-status-help"
+msgstr ""
+
+msgid "cli-json-help"
+msgstr ""
+
+msgid "cli-switch-help"
+msgstr ""
+
+msgid "cli-priority-help"
+msgstr ""
+
+msgid "cli-not-running"
+msgstr ""
+
+#. Solo per errori D-Bus non previsti; {error} è il nome tecnico dell’errore.
+#. segnaposto: {error}
+msgid "cli-dbus-error"
+msgstr ""
+
+msgid "cli-error-device-unavailable"
+msgstr ""
+
+msgid "cli-error-config-invalid"
+msgstr ""
+
+msgid "cli-error-restart-required"
+msgstr ""
+
+msgid "cli-help-help"
+msgstr ""
+
+#. Motivo dell’inibitore di logind (systemd-inhibit --list).
+msgid "session-inhibit-reason"
+msgstr ""
+

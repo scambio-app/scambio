@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "comment": "Presentazione del tray e delle notifiche di Scambio. File di design (proprietà di Claude): il codice lo carica e lo valida, non lo modifica. Schema e vocabolario in docs/context/05-ui-context.md §5.2–§5.4.",
+  "sni": {
+    "id": "app.scambio.Scambio",
+    "category": "Hardware",
+    "title": "Scambio"
+  },
+  "app_icon": "hicolor/scalable/apps/app.scambio.Scambio.svg",
+  "icons": {
+    "released": "app.scambio.Scambio-released-symbolic",
+    "connecting": "app.scambio.Scambio-connecting-symbolic",
+    "on_pc": "app.scambio.Scambio-on-pc-symbolic",
+    "priority": "app.scambio.Scambio-priority-symbolic",
+    "unavailable": "app.scambio.Scambio-unavailable-symbolic",
+    "error": "app.scambio.Scambio-error-symbolic"
+  },
+  "presentation": [
+    {"id": "not_configured", "when": {"device_configured": false}, "icon": "unavailable", "header": "tray-header-not-configured", "detail": "tray-detail-not-configured"},
+    {"id": "unavailable", "when": {"state": "unavailable"}, "icon": "unavailable", "header": "tray-header-unavailable", "detail": "tray-detail-unavailable"},
+    {"id": "connecting", "when": {"state": "connecting"}, "icon": "connecting", "header": "tray-header-connecting", "detail": "tray-detail-busy"},
+    {"id": "releasing", "when": {"state": "releasing"}, "icon": "connecting", "header": "tray-header-releasing", "detail": "tray-detail-busy"},
+    {"id": "on_pc_playing", "when": {"state": "on_pc", "audio_active": true}, "icon": "on_pc", "header": "tray-header-on-pc", "detail": "tray-detail-playing"},
+    {"id": "on_pc_idle", "when": {"state": "on_pc", "idle_release": true}, "icon": "on_pc", "header": "tray-header-on-pc", "detail": "tray-detail-idle", "detail_soon": "tray-detail-idle-soon", "tooltip_detail": "tray-detail-idle-at"},
+    {"id": "on_pc", "when": {"state": "on_pc"}, "icon": "on_pc", "header": "tray-header-on-pc", "detail": "tray-detail-on-pc"},
+    {"id": "priority", "when": {"state": "released", "iphone_priority": true}, "icon": "priority", "header": "tray-header-priority", "detail": "tray-detail-priority"},
+    {"id": "released", "when": {"state": "released"}, "icon": "released", "header": "tray-header-released", "detail": "tray-detail-released"}
+  ],
+  "error_overlay": {
+    "icon": "error",
+    "skip_rules": ["not_configured", "unavailable"],
+    "detail": {
+      "connect_failed": "tray-detail-error-connect",
+      "connect_timeout": "tray-detail-error-connect",
+      "sink_timeout": "tray-detail-error-sink",
+      "sink_lost": "tray-detail-error-sink",
+      "disconnect_failed": "tray-detail-error-release",
+      "config_invalid": "tray-detail-error-config"
+    }
+  },
+  "menu": [
+    {"id": 1, "name": "status-header", "enabled": false, "label": "@header"},
+    {"id": 2, "name": "status-detail", "enabled": false, "label": "@detail"},
+    {"id": 3, "name": "separator-1", "type": "separator"},
+    {"id": 4, "name": "switch", "action": "app.switch", "label": {"to_pc": "tray-action-to-pc", "to_phone": "tray-action-to-phone"}, "enabled_when": "available"},
+    {"id": 5, "name": "priority", "action": "app.toggle-priority", "label": "tray-action-priority", "toggle_type": "checkmark", "toggle_state": "iphone_priority"},
+    {"id": 6, "name": "separator-2", "type": "separator"},
+    {"id": 7, "name": "settings", "action": "app.open-settings", "label": "tray-action-settings", "theme_icon": "preferences-system", "visible": false},
+    {"id": 8, "name": "quit", "action": "app.quit", "label": "tray-action-quit", "theme_icon": "application-exit"}
+  ],
+  "notifications": {
+    "app_name": "Scambio",
+    "expire_timeout": -1,
+    "urgency": 1,
+    "category": {"error": "device.error", "priority": "device"},
+    "errors": {
+      "connect_failed": {"family": "grab", "title": "notify-grab-failed-title", "body": "notify-grab-failed-body", "action": "retry"},
+      "connect_timeout": {"family": "grab", "title": "notify-grab-failed-title", "body": "notify-grab-failed-body", "action": "retry"},
+      "sink_timeout": {"family": "grab", "title": "notify-sink-lost-title", "body": "notify-sink-lost-body", "action": "retry"},
+      "sink_lost": {"family": "grab", "title": "notify-sink-lost-title", "body": "notify-sink-lost-body", "action": "retry"},
+      "disconnect_failed": {"family": "release", "title": "notify-release-failed-title", "body": "notify-release-failed-body"},
+      "device_unavailable": {"family": "availability", "title": "notify-unavailable-title", "body": "notify-unavailable-body"},
+      "device_not_configured": {"family": "setup", "title": "notify-not-configured-title", "body": "notify-not-configured-body", "action": "open-config", "once_per_run": true},
+      "config_invalid": {"family": "setup", "title": "notify-config-invalid-title", "body": "notify-config-invalid-body", "action": "open-config"},
+      "audio_backend_down": {"family": "setup", "title": "notify-audio-down-title", "body": "notify-audio-down-body", "startup_only": true}
+    },
+    "priority": {
+      "on_with_switch": {"family": "priority", "title": "notify-switch-to-phone-title", "body": "notify-switch-to-phone-body", "action": "undo-switch", "transient": true},
+      "off_with_switch": {"family": "priority", "title": "notify-switch-to-pc-title", "body": "notify-switch-to-pc-body", "transient": true},
+      "on": {"family": "priority", "title": "notify-priority-on-title", "body": "notify-priority-on-body", "transient": true},
+      "off": {"family": "priority", "title": "notify-priority-off-title", "body": "notify-priority-off-body", "transient": true}
+    },
+    "actions": {
+      "retry": {"label": "notify-action-retry", "call": "Switch", "valid_when": {"state": "released"}},
+      "undo-switch": {"label": "notify-action-undo", "call": "Switch", "valid_when": {"iphone_priority": true, "state_in": ["releasing", "released"]}},
+      "open-config": {"label": "notify-action-open-config", "call": "open-config-file"}
+    }
+  }
+}

@@ -173,6 +173,23 @@ anche gli stream successivi della stessa applicazione, e dopo un crash resterebb
 sempre. La spec 02 usa solo la pausa MPRIS (decisione 51). Residuo della misura: la voce
 `ScambioMisura` resta nel file di WirePlumber, innocua.
 
+## 2026-10-05 — M11: icone del tray via `IconThemePath` su Plasma 5.27 (Claude, senza GM)
+
+Metodo: script usa e getta fuori dalla repo (`/tmp/sniprobe`) che esporta un
+`org.kde.StatusNotifierItem` minimo con `IconThemePath` = `design/icons` e cambia `IconName`
+ogni 4 s sui sei stati; screenshot con `spectacle -b -n -f`, ritagliati sul tray. Tema
+`BreezeDark` (non cambiato per non disturbare GM).
+
+| Prova | Esito |
+|---|---|
+| Icone in `hicolor/symbolic/status/` (con `index.theme` proprio) | **non trovate**: Plasma ripiega sull'icona a colori `app.scambio.Scambio` (toglie i suffissi del nome) per tutti gli stati |
+| Icone in `hicolor/scalable/status/` | trovate e **ricolorate** dal tema: occhiali chiari su pannello scuro, punto esclamativo rosso; i sei stati distinti a 22 px |
+| `StatusNotifierWatcher` | servizio di `kded5` (PID dal bus); server delle notifiche = `plasmashell` |
+| Ambiente utente di systemd | `LANG=it_IT.UTF-8`, nessun `LANGUAGE` |
+
+Conseguenza: KIconLoader usa le cartelle dell'`index.theme` di sistema di hicolor (che elenca
+`scalable/status` ma non `symbolic/status`). Non misurati: tema chiaro, GNOME con AppIndicator.
+
 ## Conseguenze per il design
 
 - Il PC non può sapere prima di connettersi se il telefono usa il dispositivo: «non prendere se
