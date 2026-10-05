@@ -356,6 +356,25 @@ Preparazione (la fa Claude): `systemctl --user restart scambio`; journal aperto 
 
 ## 7. Note di revisione (Claude, dopo la consegna)
 
+**Audit 1 — 2026-10-05** su `b8153c8`, `b7625d4`, `c260847` (report in
+`docs/verification/02/report.md`; decisioni tecniche 58–63). Verificato da Claude su `casa`:
+`make check` verde rieseguito (357 test, 0 saltati); file protetti (`AGENTS.md`, `design/`,
+`docs/context/`, `docs/specs/`, `hardware-lab.md`, XML D-Bus) invariati; misura idle di Codex
+sui finti: CPU 0 %, RSS 23 084 KiB, zero chiamate MPRIS e pactl in 600 s. Revisione statica
+(agente di controllo) di policy, adattatore, esecutore, configurazione e stato contro §3: righe
+PRESA, RILASCIO (passi 1–5), INGRESSO, ESITO_ERRORE, PAUSA_RILASCIO, G8, C4–C8, O1, O8, O10–O12,
+L1, L2 conformi; test esaustivo su 18^6 sequenze con ¬`held` in `released`/`unavailable`.
+Esito: **ok per la prova reale**, con correzioni chieste a Codex prima della prova:
+
+1. Esecutore: un'eccezione dentro un'operazione accodata lasciava bloccate le code (i player
+   sarebbero rimasti in pausa); completamenti non idempotenti.
+2. Arresto: il limite di attesa partiva da `stop()` e non dalla ripresa delle voci `grab`.
+3. Adattatore MPRIS: `closed` mai controllato dopo `close()`.
+4. `GetId` fallito: `bus_id` vuoto cancellava `resume_players` validi.
+5. `assert` in produzione e `Any` non ristretto in `players.py`.
+6. Log d'errore MPRIS senza il nome del player.
+7–8. Quattro test a sottoinsieme da rendere esatti; manca la riga PRESA da `Switch` con audio.
+
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
 Riletta da me e poi da un agente indipendente contro `AGENTS.md`, `02`, la spec 01 §3.1.5, le
