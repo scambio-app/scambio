@@ -260,3 +260,19 @@ Conclusione: la via portal per la scorciatoia della spec 04 è disponibile su ca
 nel funzionamento reale (CreateSession → BindShortcuts → dialogo KDE → segnale `Activated`): va
 nella spec 04 come prima prova, con riserva CLI se fallisce. GNOME non misurato.
 
+## 2026-10-06 — M14: clic sull'icona del tray su Plasma 5.27 (GM + Claude)
+
+Metodo: Scambio a `f4082a5` (spec 03 consegnata) riavviato alle 11:01; `dbus-monitor` filtrato sul
+nome unico del demone mentre GM clicca sull'icona con il tasto sinistro e con il destro;
+sorgente QML del systemtray (`plasma-workspace` 5.27.12,
+`org.kde.plasma.private.systemtray/contents/ui/items/StatusNotifierItem.qml`).
+
+| Osservazione | Esito |
+|---|---|
+| Clic sinistro | `plasmashell` chiama `ProvideXdgActivationToken` (risposta `UnknownMethod`) e poi `Activate(x, y)`; Scambio risponde con successo e **non si apre nulla**: `ItemIsMenu = true` è ignorato |
+| QML del systemtray | `onActivated` apre il menu contestuale **solo se** il job `Activate` fallisce (`if (!job.result) openContextMenu`) |
+| Clic destro | `AboutToShow(0)`, poi `Event(0, "opened")`; menu mostrato; `Event(0, "closed")` e `Event(5, "clicked")` → `SetPriority` dal demone stesso: funziona |
+| Icone con Breeze scuro | «occhiali + telefono» ricolorata dal tema (conferma M11) |
+| Prese e rilasci reali | GM: icona corretta sia con gli occhiali sul PC sia sull'iPhone |
+
+Conseguenza: decisione 85 (`Activate` risponde con un errore). Non misurati: tema chiaro, GNOME.

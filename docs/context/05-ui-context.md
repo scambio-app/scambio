@@ -29,7 +29,8 @@ direzione della finestra e diventano definitive con la spec 04.
 | Finestra impostazioni | GTK4 + libadwaita, Blueprint in `design/ui/` | processo separato, su richiesta | 04 |
 | Scorciatoia | portal GlobalShortcuts, default Meta+G | demone | 04 |
 
-Clic sinistro e destro sull'icona aprono lo stesso menu (`ItemIsMenu = true`, decisione 71).
+Clic sinistro e destro sull'icona aprono lo stesso menu (`ItemIsMenu = true`, decisione 71; su Plasma 5.27
+il clic sinistro passa dall'errore di `Activate`, §5.3, decisione 85).
 Su GNOME senza estensione AppIndicator il tray non c'è: bastano notifiche e finestra.
 
 ## 3. Stati e icone (`design/icons/hicolor/scalable/status/`)
@@ -121,7 +122,10 @@ Nessun file viene installato fuori da `~/.config/scambio/` e `~/.local/share/sca
 | `ItemIsMenu` | `true` |
 | `Menu` | `/MenuBar` |
 
-Metodi `Activate`, `SecondaryActivate`, `ContextMenu`, `Scroll`: nessun effetto. Segnali
+Metodo `Activate`: risponde **sempre** con l'errore D-Bus `org.freedesktop.DBus.Error.NotSupported`
+e nient'altro (decisione 85): Plasma 5.27 ignora `ItemIsMenu`, al clic sinistro chiama `Activate` e apre
+il menu solo se la chiamata fallisce (M14). Metodi `SecondaryActivate`, `ContextMenu`, `Scroll`:
+nessun effetto. `ProvideXdgActivationToken` (chiamato da Plasma) non si implementa. Segnali
 `NewIcon`, `NewAttentionIcon`, `NewToolTip`, `NewTitle`, `NewStatus(s)` solo quando il valore
 cambia. Testi del tooltip con `&`, `<`, `>` sostituiti dalle entità (Plasma interpreta il
 markup).

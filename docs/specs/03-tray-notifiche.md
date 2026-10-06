@@ -299,6 +299,36 @@ nome d'icona, nessun parametro delle notifiche. `design/ui/settings-window.blp` 
 
 ## 7. Note di revisione (Claude, dopo la consegna)
 
+### Audit 1 (2026-10-06, chat di audit)
+
+**Codice** (commit `52a300b`, `5bfe574`, `0c1aea3`) contro §3 e 05 §5: conforme.
+- Ordine dei segnali: il servizio emette `Transition` e poi `PropertiesChanged` nello stesso passo
+  di `event()`, e `PropertiesChanged` prima di `return_value`; il client inoltra
+  `g-signal` e `g-properties-changed` nell'ordine di arrivo; «con switch» = ultimo segnale
+  `Transition(_, _, "switch")` (`notify.py`). Cambi propri = chiamate UI in corso (`pending`).
+- Errori all'avvio da `LastError` alla prima lettura (`Notifications.startup`), tray esportato
+  solo dopo; `audio_backend_down` `startup_only`; `valid_when` valutato al clic.
+- dbusmenu: radice `children-display`, `toggle-state` int32, revisione, `AboutToShow`/`Group` ed
+  `Event(0, "opened")` segnano l'errore come visto; voci disabilitate o nascoste ignorate.
+- Nessun timer né polling nella UI; nessun testo, nome d'icona o parametro di notifica nel
+  codice (tutto da `tray.json` e dai cataloghi); nessuna scrittura della UI su disco.
+- Test: 564, copertura adeguata. Manca solo un test end-to-end di `scambio switch` sul demone
+  vero per la notifica «con switch» (coperta con dbusmock e dai passi 4–5 della prova reale).
+
+**Difetto trovato nella prova (M14):** il clic sinistro non apriva il menu, perché Plasma 5.27
+ignora `ItemIsMenu` e apre il menu solo se `Activate` fallisce. Correzione: decisione 85,
+05 §5.3 aggiornato; affidata a Codex.
+
+**Punti minori, non correggo ora:**
+1. Errori diversi della stessa famiglia in raffica (`connect_failed` poi `connect_timeout`)
+   sostituiscono la notifica `grab` invece di tacere: accettabile (una sola notifica visibile).
+2. `ui.tray` da vero a falso con `Reload`: il watcher di `kded5` toglie gli item solo quando il
+   nome sparisce dal bus, quindi l'icona potrebbe restare fino al riavvio del demone. Da
+   osservare alla prova reale; se succede, si annota come debito per la spec 04.
+
+**Visivo:** con Breeze scuro icona «occhiali + telefono» conforme al mock; GM vede le icone
+corrette sul PC e sull'iPhone. Menu, notifiche e tema chiaro alla prova reale (§6.1).
+
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
 Riletta da me e poi da un agente di controllo indipendente contro `AGENTS.md`, `02`, `03`, le

@@ -366,3 +366,11 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     Si contano anche le chiamate ai due server durante l'intervallo e si salvano
     gli hash dei sorgenti UI. Il campione conclusivo viene ripetuto dopo gli
     ultimi cambi runtime; test umani e verifica visiva restano separati.
+
+## 2026-10-06 — Spec 03, audit (chat di audit; numeri 85–89)
+
+85. Claude — `Activate` del tray risponde con l'errore `org.freedesktop.DBus.Error.NotSupported`
+    invece di riuscire senza effetti. Motivo (M14): Plasma 5.27 non guarda `ItemIsMenu`; al clic
+    sinistro chiama `Activate` e apre il menu solo se la chiamata fallisce, quindi con la versione
+    consegnata il clic sinistro non faceva nulla e la decisione 71 non era rispettata. È lo stesso
+    comportamento delle app basate su libappindicator, che `Activate` non lo implementano.
