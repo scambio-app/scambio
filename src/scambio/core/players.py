@@ -149,7 +149,12 @@ class Players:
         if self.closed:
             return
         if not self.bus_id:
-            LOG.warning("Cannot update resume_players without a session bus identity")
+            # Empty startup/shutdown has nothing to persist and needs no identity.
+            # Keep the warning when actual recovery data would be at risk.
+            if self.held or self.store.value.resume_players is not None:
+                LOG.warning(
+                    "Cannot update resume_players without a session bus identity"
+                )
             return
         refs = tuple(ref for ref, kind in self.held.items() if kind == "grab")
         value = ResumePlayers(self.bus_id, refs) if refs else None

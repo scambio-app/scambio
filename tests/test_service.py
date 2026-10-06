@@ -93,6 +93,11 @@ def test_cli_switch_priority_persistence(daemon, fake_pactl, tmp_path):
         "IdleReleaseAt",
         "LastError",
         "Version",
+        "Shortcut",
+        "ShortcutLabel",
+        "ShortcutState",
+        "ShortcutOwner",
+        "ShortcutBackend",
     }
     fake_pactl.add_sink()
     fake_pactl.event()

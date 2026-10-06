@@ -4,6 +4,12 @@
     <method name="SetPriority"><arg name="enabled" type="b" direction="in"/></method>
     <method name="Reload"/>
     <method name="Quit"/>
+    <method name="RetryShortcut"/>
+    <property name="Shortcut" type="s" access="read"/>
+    <property name="ShortcutLabel" type="s" access="read"/>
+    <property name="ShortcutState" type="s" access="read"/>
+    <property name="ShortcutOwner" type="s" access="read"/>
+    <property name="ShortcutBackend" type="s" access="read"/>
     <property name="State" type="s" access="read"/>
     <property name="IphonePriority" type="b" access="read"/>
     <property name="AudioActive" type="b" access="read"/>

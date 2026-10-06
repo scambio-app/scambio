@@ -101,6 +101,20 @@ def complete(method, *args):
     assert done == [True]
 
 
+def test_empty_startup_without_bus_identity_is_silent(adapter, caplog):
+    complete(adapter.recover)
+    complete(adapter.forget)
+    assert not adapter.bus_id
+    assert "Cannot update resume_players" not in caplog.text
+    assert not adapter.store.path.exists()
+    # A real unresolved recovery record must still be preserved and diagnosed.
+    saved = ResumePlayers("unknown", (PlayerRef(PREFIX + "test", ":1.123"),))
+    adapter.store.value.resume_players = saved
+    complete(adapter.forget)
+    assert adapter.store.value.resume_players == saved
+    assert "Cannot update resume_players" in caplog.text
+
+
 def test_pause_candidates_and_idle(adapter, player_factory):
     playing = player_factory("chromium.instance1")
     paused = player_factory("firefox.instance1", "Paused")

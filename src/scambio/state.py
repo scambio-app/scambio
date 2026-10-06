@@ -50,11 +50,17 @@ def parse_resume(raw: object) -> ResumePlayers | None:
 
 
 @dataclass
+class Shortcut:
+    preferred: str
+
+
+@dataclass
 class State:
     version: int = 1
     iphone_priority: bool = False
     restore_default_sink: str | None = None
     resume_players: ResumePlayers | None = None
+    shortcut: Shortcut | None = None
 
 
 class Store:
@@ -77,6 +83,14 @@ class Store:
                 self.value.resume_players = parse_resume(data.get("resume_players"))
             except ValueError as exc:
                 LOG.warning("Ignoring malformed resume_players: %s", exc)
+            shortcut = data.get("shortcut")
+            if shortcut is not None:
+                if isinstance(shortcut, dict) and isinstance(
+                    shortcut.get("preferred"), str
+                ):
+                    self.value.shortcut = Shortcut(shortcut["preferred"])
+                else:
+                    LOG.warning("Ignoring malformed shortcut state")
         except (OSError, ValueError) as exc:
             LOG.warning("Cannot load state; using defaults: %s", exc)
             self.value = State()

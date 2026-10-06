@@ -442,3 +442,20 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
 109. Claude — I testi del `.ui` compilato si traducono con lo stesso `Translator` della UI (proprietà
      `translatable` sostituite prima del caricamento), non con il gettext di libc di GtkBuilder:
      così valgono `ui.language` e i cataloghi in `build/locale` anche con `LANG=C`.
+
+## 2026-10-07 — Spec 04, implementazione (Codex: 110–119)
+
+110. Codex — Conversione GTK/Qt/XDG in `core/shortcut_keys.py`, modulo puro;
+     `core/shortcuts.py` possiede le chiamate Gio e le sottoscrizioni, con
+     generazioni per scartare risposte obsolete dopo reload, perdita del nome
+     o chiusura. Nessun timer aggiunto. Le richieste portal sottoscrivono il
+     percorso determinato dal token prima dell'invio; le richieste pendenti
+     e la sessione vengono chiuse alla sostituzione o all'arresto. Un errore
+     di aggiornamento KGlobalAccel conserva anche le sottoscrizioni del tasto
+     già attivo, oltre alle proprietà. Il client pubblico separato della
+     scorciatoia non sopprime le notifiche come una chiamata propria del tray.
+111. Codex — Il warning MPRIS senza identità del bus resta per dati di recupero
+     o player effettivi; il caso vuoto non salva nulla e non avverte. Causa:
+     `recover()` senza stato termina prima di chiedere `GetId`, mentre
+     `forget()` e il primo `pause()` possono già chiamare `_save()`. Non si
+     cancella uno stato da recuperare quando l'identità è sconosciuta.

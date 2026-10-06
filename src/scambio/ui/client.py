@@ -90,7 +90,13 @@ class ScambioClient:
         if not self.closed:
             self.emit(name, params.unpack())
 
-    def call(self, method: str, parameters: GLib.Variant | None = None) -> None:
+    def call(
+        self,
+        method: str,
+        parameters: GLib.Variant | None = None,
+        on_reply: Callable[[Any], None] | None = None,
+        on_error: Callable[[str], None] | None = None,
+    ) -> None:
         if self.closed or self.proxy is None:
             return
         self.pending += 1
@@ -99,9 +105,14 @@ class ScambioClient:
         def done(proxy: Gio.DBusProxy, result: Gio.AsyncResult) -> None:
             self.pending -= 1
             try:
-                proxy.call_finish(result)
+                reply = proxy.call_finish(result)
             except GLib.Error as exc:
                 LOG.debug("UI command %s failed: %s", method, exc)
+                if on_error and not self.closed:
+                    on_error(Gio.DBusError.get_remote_error(exc) or str(exc))
+            else:
+                if on_reply and not self.closed:
+                    on_reply(reply.unpack())
 
         try:
             self.proxy.call(

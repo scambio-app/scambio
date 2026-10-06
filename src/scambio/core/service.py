@@ -26,6 +26,7 @@ from scambio.core.ports import (
     SessionPort,
 )
 from scambio.core.session import Session
+from scambio.core.shortcuts import Shortcuts
 from scambio.state import Store
 from scambio.ui import DisabledUi, Ui, start_ui
 
@@ -63,6 +64,7 @@ class Service:
         players: PlayersPort | None = None,
     ) -> None:
         self.ui: Ui | DisabledUi | None = None
+        self.shortcuts: Shortcuts | None = None
         self.quit_done: Done = lambda: None
         self.bus, self.config, self.store = bus, config, store
         self.config_file, self.schedule = config_file, timer
@@ -114,6 +116,8 @@ class Service:
         self.registration = self.bus.register_object(
             PATH, self.info, self._method, self._get, None
         )
+        self.shortcuts = Shortcuts(self.bus, self.config, self.store, self._publish)
+        self.shortcuts.start()
         self._publish()
         if not self.config.device.address:
             self._error("device_not_configured", "Configure device.address")
@@ -389,6 +393,17 @@ class Service:
             "LastError": self.ctx.last_error,
             "Version": __version__,
         }
+        values.update(
+            self.shortcuts.values
+            if self.shortcuts
+            else {
+                "Shortcut": "",
+                "ShortcutLabel": "",
+                "ShortcutState": "unbound",
+                "ShortcutOwner": "",
+                "ShortcutBackend": "none",
+            }
+        )
         return {
             p.name: GLib.Variant(p.signature, values[p.name])
             for p in self.info.properties
@@ -439,6 +454,11 @@ class Service:
             elif method == "Reload":
                 self.reload()
                 invocation.return_value(None)
+            elif method == "RetryShortcut":
+                if self.shortcuts:
+                    self.shortcuts.retry(lambda: invocation.return_value(None))
+                else:
+                    invocation.return_value(None)
         except ConfigInvalid as exc:
             invocation.return_dbus_error(INTERFACE + ".Error.ConfigInvalid", str(exc))
         except RestartRequired as exc:
@@ -457,6 +477,8 @@ class Service:
         self.session.reload(config)
         self.audio.reload(config)
         self.players.reload(config)
+        if self.shortcuts:
+            self.shortcuts.reload(config)
         if self.ui:
             self.ui.apply_config(config)
         self._publish()
@@ -512,6 +534,8 @@ class Service:
         if self.closed:
             return
         self.closed = True
+        if self.shortcuts:
+            self.shortcuts.close()
         if self.ui:
             self.ui.stop()
         if self.stop_source:
