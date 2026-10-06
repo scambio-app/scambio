@@ -15,7 +15,7 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 |---|---|---|
 | 0 | Fondazioni documentali e misure iniziali | ✅ chiusa |
 | 1 | Spec 01 — demone headless: tooling, config, BlueZ, eventi audio, sessione, macchina a stati, instradamento, API D-Bus, CLI `switch/status/priority`, servizio utente | ✅ verificata 2026-10-05 (237 test, prova reale GM ok; sospensione n/a su casa) |
-| 2 | Spec 02 — pausa MPRIS durante presa e rilascio (decisioni 50–56; niente muto, M10); l'instradamento e il rilascio a tempo sono già nella spec 01 | ✅ verificata 2026-10-05 (418 test, prova reale GM ok dopo la correzione 68; annuncio misurato M11; Q4 chiusa senza misura, decisione 67) |
+| 2 | Spec 02 — pausa MPRIS durante presa e rilascio (decisioni 50–56; niente muto, M10); l'instradamento e il rilascio a tempo sono già nella spec 01 | ✅ verificata 2026-10-05 (418 test, prova reale GM ok dopo la correzione 68; annuncio misurato M11b; Q4 chiusa senza misura, decisione 67) |
 | 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | mock approvato (2026-10-05, icona B; decisioni 70–84); `design/` e 05 §5 completati; spec 03 **approvata** da GM (2026-10-05, decisione 84); Codex parte dopo la chiusura della spec 02 e con `gettext` installato; misura M11 |
 | 4 | Spec 04 — scorciatoia globale (portal) + finestra impostazioni | da fare |
 | 5 | Avvio automatico, packaging (Flatpak), prima release | da fare |

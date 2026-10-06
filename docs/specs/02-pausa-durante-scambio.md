@@ -337,7 +337,7 @@ l'esaustivo); (b) adattatore MPRIS; (c) esecutore, ciclo di vita, integrazione, 
 - [x] `design/`, `docs/context/`, `docs/specs/`, `docs/hardware-lab.md` non modificati.
 - [x] `docs/verification/02/report.md` scritto con la checklist §6.1 e i comandi esatti;
       decisioni tecniche in `docs/decisions.md` solo se servono (58–69).
-- [x] Prova reale eseguita da GM: punti 0 (annuncio, M11), 1, 2, 4, 6, 8, 10, 11, 13 ok; 9 e 12 eseguiti da Claude sul sistema reale; 3 (Elisa) saltato; 5 non eseguito (GM: superfluo); Q4 chiusa senza misura (decisione 67) · GM, 2026-10-05.
+- [x] Prova reale eseguita da GM: punti 0 (annuncio, M11b), 1, 2, 4, 6, 8, 10, 11, 13 ok; 9 e 12 eseguiti da Claude sul sistema reale; 3 (Elisa) saltato; 5 non eseguito (GM: superfluo); Q4 chiusa senza misura (decisione 67) · GM, 2026-10-05.
 
 ### 6.1 Checklist di prova reale per GM (occhiali + iPhone)
 
@@ -346,7 +346,7 @@ Preparazione (la fa Claude): `systemctl --user restart scambio`; journal aperto 
 
 | # | Azione | Atteso |
 |---|---|---|
-| 0 | Misure: `python3 ~/Scrivania/Claude/scambio-misure/annuncio.py` (3 giri, ferma e riavvia Scambio da solo); poi una chiamata GSM vera, presa dal PC con un video e `scambio switch` (Q4) | Claude registra M11 e M12 in hardware-lab e, se serve, fa correggere il default di `resume_delay_ms` |
+| 0 | Misure: `python3 ~/Scrivania/Claude/scambio-misure/annuncio.py` (3 giri, ferma e riavvia Scambio da solo); poi una chiamata GSM vera, presa dal PC con un video e `scambio switch` (Q4) | Claude registra M11b e M12 in hardware-lab e, se serve, fa correggere il default di `resume_delay_ms` |
 | 1 | Occhiali sull'iPhone; video YouTube in **Chrome** sul PC | ≈ 0,5 s dalle casse, poi il video si ferma; presa; annuncio da solo; il video riparte negli occhiali dal punto di pausa |
 | 2 | Come 1 con **Firefox** | uguale |
 | 3 | Come 1 con **Elisa** (musica locale) | uguale |
@@ -407,7 +407,7 @@ di M9, comandi MPRIS da `systemd-run --user`):
   `pause()` salva la riclassificazione prima di aver letto `GetId`. Innocuo: il salvataggio dopo
   la pausa riuscita avviene con `bus_id` (verificato in `state.json`).
 
-**Prova reale di GM — 2026-10-05 sera** (occhiali + iPhone, journal letto da Claude; M11, M12).
+**Prova reale di GM — 2026-10-05 sera** (occhiali + iPhone, journal letto da Claude; M11b, M12).
 Punto 0: annuncio presente 3 volte su 3, audio del PC udibile ≈ 1,0–1,3 s dopo il sink: il
 ritardo di 2000 ms resta definitivo; Q4 chiusa senza misura (decisione 67). Ok: 1 (Chrome, «va
 da dio»), 2 (Firefox, dalla seconda presa: la prima riproduzione in una finestra nuova non è

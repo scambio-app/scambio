@@ -194,7 +194,10 @@ ogni 4 s sui sei stati; screenshot con `spectacle -b -n -f`, ritagliati sul tray
 Conseguenza: KIconLoader usa le cartelle dell'`index.theme` di sistema di hicolor (che elenca
 `scalable/status` ma non `symbolic/status`). Non misurati: tema chiaro, GNOME con AppIndicator.
 
-## 2026-10-05 — M11: annuncio vocale degli occhiali alla connessione (GM + Claude)
+## 2026-10-05 — M11b: annuncio vocale degli occhiali alla connessione (GM + Claude)
+
+Numerata M11b perché M11 è già la misura delle icone del tray (stessa data, chat di design);
+la spec 02 la cita come M11b.
 
 Metodo: script usa e getta `~/Scrivania/Claude/scambio-misure/annuncio.py` (Scambio fermo):
 occhiali indossati sull'iPhone; `bluetoothctl connect`; appena compare il sink Bluetooth parte
@@ -240,7 +243,7 @@ Claude dopo i passi.
 - Q5: portal GlobalShortcuts su Plasma 5.27.
 - Latenza della prima uscita audio in HFP (apertura del link SCO).
 - Passaggio automatico a HFP quando un'app apre il microfono (autoswitch di WirePlumber).
-- Se l'annuncio vocale si può disattivare dall'app Meta AI (durata misurata in M11).
+- Se l'annuncio vocale si può disattivare dall'app Meta AI (durata misurata in M11b).
 
 ## 2026-10-05 — M13: portal GlobalShortcuts su casa (Q5, orchestratore, senza GM)
 
