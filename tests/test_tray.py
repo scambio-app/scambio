@@ -117,17 +117,45 @@ def test_properties_layout_and_methods(tray):
     assert opened
     result = rpc(bus, dest, MENU, "AboutToShowGroup", "(ai)", ([0, 999],)).unpack()
     assert result == ([], [999])
+    opened_before = list(opened)
     for method, signature, args in [
-        ("Activate", "(ii)", (0, 0)),
         ("SecondaryActivate", "(ii)", (0, 0)),
         ("ContextMenu", "(ii)", (0, 0)),
         ("Scroll", "(is)", (1, "vertical")),
     ]:
         rpc(bus, dest, SNI, method, signature, args, SNI_PATH)
-    assert not calls(obj, "Switch")
+    assert opened == opened_before
+    for method in ("Switch", "SetPriority", "Quit"):
+        assert not calls(obj, method)
     with pytest.raises(GLib.Error):
         rpc(bus, dest, MENU, "GetProperty", "(is)", (999, "label"))
     assert rpc(bus, dest, MENU, "GetLayout", "(iias)", (0, -1, [])).unpack()[0] == 1
+
+
+@pytest.mark.parametrize(
+    "state", ["released", "connecting", "on_pc", "releasing", "unavailable"]
+)
+def test_activate_not_supported_without_side_effects(tray, state):
+    tray, client, obj, opened = tray
+    model = present(
+        tray.design, client.props | {"State": state}, "", 0, Translator("en")
+    )
+    tray.update(model)
+    bus, dest = client.connection, client.connection.get_unique_name()
+    for coordinates in ((0, 0), (-1, 42)):
+        with pytest.raises(GLib.Error) as exc:
+            rpc(bus, dest, SNI, "Activate", "(ii)", coordinates, SNI_PATH)
+        assert Gio.DBusError.get_remote_error(exc.value) == (
+            "org.freedesktop.DBus.Error.NotSupported"
+        )
+    assert not opened
+    assert tray.model == model
+    for method in ("Switch", "SetPriority", "Quit"):
+        assert not calls(obj, method)
+    # The host can still retrieve and open the menu after Activate fails.
+    assert rpc(bus, dest, MENU, "GetLayout", "(iias)", (0, -1, [])).unpack()[0] == 1
+    assert rpc(bus, dest, MENU, "AboutToShow", "(i)", (0,)).unpack() == (False,)
+    assert opened == [True]
 
 
 @pytest.mark.parametrize(
@@ -240,6 +268,13 @@ def test_ui_error_seen_and_dynamic_minutes(ui_client, tmp_path, opened_method):
         spin_until(lambda: ui.notifications.active_error == "connect_failed")
         assert ui.tray.model.status == "NeedsAttention"
         bus, dest = client.connection, client.connection.get_unique_name()
+        with pytest.raises(GLib.Error) as exc:
+            rpc(bus, dest, SNI, "Activate", "(ii)", (0, 0), SNI_PATH)
+        assert Gio.DBusError.get_remote_error(exc.value) == (
+            "org.freedesktop.DBus.Error.NotSupported"
+        )
+        assert ui.notifications.active_error == "connect_failed"
+        assert ui.tray.model.status == "NeedsAttention"
         if opened_method == "AboutToShow":
             rpc(bus, dest, MENU, "AboutToShow", "(i)", (0,))
         else:

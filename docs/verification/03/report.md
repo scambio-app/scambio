@@ -177,3 +177,54 @@ queste righe una prova già eseguita.
 - `src/scambio/ui/__init__.py`, `client.py`, `presentation.py`, `actions.py`, `guard.py`, `notify.py`, `tray.py`.
 - `tests/test_i18n.py`, `tests/test_presentation.py`, `tests/test_notifications.py`, `tests/test_tray.py`, `tests/test_ui_service.py`.
 - `tools/measure_idle.py`, `docs/decisions.md`, `docs/verification/03/{report.md,make-check.txt,idle-before.json,idle-after.json}`.
+
+## Correzione dopo audit — decisione 85 (2026-10-06)
+
+Scope del nuovo `/goal`: clic sinistro del tray secondo la decisione 85 e
+`05-ui-context.md` §5.3. Base `43ab731`, branch `main`; commit della correzione:
+quello contenente questa sezione (`git log -1 --format=fuller -- src/scambio/ui/tray.py`).
+Le sezioni precedenti documentano la consegna originale della spec 03.
+
+`Activate` su `org.kde.StatusNotifierItem` restituisce sempre
+`org.freedesktop.DBus.Error.NotSupported` e termina senza altri effetti.
+Applicazione diretta della decisione 85, senza nuove decisioni tecniche o
+scostamenti dal contratto. `ItemIsMenu` resta vero; `SecondaryActivate`,
+`ContextMenu` e `Scroll` restano senza effetti. Nessuna richiesta per `design/`.
+
+Evidenza automatica su bus privati con Gio e dbusmock:
+
+- Il nuovo test, prima della correzione, falliva con `DID NOT RAISE Error`:
+  `.venv/bin/pytest tests/test_tray.py -k activate_not_supported --maxfail=1 -q`.
+- Dopo la correzione, `.venv/bin/pytest tests/test_tray.py -q`: **17 passed**.
+  Il nome remoto dell'errore è verificato in tutti e cinque gli stati, con
+  chiamate ripetute e coordinate diverse. Nessuna chiamata a `Switch`,
+  `SetPriority`, `Quit`, nessun menu segnato aperto, modello invariato.
+- `GetLayout` e `AboutToShow` funzionano dopo l'errore. Con errore UI attivo,
+  `Activate` non lo segna visto: lo fanno successivamente `AboutToShow(0)` o
+  `Event(0, "opened")`. Gli altri tre metodi SNI non aprono né attivano azioni.
+- `make check` verde: **569 passed in 66,14 s, zero skip**; compilazione dei
+  cataloghi, formattazione, lint e mypy verdi. Log completo:
+  [make-check-activate.txt](make-check-activate.txt).
+
+Checklist della correzione: comportamento e regressione coperti; nessun
+polling, timer, dipendenza, modifica di design o di configurazione introdotti.
+File toccati: `src/scambio/ui/tray.py`, `tests/test_tray.py`, questo report e
+`docs/verification/03/make-check-activate.txt`.
+
+Limiti separati dall'evidenza: il comportamento dell'host Plasma deriva dalla
+misura M14 già registrata, non da una nuova prova visiva. Non eseguiti riavvii
+del demone reale né misure Bluetooth/audio/CPU; i campioni CPU/RSS sopra
+identificano la consegna originale. GNOME resta non verificato.
+
+Verifica manuale per GM, ancora da eseguire: dalla repo,
+`systemctl --user restart scambio`; clic sinistro sull'icona → menu; chiuderlo,
+clic destro → stesso menu. Annotare esito e data per Claude. Questa prova non
+è inclusa nel criterio automatico di completamento del presente `/goal`.
+
+Ricerca: graphify query/affected/path e lettura dei file; alcuni simboli non
+risolti in modo univoco, impatto verificato tramite il nodo `tray.py`. Nessun
+fallback grep/rg. Brain consultato in sola lettura via MCP `agvm-scambio`:
+restituisce le milestone 0 e 2, nessuna evidenza sulla decisione 85, verificata
+direttamente nel repository insieme a M14. Graphify si aggiorna al commit.
+Nessuna domanda tecnica aperta. Handoff a Claude: aggiornare tracker ed esito
+dell'audit; registrare la futura prova di GM nei file di sua proprietà.

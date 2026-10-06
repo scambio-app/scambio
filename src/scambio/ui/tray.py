@@ -295,6 +295,12 @@ class Tray:
         invocation: Gio.DBusMethodInvocation,
     ) -> None:
         try:
+            if interface == SNI and method == "Activate":
+                # Plasma 5.27 opens the menu only when Activate fails (decision 85).
+                invocation.return_dbus_error(
+                    "org.freedesktop.DBus.Error.NotSupported", "Use the tray menu"
+                )
+                return
             result = (
                 None if interface == SNI else self._dispatch(method, params.unpack())
             )
