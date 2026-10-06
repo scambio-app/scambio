@@ -10,6 +10,7 @@ from helpers import drain, spin_until
 from test_notifications import calls, error, update
 from test_notifications import ui_client as ui_client
 
+from scambio.api import SETTINGS_BUS_NAME, SETTINGS_PATH
 from scambio.config import Config
 from scambio.i18n import Translator
 from scambio.paths import design_dir
@@ -85,8 +86,62 @@ def test_watcher_registers_and_restarts(tray):
     for _ in range(2):
         with watcher() as server:
             spin_until(lambda: calls(server.obj, "RegisterStatusNotifierItem"))
-            assert calls(server.obj, "RegisterStatusNotifierItem")[0][1] == [SNI_PATH]
+            assert calls(server.obj, "RegisterStatusNotifierItem")[0][1] == [tray.name]
         drain()
+
+
+def test_settings_menu_activation_and_missing_service(tray, caplog):
+    item, client, _, _ = tray
+    assert item.model.menu[7]["visible"]
+    with dbusmock.SpawnedMock.spawn_for_name(
+        SETTINGS_BUS_NAME,
+        SETTINGS_PATH,
+        "org.freedesktop.Application",
+        stdout=subprocess.DEVNULL,
+    ) as mock:
+        mock.obj.AddMethod(
+            "org.freedesktop.Application",
+            "Activate",
+            "a{sv}",
+            "",
+            "",
+            dbus_interface=dbusmock.MOCK_IFACE,
+        )
+        item.event(7, "clicked")
+        spin_until(lambda: calls(mock.obj, "Activate"))
+    item.event(7, "clicked")
+    spin_until(lambda: "make install-user" in caplog.text)
+
+
+def test_tray_name_disappears_and_returns(ui_client, tmp_path):
+    client, _ = ui_client
+    config = Config(notifications=False)
+    ui = start_ui(
+        client.connection,
+        config,
+        client.bus_name,
+        client.path,
+        tmp_path / "config.toml",
+    )
+    bus = dbusmock.BusType.SESSION.get_connection()
+    try:
+        with watcher() as server:
+            spin_until(
+                lambda: ui.tray and calls(server.obj, "RegisterStatusNotifierItem")
+            )
+            name = ui.tray.name
+            assert bus.name_has_owner(name)
+            ui.apply_config(replace(config, tray=False))
+            spin_until(lambda: not bus.name_has_owner(name))
+            ui.apply_config(config)
+            spin_until(
+                lambda: len(calls(server.obj, "RegisterStatusNotifierItem")) == 2
+            )
+            assert bus.name_has_owner(name)
+            assert calls(server.obj, "RegisterStatusNotifierItem")[-1][1] == [name]
+    finally:
+        ui.stop()
+    spin_until(lambda: not bus.name_has_owner(name))
 
 
 def test_properties_layout_and_methods(tray):
@@ -243,7 +298,7 @@ def test_update_signals_and_revision(tray):
         assert not any(e[0] == "LayoutUpdated" for e in events)
         assert any(e[0] == "NewToolTip" for e in events)
         changed = copy.deepcopy(new.menu)
-        changed[7]["visible"] = True
+        changed[7]["visible"] = False
         tray.update(replace(new, menu=changed))
         spin_until(lambda: any(e[0] == "LayoutUpdated" for e in events))
         assert tray.revision == 2

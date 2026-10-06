@@ -9,6 +9,7 @@ from typing import Any
 
 from gi.repository import Gio, GLib
 
+from scambio.api import SETTINGS_ACTIVE
 from scambio.i18n import Translator
 from scambio.paths import design_dir
 from scambio.ui.client import ScambioClient
@@ -42,11 +43,28 @@ class Notifications:
         self.queue: deque[tuple[dict[str, Any], str, int]] = deque()
         self.busy = False
         self.closed = False
+        self.foreground = False
         self.cancel = Gio.Cancellable()
         self.subscription = client.connection.signal_subscribe(
             NAME, NAME, None, PATH, None, Gio.DBusSignalFlags.NONE, self._signal
         )
         client.listeners.append(self.event)
+        self.active_watch = Gio.bus_watch_name_on_connection(
+            client.connection,
+            SETTINGS_ACTIVE,
+            Gio.BusNameWatcherFlags.NONE,
+            self._active,
+            self._inactive,
+        )
+
+    @guarded
+    def _active(self, *args: Any) -> None:
+        self.foreground = True
+        self.queue = deque(item for item in self.queue if item[1] != "priority")
+
+    @guarded
+    def _inactive(self, *args: Any) -> None:
+        self.foreground = False
 
     def startup(self) -> None:
         code = self.client.props.get("LastError", "")
@@ -95,7 +113,11 @@ class Notifications:
                 self.send(self.data["priority"][key], "priority", -1)
 
     def send(self, entry: dict[str, Any], category: str, generation: int) -> None:
-        if self.closed or not self.enabled:
+        if (
+            self.closed
+            or not self.enabled
+            or (category == "priority" and self.foreground)
+        ):
             return
         self.queue.append((entry, category, generation))
         self._pump()
@@ -244,5 +266,6 @@ class Notifications:
         self.cancel.cancel()
         self.queue.clear()
         self.client.connection.signal_unsubscribe(self.subscription)
+        Gio.bus_unwatch_name(self.active_watch)
         if self.event in self.client.listeners:
             self.client.listeners.remove(self.event)

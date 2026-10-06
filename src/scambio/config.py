@@ -1,8 +1,14 @@
-"""Validated, read-only TOML configuration (except initial template creation)."""
+"""Validated TOML configuration with narrowly scoped, lossless edits."""
 
+import copy
+import json
 import logging
+import os
 import re
+import stat
+import tempfile
 import tomllib
+from collections.abc import Iterator
 from dataclasses import dataclass, field, fields
 from pathlib import Path
 
@@ -10,6 +16,13 @@ from scambio.i18n import Translator
 
 LOG = logging.getLogger(__name__)
 RESUME_DEFAULTS = {"generic": 0, "meta_glasses": 2000}
+WINDOW_KEYS = {
+    "device.address": str,
+    "policy.release_idle_seconds": int,
+    "ui.tray": bool,
+    "ui.notifications": bool,
+    "ui.language": str,
+}
 
 
 class ConfigInvalid(ValueError):
@@ -252,3 +265,145 @@ def parse(data: dict[str, object]) -> Config:
         bool(ui.get("tray", True)),
         bool(ui.get("notifications", True)),
     )
+
+
+def window_values(config: Config) -> dict[str, str | int | bool]:
+    return {
+        "device.address": config.device.address,
+        "policy.release_idle_seconds": config.policy.release_idle_seconds,
+        "ui.tray": config.tray,
+        "ui.notifications": config.notifications,
+        "ui.language": config.language,
+        "shortcut.preferred": config.shortcut,
+    }
+
+
+def _statements(lines: list[str]) -> Iterator[tuple[int, int, str]]:
+    """Use the TOML parser to delimit statements, including untouched multiline values.
+
+    Parsing each logical statement prevents a '[ui]' inside a multiline string
+    or an array from being mistaken for a table header. No TOML serializer is used.
+    """
+    start = 0
+    buffer = ""
+    for end, line in enumerate(lines, 1):
+        buffer += line
+        try:
+            tomllib.loads(buffer)
+        except tomllib.TOMLDecodeError:
+            continue
+        yield start, end, buffer
+        start, buffer = end, ""
+    if buffer:
+        raise ConfigInvalid("Unsupported TOML statement")
+
+
+def _replace_value(
+    text: str, section: str, key: str, value: object, data: dict[str, object]
+) -> str:
+    lines = text.splitlines(keepends=True)
+    newline = "\r\n" if "\r\n" in text else "\n"
+    table = ""
+    insertion: int | None = None
+    target: tuple[int, re.Match[str]] | None = None
+    encoded = json.dumps(value, ensure_ascii=False)
+    scalar = r"""(?:"(?:[^"\\\r\n]|\\.)*"|'[^'\r\n]*'|[^\s#'"\[\{]+)"""
+    assignment = re.compile(
+        r"^([ \t]*"
+        + re.escape(key)
+        + r"[ \t]*=[ \t]*)("
+        + scalar
+        + r")([ \t]*(?:#[^\r\n]*)?(?:\r?\n)?)$"
+    )
+    for start, end, statement in _statements(lines):
+        stripped = statement.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("["):
+            header = re.fullmatch(
+                r"\[\s*([A-Za-z0-9_-]+)\s*\]\s*(?:#[^\r\n]*)?", stripped
+            )
+            table = header[1] if header else ""
+            if table == section:
+                insertion = end
+        elif table == section:
+            insertion = end
+            match = assignment.fullmatch(statement)
+            if match:
+                target = start, match
+    if target:
+        index, match = target
+        lines[index] = match[1] + encoded + match[3]
+    else:
+        raw_section = data.get(section, {})
+        if (isinstance(raw_section, dict) and key in raw_section) or (
+            section in data and insertion is None
+        ):
+            LOG.warning("Cannot edit %s.%s: unsupported TOML form", section, key)
+            raise ConfigInvalid("Unsupported TOML form for " + section + "." + key)
+        line = key + " = " + encoded + newline
+        if insertion is None:
+            if lines and not lines[-1].endswith("\n"):
+                lines[-1] += newline
+            lines.extend([newline, "[" + section + "]" + newline, line])
+        else:
+            if insertion and not lines[insertion - 1].endswith("\n"):
+                lines[insertion - 1] += newline
+            lines.insert(insertion, line)
+    return "".join(lines)
+
+
+@dataclass(frozen=True)
+class ConfigEdit:
+    path: Path
+    text: str
+    config: Config
+    mode: int
+
+    def write(self) -> None:
+        """Commit only after the service's DeviceBusy check."""
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        fd, name = tempfile.mkstemp(prefix=".config-", dir=self.path.parent)
+        try:
+            with os.fdopen(fd, "wb") as out:
+                os.fchmod(out.fileno(), self.mode)
+                out.write(self.text.encode("utf-8"))
+                out.flush()
+                os.fsync(out.fileno())
+            os.replace(name, self.path)
+        finally:
+            if os.path.exists(name):
+                os.unlink(name)
+
+
+def prepare_update(
+    path: Path, changes: dict[str, object], language: str = "auto"
+) -> ConfigEdit:
+    for key, value in changes.items():
+        if key not in WINDOW_KEYS or type(value) is not WINDOW_KEYS[key]:
+            raise ConfigInvalid("Unsupported configuration key or type: " + key)
+    try:
+        text = path.read_bytes().decode("utf-8")
+        mode = stat.S_IMODE(path.stat().st_mode)
+    except FileNotFoundError:
+        text, mode = template(language), 0o600
+    except (OSError, UnicodeError) as exc:
+        raise ConfigInvalid(str(exc)) from exc
+    try:
+        data = tomllib.loads(text)
+        merged = copy.deepcopy(data)
+        for name, value in changes.items():
+            section, key = name.split(".")
+            table = merged.setdefault(section, {})
+            if not isinstance(table, dict):
+                raise ConfigInvalid("Expected table: " + section)
+            table[key] = value
+        config = parse(merged)
+        for name, value in changes.items():
+            section, key = name.split(".")
+            text = _replace_value(text, section, key, value, tomllib.loads(text))
+        if tomllib.loads(text) != merged:
+            raise ConfigInvalid("TOML edit changed unrelated values")
+    except (ValueError, TypeError) as exc:
+        raise ConfigInvalid(str(exc)) from exc
+    return ConfigEdit(path, text, config, mode)

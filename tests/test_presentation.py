@@ -49,7 +49,7 @@ def test_rules(design, props, rule):
             next(r for r in design.data["presentation"] if r["id"] == rule)["icon"]
         ]
     )
-    assert model.menu[7]["visible"] is False
+    assert model.menu[7]["visible"] is True
     assert model.menu[1]["enabled"] is False
     if rule != "not_configured":
         assert "A__&<B>" in model.menu[1]["label"]

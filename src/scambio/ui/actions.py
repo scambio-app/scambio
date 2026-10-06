@@ -1,9 +1,42 @@
 """Shared GActions dispatch only through the public daemon client."""
 
+import logging
+
 from gi.repository import Gio, GLib
 
+from scambio.api import SETTINGS_BUS_NAME, SETTINGS_PATH
 from scambio.ui.client import ScambioClient
 from scambio.ui.guard import guarded
+
+LOG = logging.getLogger(__name__)
+
+
+def open_settings(client: ScambioClient) -> None:
+    @guarded
+    def done(bus: Gio.DBusConnection, result: Gio.AsyncResult) -> None:
+        try:
+            bus.call_finish(result)
+        except GLib.Error as exc:
+            if (
+                Gio.DBusError.get_remote_error(exc)
+                == "org.freedesktop.DBus.Error.ServiceUnknown"
+            ):
+                LOG.warning("Cannot open settings: eseguire make install-user")
+            else:
+                LOG.warning("Cannot open settings: %s", exc)
+
+    client.connection.call(
+        SETTINGS_BUS_NAME,
+        SETTINGS_PATH,
+        "org.freedesktop.Application",
+        "Activate",
+        GLib.Variant("(a{sv})", ({},)),
+        None,
+        Gio.DBusCallFlags.NONE,
+        client.timeout_ms,
+        None,
+        done,
+    )
 
 
 def create_actions(client: ScambioClient) -> Gio.SimpleActionGroup:
@@ -21,8 +54,10 @@ def create_actions(client: ScambioClient) -> Gio.SimpleActionGroup:
             )
         elif name == "quit":
             client.call("Quit")
+        elif name == "open-settings":
+            open_settings(client)
 
-    for name in ("switch", "toggle-priority", "quit"):
+    for name in ("switch", "toggle-priority", "quit", "open-settings"):
         action = Gio.SimpleAction.new(name, None)
         action.connect("activate", activate)
         group.add_action(action)

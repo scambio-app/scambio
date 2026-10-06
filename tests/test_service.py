@@ -93,6 +93,7 @@ def test_cli_switch_priority_persistence(daemon, fake_pactl, tmp_path):
         "IdleReleaseAt",
         "LastError",
         "Version",
+        "Config",
         "Shortcut",
         "ShortcutLabel",
         "ShortcutState",

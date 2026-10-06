@@ -5,6 +5,9 @@
     <method name="Reload"/>
     <method name="Quit"/>
     <method name="RetryShortcut"/>
+    <method name="SetConfig"><arg name="changes" type="a{sv}" direction="in"/></method>
+    <method name="ListDevices"><arg name="devices" type="a(ss)" direction="out"/></method>
+    <property name="Config" type="a{sv}" access="read"/>
     <property name="Shortcut" type="s" access="read"/>
     <property name="ShortcutLabel" type="s" access="read"/>
     <property name="ShortcutState" type="s" access="read"/>

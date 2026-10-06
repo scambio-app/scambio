@@ -12,7 +12,14 @@ from gi.repository import Gio, GLib
 
 from scambio import __version__
 from scambio.api import BUS_NAME, INTERFACE, PATH, introspection_xml
-from scambio.config import Config, ConfigInvalid, config_path, load
+from scambio.config import (
+    Config,
+    ConfigInvalid,
+    config_path,
+    load,
+    prepare_update,
+    window_values,
+)
 from scambio.core.audio import Audio
 from scambio.core.bluez import BlueZ
 from scambio.core.players import Players
@@ -46,6 +53,13 @@ Schedule = Callable[[int, Callable[[], bool]], int]
 Factory = Callable[[Emit], tuple[BluetoothPort, AudioPort, SessionPort]]
 
 
+def read_cgroup() -> str:
+    try:
+        return Path("/proc/self/cgroup").read_text()
+    except OSError:
+        return ""
+
+
 def schedule(milliseconds: int, callback: Callable[[], bool]) -> int:
     if milliseconds >= 1000 and milliseconds % 1000 == 0:
         return int(GLib.timeout_add_seconds(milliseconds // 1000, callback))
@@ -62,12 +76,14 @@ class Service:
         factory: Factory,
         timer: Schedule = schedule,
         players: PlayersPort | None = None,
+        cgroup: Callable[[], str] = read_cgroup,
     ) -> None:
         self.ui: Ui | DisabledUi | None = None
         self.shortcuts: Shortcuts | None = None
         self.quit_done: Done = lambda: None
         self.bus, self.config, self.store = bus, config, store
         self.config_file, self.schedule = config_file, timer
+        self.cgroup = cgroup
         self.ctx = Context(priority=store.value.iphone_priority)
         self.bluez, self.audio, self.session = factory(self.event)
         self.players = players if players is not None else Players(bus, config, store)
@@ -381,7 +397,7 @@ class Service:
             self.bus.emit_signal(None, PATH, INTERFACE, name, params)
 
     def properties(self) -> dict[str, GLib.Variant]:
-        values: dict[str, str | bool | int] = {
+        values: dict[str, Any] = {
             "State": self.ctx.state,
             "IphonePriority": self.ctx.priority,
             "AudioActive": self.ctx.audio_active,
@@ -392,6 +408,12 @@ class Service:
             "IdleReleaseAt": self.idle_release_at,
             "LastError": self.ctx.last_error,
             "Version": __version__,
+            "Config": {
+                k: GLib.Variant(
+                    "b" if type(v) is bool else "i" if type(v) is int else "s", v
+                )
+                for k, v in window_values(self.config).items()
+            },
         }
         values.update(
             self.shortcuts.values
@@ -459,10 +481,82 @@ class Service:
                     self.shortcuts.retry(lambda: invocation.return_value(None))
                 else:
                     invocation.return_value(None)
+            elif method == "ListDevices":
+                self.bluez.list_devices(
+                    lambda devices: invocation.return_value(
+                        GLib.Variant("(a(ss))", (devices,))
+                    )
+                )
+            elif method == "SetConfig":
+                values = params.get_child_value(0)
+                changes: dict[str, object] = {}
+                types = {
+                    "device.address": "s",
+                    "ui.language": "s",
+                    "policy.release_idle_seconds": "i",
+                    "ui.tray": "b",
+                    "ui.notifications": "b",
+                }
+                for index in range(values.n_children()):
+                    entry = values.get_child_value(index)
+                    key = entry.get_child_value(0).unpack()
+                    value = entry.get_child_value(1).get_variant()
+                    if key not in types or value.get_type_string() != types[key]:
+                        raise ConfigInvalid("Unsupported key or D-Bus type")
+                    changes[key] = value.unpack()
+                restart = self.set_config(changes)
+                invocation.return_value(None)
+                if restart:
+                    self._restart()
         except ConfigInvalid as exc:
             invocation.return_dbus_error(INTERFACE + ".Error.ConfigInvalid", str(exc))
         except RestartRequired as exc:
             invocation.return_dbus_error(INTERFACE + ".Error.RestartRequired", str(exc))
+        except DeviceBusy as exc:
+            invocation.return_dbus_error(INTERFACE + ".Error.DeviceBusy", str(exc))
+
+    def set_config(self, changes: dict[str, object]) -> bool:
+        edit = prepare_update(self.config_file, changes, self.config.language)
+        device_changed = edit.config.device.address != self.config.device.address
+        if device_changed and self.ctx.state in {"connecting", "on_pc", "releasing"}:
+            raise DeviceBusy("Cannot change device during a connection")
+        try:
+            edit.write()
+        except OSError as exc:
+            raise ConfigInvalid(str(exc)) from exc
+        if device_changed:
+            if any(
+                line.rsplit("/", 1)[-1] == "scambio.service"
+                for line in self.cgroup().splitlines()
+            ):
+                return True
+            raise RestartRequired("Configuration saved; restart required")
+        self._apply_config(edit.config)
+        return False
+
+    def _restart(self) -> None:
+        LOG.info("Restarting scambio.service after configured device change")
+
+        def finished(bus: Gio.DBusConnection, result: Gio.AsyncResult) -> None:
+            try:
+                bus.call_finish(result)
+            except GLib.Error as exc:
+                LOG.error(
+                    "Cannot restart scambio.service; configuration saved: %s", exc
+                )
+
+        self.bus.call(
+            "org.freedesktop.systemd1",
+            "/org/freedesktop/systemd1",
+            "org.freedesktop.systemd1.Manager",
+            "RestartUnit",
+            GLib.Variant("(ss)", ("scambio.service", "replace")),
+            None,
+            Gio.DBusCallFlags.NO_AUTO_START,
+            self.config.backend.dbus_timeout_seconds * 1000,
+            None,
+            finished,
+        )
 
     def reload(self) -> None:
         try:
@@ -472,6 +566,9 @@ class Service:
             raise
         if config.device.address != self.config.device.address:
             raise RestartRequired("Changing device.address requires a restart")
+        self._apply_config(config)
+
+    def _apply_config(self, config: Config) -> None:
         self.config = config
         self.bluez.reload(config)
         self.session.reload(config)
@@ -575,6 +672,10 @@ class Service:
 
 class RestartRequired(ValueError):
     """Reload would change the configured device identity."""
+
+
+class DeviceBusy(ValueError):
+    """Changing the configured device is unsafe in the current state."""
 
 
 def run(

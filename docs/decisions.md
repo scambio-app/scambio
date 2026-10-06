@@ -459,3 +459,12 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
      `recover()` senza stato termina prima di chiedere `GetId`, mentre
      `forget()` e il primo `pause()` possono già chiamare `_save()`. Non si
      cancella uno stato da recuperare quando l'identità è sconosciuta.
+
+112. Codex — `SetConfig` prepara un `ConfigEdit` prima della scrittura: legge
+     i byte preservando CRLF, unisce e valida i valori del file, localizza
+     gli statement con tomllib per non confondere intestazioni dentro stringhe
+     multilinea, sostituisce solo scalari ammessi e verifica il dizionario
+     finale. Il servizio controlla DeviceBusy prima del commit atomico con
+     permessi conservati. Il cgroup è una funzione iniettabile nei test;
+     RestartUnit parte dopo la risposta di successo e non applica il nuovo
+     dispositivo al processo uscente. Nessuna cache aggiunta a ListDevices.

@@ -1,5 +1,6 @@
 """Only the configured, paired BlueZ device is ever acted on."""
 
+from collections.abc import Callable
 from typing import Any
 
 from gi.repository import Gio
@@ -13,6 +14,11 @@ DEVICE = "org.bluez.Device1"
 ADAPTER = "org.bluez.Adapter1"
 PROPERTIES = "org.freedesktop.DBus.Properties"
 MANAGER = "org.freedesktop.DBus.ObjectManager"
+AUDIO_UUIDS = {
+    "0000110b-0000-1000-8000-00805f9b34fb",
+    "0000111e-0000-1000-8000-00805f9b34fb",
+    "00001108-0000-1000-8000-00805f9b34fb",
+}
 
 
 class BlueZ:
@@ -154,6 +160,25 @@ class BlueZ:
 
     def disconnect(self) -> None:
         self._operate("Disconnect", "DisconnectResult")
+
+    def list_devices(self, done: Callable[[list[tuple[str, str]]], None]) -> None:
+        def received(reply: Any, error: str) -> None:
+            objects = reply[0] if not error else {}
+            devices: dict[str, str] = {}
+            for interfaces in objects.values():
+                props = interfaces.get(DEVICE, {})
+                powered = (
+                    objects.get(props.get("Adapter", ""), {})
+                    .get(ADAPTER, {})
+                    .get("Powered", False)
+                )
+                uuids = {str(v).lower() for v in props.get("UUIDs", [])}
+                address = str(props.get("Address", "")).upper()
+                if powered and props.get("Paired") and uuids & AUDIO_UUIDS and address:
+                    devices.setdefault(address, str(props.get("Alias", "")))
+            done(sorted(devices.items(), key=lambda item: item[1].casefold()))
+
+        self.client.call("/", MANAGER, "GetManagedObjects", None, received)
 
     def close(self) -> None:
         self.operation += 1

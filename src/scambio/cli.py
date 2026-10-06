@@ -77,7 +77,15 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 json.dumps(values, sort_keys=True)
                 if args.json
-                else "\n".join(f"{key}: {value}" for key, value in values.items())
+                else "\n".join(
+                    f"{key}: "
+                    + (
+                        ", ".join(f"{k}={v}" for k, v in value.items())
+                        if isinstance(value, dict)
+                        else str(value)
+                    )
+                    for key, value in values.items()
+                )
             )
         elif args.command == "switch":
             reply = proxy.call_sync(

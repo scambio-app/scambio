@@ -45,7 +45,7 @@
     {"id": 4, "name": "switch", "action": "app.switch", "label": {"to_pc": "tray-action-to-pc", "to_phone": "tray-action-to-phone"}, "enabled_when": "available"},
     {"id": 5, "name": "priority", "action": "app.toggle-priority", "label": "tray-action-priority", "toggle_type": "checkmark", "toggle_state": "iphone_priority"},
     {"id": 6, "name": "separator-2", "type": "separator"},
-    {"id": 7, "name": "settings", "action": "app.open-settings", "label": "tray-action-settings", "theme_icon": "preferences-system", "visible": false},
+    {"id": 7, "name": "settings", "action": "app.open-settings", "label": "tray-action-settings", "theme_icon": "preferences-system"},
     {"id": 8, "name": "quit", "action": "app.quit", "label": "tray-action-quit", "theme_icon": "application-exit"}
   ],
   "notifications": {

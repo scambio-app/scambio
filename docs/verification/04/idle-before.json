@@ -1,0 +1,57 @@
+{
+  "source_sha256": {
+    "src/scambio/config.py": "891a3e0cc37f66c20d70163a1d7d83dc275dc2b553ba2fb39f06209e445f658c",
+    "src/scambio/state.py": "4b5633e718c725a60e544d5bdc6fb88b826b1300311df254d9f1edc0283e06e1",
+    "src/scambio/core/policy.py": "a38cd621b297cfced908147d96818b3f24e431fbf5e72e610c8f60c360997c21",
+    "src/scambio/core/players.py": "54e1313b21ebd41066b544da853cde812cdca54feebc3889c943992c165525e8",
+    "src/scambio/core/service.py": "7f9ba47779f8daa6560964e3ced9bb5176753289cd371010fea31f7c4d605952",
+    "tests/fixtures/run_daemon.py": "a10a3a31882b3294dc9834048f2059217e14eb662dbd7192a7299e61b30b1729",
+    "src/scambio/i18n.py": "98943583c4aac8dbce0ac377591e26a4c3c03a0ade6d8907e5da7f6412fe74a4",
+    "src/scambio/paths.py": "49d72f9276a00315adb8574f13c831badc5d831f9ca9f39a8ac210765099bf1b",
+    "src/scambio/ui/__init__.py": "7d5e6a656a61b7d7173d5ec614603bbb4a1f2722c0afed25c13ec4fd2744ee80",
+    "src/scambio/ui/client.py": "ba825a2421930c97638332a923654a395afac1f7cccddf49eb96253b09d06825",
+    "src/scambio/ui/actions.py": "07813f56f6e4bf9d48a366e19f42f9a1efea7b7a4fb4184d836e3ae5d2850591",
+    "src/scambio/ui/guard.py": "244f77f362d00665ec3c930830289af5ef6943a2e61edfa9dfed63a2a878631e",
+    "src/scambio/ui/notify.py": "9b2784fa479129bc954ed84c420e5b2ee71838a737ef0016207be30bdbed8e28",
+    "src/scambio/ui/presentation.py": "245b2ac76bf68c6d1dab15de922f54630bea969108ccfc26a3fb0a35ce3042f7",
+    "src/scambio/ui/tray.py": "7a354205b7d87c44bc7f075845fc7a84260badf0e352ccfefb50173567fd92ad"
+  },
+  "environment": "private dbusmock system/session buses; bluez5/logind/ScreenSaver/MPRIS; fake pactl; app.scambio.Test; SNI watcher/notifications mocks",
+  "started_utc": "2026-10-06T23:22:20.032998+00:00",
+  "elapsed_seconds": 600.0931466210168,
+  "processes": {
+    "daemon": {
+      "pid": 1897456,
+      "before": {
+        "cpu_seconds": 0.07,
+        "rss_kib": 23764
+      },
+      "after": {
+        "cpu_seconds": 0.07,
+        "rss_kib": 23892
+      },
+      "cpu_percent_interval": 0.0
+    },
+    "fake_pactl": {
+      "pid": 1897466,
+      "before": {
+        "cpu_seconds": 0.01,
+        "rss_kib": 11356
+      },
+      "after": {
+        "cpu_seconds": 0.01,
+        "rss_kib": 11356
+      },
+      "cpu_percent_interval": 0.0
+    }
+  },
+  "pactl_calls_during_idle": 0,
+  "mpris_calls_during_idle": 0,
+  "state_after": "released",
+  "ui_enabled": true,
+  "ui_calls_during_idle": {
+    "watcher": 0,
+    "notifications": 0
+  },
+  "real_measurement": "Private buses; GM desktop/hardware proof separate"
+}

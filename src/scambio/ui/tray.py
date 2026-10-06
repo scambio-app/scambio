@@ -1,6 +1,7 @@
 """SNI and dbusmenu exports on the daemon's single Gio connection."""
 
 import logging
+import os
 from collections.abc import Callable
 from importlib.resources import files
 from typing import Any
@@ -43,6 +44,10 @@ class Tray:
         self.revision = 1
         self.registrations: list[int] = []
         self.watch = 0
+        self.owner_id = 0
+        self.owned = False
+        self.watcher_owner = ""
+        self.name = f"org.kde.StatusNotifierItem-{os.getpid()}-1"
         self.closed = False
         self.cancel = Gio.Cancellable()
         try:
@@ -61,13 +66,33 @@ class Tray:
                 self._appeared,
                 self._vanished,
             )
+            self.owner_id = Gio.bus_own_name_on_connection(
+                self.bus,
+                self.name,
+                Gio.BusNameOwnerFlags.DO_NOT_QUEUE,
+                self._name_acquired,
+                self._name_lost,
+            )
         except Exception:
             self.stop()
             raise
 
     @guarded
     def _appeared(self, bus: Gio.DBusConnection, name: str, owner: str) -> None:
-        if self.closed:
+        self.watcher_owner = owner
+        self._register()
+
+    @guarded
+    def _name_acquired(self, bus: Gio.DBusConnection, name: str) -> None:
+        self.owned = True
+        self._register()
+
+    @guarded
+    def _name_lost(self, bus: Gio.DBusConnection, name: str) -> None:
+        self.owned = False
+
+    def _register(self) -> None:
+        if self.closed or not self.owned or not self.watcher_owner:
             return
 
         @guarded
@@ -77,12 +102,12 @@ class Tray:
             except GLib.Error as exc:
                 LOG.debug("Cannot register tray: %s", exc)
 
-        bus.call(
+        self.bus.call(
             WATCHER,
             "/StatusNotifierWatcher",
             WATCHER,
             "RegisterStatusNotifierItem",
-            GLib.Variant("(s)", (SNI_PATH,)),
+            GLib.Variant("(s)", (self.name,)),
             None,
             Gio.DBusCallFlags.NO_AUTO_START,
             self.timeout_ms,
@@ -92,6 +117,7 @@ class Tray:
 
     @guarded
     def _vanished(self, *args: Any) -> None:
+        self.watcher_owner = ""
         if not self.closed:
             LOG.info("StatusNotifierWatcher absent; tray unavailable")
 
@@ -320,3 +346,6 @@ class Tray:
         for registration in self.registrations:
             self.bus.unregister_object(registration)
         self.registrations.clear()
+        if self.owner_id:
+            Gio.bus_unown_name(self.owner_id)
+            self.owner_id = 0

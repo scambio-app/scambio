@@ -6,7 +6,7 @@ import pytest
 from gi.repository import Gio
 from helpers import drain, spin_until
 
-from scambio.api import INTERFACE, PATH
+from scambio.api import INTERFACE, PATH, SETTINGS_ACTIVE
 from scambio.i18n import Translator
 from scambio.paths import design_dir
 from scambio.ui.actions import create_actions
@@ -344,6 +344,24 @@ def test_automatic_transitions_are_silent(notices):
         update(obj, State=after)
     drain()
     assert not calls(server, "Notify")
+
+
+def test_foreground_window_suppresses_only_priority(notices):
+    n, client, obj, server, _ = notices
+    with dbusmock.SpawnedMock.spawn_for_name(
+        SETTINGS_ACTIVE, "/test", "app.scambio.ActiveTest", stdout=subprocess.DEVNULL
+    ):
+        spin_until(lambda: n.foreground)
+        update(obj, IphonePriority=dbus.Boolean(True))
+        drain()
+        assert not calls(server, "Notify")
+        error(obj, "connect_failed")
+        spin_until(lambda: calls(server, "Notify"))
+        sent(n)
+        assert n.families.keys() == {"grab"}
+    spin_until(lambda: not n.foreground)
+    update(obj, IphonePriority=dbus.Boolean(False))
+    spin_until(lambda: "priority" in n.families)
 
 
 def test_absent_notification_server_no_retry(ui_client, tmp_path, caplog):
