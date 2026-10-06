@@ -48,8 +48,10 @@ finale; non lo fa da sé. L'interfaccia fra design e codice è il contratto in
 
 - Un solo processo demone, un solo main loop GLib; tutto il D-Bus via Gio.
 - **Nessun polling.** Solo segnali ed eventi. CPU a riposo ≈ 0%, memoria residente minima.
-- Mai root, mai `sudo`. Nessuna modifica di sistema fuori da `~/.config/scambio/` e
-  `~/.local/share/scambio/`.
+- Mai root, mai `sudo`. Il demone non scrive fuori da `~/.config/scambio/` e
+  `~/.local/share/scambio/`; `make install-user` installa solo l'unità systemd utente, il lanciatore
+  `.desktop` e il servizio D-Bus della finestra (decisione 106). I binding dell'utente (altre
+  scorciatoie, khotkeys) non si toccano mai.
 - Mai disaccoppiare (unpair) un dispositivo; agire solo sui dispositivi configurati.
 - Le interfacce grafiche, la scorciatoia e la CLI parlano col demone **solo** tramite la sua API
   D-Bus. Nessuna logica nelle UI; mai `bluetoothctl` diretto.

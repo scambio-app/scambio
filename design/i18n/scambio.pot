@@ -1,11 +1,11 @@
 # Scambio — testi dell'interfaccia (modello).
 # Proprietà di Claude (design/). Chiavi simboliche: msgid = chiave del contratto
 # in docs/context/05-ui-context.md; en.po è obbligatorio come gli altri.
-# Segnaposto: {device}, {minutes}, {time}, {error} (str.format).
+# Segnaposto: {device}, {minutes}, {time}, {error}, {shortcut}, {owner}, {version} (str.format).
 msgid ""
 msgstr ""
 "Project-Id-Version: scambio 0.1\n"
-"PO-Revision-Date: 2026-10-05 13:30+0200\n"
+"PO-Revision-Date: 2026-10-07 01:00+0200\n"
 "Last-Translator: Claude (design di Scambio)\n"
 "Language-Team: Scambio\n"
 "Language: \n"
@@ -194,7 +194,21 @@ msgstr ""
 msgid "notify-action-open-config"
 msgstr ""
 
-#. Finestra impostazioni (spec 04, bozza).
+#. Finestra impostazioni (spec 04). Titolo della finestra.
+msgid "settings-window-title"
+msgstr ""
+
+#. Banner in cima quando il demone non è sul bus.
+msgid "settings-daemon-down"
+msgstr ""
+
+msgid "settings-daemon-start"
+msgstr ""
+
+#. Riga di stato quando il demone non è in esecuzione.
+msgid "settings-status-unknown"
+msgstr ""
+
 msgid "settings-priority-subtitle"
 msgstr ""
 
@@ -204,7 +218,19 @@ msgstr ""
 msgid "settings-device-title"
 msgstr ""
 
-msgid "settings-group-release"
+#. Voce dell’elenco quando non è configurato alcun dispositivo.
+msgid "settings-device-none"
+msgstr ""
+
+#. Sottotitolo: elenco bloccato mentre il dispositivo è sul PC o in passaggio.
+msgid "settings-device-busy"
+msgstr ""
+
+msgid "settings-device-empty"
+msgstr ""
+
+#. Avviso breve (toast).
+msgid "settings-device-restarting"
 msgstr ""
 
 msgid "settings-release-title"
@@ -222,40 +248,85 @@ msgstr ""
 msgid "settings-shortcut-subtitle"
 msgstr ""
 
+#. Al posto del tasto quando la scorciatoia non ha un tasto.
+msgid "settings-shortcut-unbound"
+msgstr ""
+
+#. Sottotitolo in caso di conflitto. {shortcut} = tasto leggibile (es. Meta+G), {owner} = nome dell’azione che lo usa.
+#. segnaposto: {owner}, {shortcut}
+msgid "settings-shortcut-conflict"
+msgstr ""
+
+msgid "settings-shortcut-unsupported"
+msgstr ""
+
+#. Apre Impostazioni di sistema → Scorciatoie (KDE).
 msgid "settings-shortcut-change"
 msgstr ""
 
 msgid "settings-group-general"
 msgstr ""
 
-msgid "settings-autostart"
+msgid "settings-tray"
 msgstr ""
 
-msgid "settings-tray"
+msgid "settings-tray-subtitle"
+msgstr ""
+
+msgid "settings-notifications"
+msgstr ""
+
+msgid "settings-notifications-subtitle"
 msgstr ""
 
 msgid "settings-language"
 msgstr ""
 
+#. Le altre voci restano nella propria lingua: Italiano, English, Deutsch.
 msgid "settings-language-auto"
 msgstr ""
 
-msgid "settings-advanced-title"
+#. Avviso breve (toast).
+msgid "settings-language-next-open"
 msgstr ""
 
-msgid "settings-advanced-subtitle"
+msgid "settings-config-title"
 msgstr ""
 
-msgid "settings-grab-delay-title"
+msgid "settings-config-subtitle"
 msgstr ""
 
-msgid "settings-grab-delay-subtitle"
+msgid "settings-config-open"
 msgstr ""
 
-msgid "settings-ignored-apps-title"
+#. Piè di pagina.
+#. segnaposto: {version}
+msgid "settings-version"
 msgstr ""
 
-msgid "settings-ignored-apps-subtitle"
+#. Avviso breve (toast) per ConfigInvalid.
+msgid "settings-error-invalid"
+msgstr ""
+
+#. Avviso breve (toast) per RestartRequired (Scambio non avviato da systemd).
+msgid "settings-error-restart-required"
+msgstr ""
+
+#. Avviso breve (toast); {error} = nome dell’errore D-Bus.
+#. segnaposto: {error}
+msgid "settings-error-generic"
+msgstr ""
+
+#. Nome del gruppo in Impostazioni di sistema → Scorciatoie (KDE).
+msgid "shortcut-component-name"
+msgstr ""
+
+#. Nome dell’azione nelle impostazioni delle scorciatoie del desktop (KDE e portal).
+msgid "shortcut-switch-name"
+msgstr ""
+
+#. scambio settings senza GTK 4/libadwaita (spec 04).
+msgid "cli-error-gtk-missing"
 msgstr ""
 
 #. Riga di comando (decisioni 27 e 29b). Stati e codici restano stringhe stabili non tradotte.
@@ -263,6 +334,9 @@ msgid "cli-description"
 msgstr ""
 
 msgid "cli-daemon-help"
+msgstr ""
+
+msgid "cli-settings-help"
 msgstr ""
 
 msgid "cli-debug-help"

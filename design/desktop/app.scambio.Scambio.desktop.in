@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Scambio
+Comment=Bluetooth audio between PC and iPhone
+Comment[it]=Audio Bluetooth fra PC e iPhone
+Comment[de]=Bluetooth-Audio zwischen PC und iPhone
+Icon=@ICON@
+Exec=@EXEC@ settings
+TryExec=@EXEC@
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=Bluetooth;audio;headphones;glasses;
+Keywords[it]=Bluetooth;audio;cuffie;occhiali;
+Keywords[de]=Bluetooth;Audio;Kopfhörer;Brille;
+StartupNotify=true
+StartupWMClass=app.scambio.Scambio.Settings

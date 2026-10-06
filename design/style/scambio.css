@@ -1,24 +1,41 @@
-/* Scambio — stile GTK della finestra impostazioni (BOZZA per la spec 04).
- * Solo ritocchi sopra libadwaita: colori e caratteri vengono dal tema (accent, chiaro/scuro).
- * Il tray e le notifiche non usano CSS: sono disegnati dal desktop. */
+/* Scambio — stile GTK della finestra impostazioni (spec 04).
+ * Solo ritocchi sopra libadwaita: colori e caratteri vengono dal tema (accento, chiaro/scuro).
+ * Il tray e le notifiche non usano CSS: sono disegnati dal desktop.
+ * Classi impostate dal codice: vedi docs/context/05-ui-context.md §5.10. */
 
 /* Riga di stato in cima: più alta, titolo più grande. */
 row.scambio-hero {
-  min-height: 92px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  min-height: 84px;
 }
 
 row.scambio-hero .title {
-  font-size: 1.2em;
+  font-size: 1.15em;
   font-weight: 700;
 }
 
 /* Icona di stato dentro un riquadro tenue nel colore d'accento. */
 image.scambio-hero-icon {
-  min-width: 56px;
-  min-height: 56px;
+  min-width: 52px;
+  min-height: 52px;
+  margin-right: 4px;
   border-radius: 14px;
   color: @accent_color;
-  background-color: alpha(@accent_bg_color, 0.12);
+  background-color: alpha(@accent_bg_color, 0.14);
+}
+
+/* Stato «non disponibile»: icona spenta, niente accento. */
+image.scambio-hero-icon.scambio-dim {
+  color: alpha(currentColor, 0.55);
+  background-color: alpha(currentColor, 0.08);
+}
+
+/* Scorciatoia in conflitto: il sottotitolo diventa un avviso. */
+row.scambio-shortcut-conflict .subtitle {
+  color: @warning_color;
+  opacity: 1;
+}
+
+/* Piè di pagina centrato con la versione. */
+label.caption.dim-label {
+  margin-top: 6px;
 }

@@ -240,7 +240,7 @@ Claude dopo i passi.
 
 ## Da misurare
 
-- Q5: portal GlobalShortcuts su Plasma 5.27.
+- ~~Q5: portal GlobalShortcuts su Plasma 5.27~~ — misurato in M16 (2026-10-07): non utilizzabile, si usa KGlobalAccel.
 - Latenza della prima uscita audio in HFP (apertura del link SCO).
 - Passaggio automatico a HFP quando un'app apre il microfono (autoswitch di WirePlumber).
 - Se l'annuncio vocale si può disattivare dall'app Meta AI (durata misurata in M11b).
@@ -297,3 +297,89 @@ riuscito: il comportamento non è sistematico. Non è un difetto del tray (il pu
 `on_pc` in 4,3 s. Il rifiuto si presenta solo con una presa nei primissimi secondi dopo il
 rilascio; nessuna modifica per ora (se dà fastidio nell'uso: ritardo minimo prima di una presa
 che segue un rilascio, da decidere con GM).
+
+## 2026-10-07 — M16: scorciatoia globale su Plasma 5.27 — portal e KGlobalAccel (Claude, senza GM)
+
+Metodo: script usa e getta fuori dalla repo (`~/Scrivania/Claude/scambio-misure/portal_probe.py`,
+`kglobalaccel_probe.py`, `kga_conflict.py`, `xtest_key.py`); journal di
+`xdg-desktop-portal-kde` (debug già attivo); sorgente di `globalshortcuts.cpp` di
+xdg-desktop-portal-kde **v5.27.11**; pressione dei tasti simulata con XTest (sessione X11: passa dal
+server X come un tasto fisico); copia di `~/.config/kglobalshortcutsrc` prima delle prove e
+confronto finale (identico: nessun residuo). Scambio attivo con gli occhiali sul PC; Meta+G non è
+mai stato premuto (è il binding khotkeys della decisione 99).
+
+**Portal `org.freedesktop.portal.GlobalShortcuts` (v1, frontend 1.18.4, backend KDE 5.27.11)**
+
+| Passo | Esito |
+|---|---|
+| `CreateSession` | riesce subito (`Response` 0); `app_id` ricavato dallo scope systemd del processo chiamante (qui `com.anthropic.Claude`) |
+| `BindShortcuts` con `preferred_trigger` | `Response` 0 con `shortcuts = []`: il backend 5.27 **ignora le scorciatoie passate** e si limita ad aprire `systemsettings://kcm_keys/<app_id>` |
+| Dove il backend 5.27 legge le scorciatoie | solo dall'opzione `shortcuts` di `CreateSession` (bozza vecchia dell'API); il frontend 1.18 **la filtra** (log del backend: «Wrong global shortcuts type … instead of ""»), quindi la sessione resta vuota |
+| `ListShortcuts` | nessuna `Response` entro 25 s |
+| `Activated` | mai emesso (nessuna scorciatoia legata) |
+| Dialogo KDE | nessuno in primo piano (screenshot) |
+
+Conclusione: su Plasma 5.27 + xdg-desktop-portal 1.18 (Kubuntu 24.04) il portal **non permette di
+legare una scorciatoia**; il backend KDE implementa `BindShortcuts` per davvero solo da Plasma 6.
+
+**KGlobalAccel su D-Bus (`org.kde.kglobalaccel`, `/kglobalaccel`, `org.kde.KGlobalAccel`)**
+
+| Prova | Esito |
+|---|---|
+| `doRegister([comp, azione, nome comp, nome azione])` + `setShortcut(id, [Meta+F9], 2 = SetPresent)` | restituisce `[Meta+F9]` (interi Qt); voce scritta in `kglobalshortcutsrc` (`switch=Meta+F9,none,…`) |
+| Oggetto del componente | `getComponent(comp)` → `/component/<comp con «.» → «_»>`, interfaccia `org.kde.kglobalaccel.Component` |
+| Tasto premuto (XTest) | segnali `globalShortcutPressed(comp, azione, ts)` e `globalShortcutReleased` in ≈ 30 ms |
+| `invokeShortcut(azione, "default")` sul componente | emette `globalShortcutPressed` (utile per provare senza tastiera) |
+| Tasto già usato (Meta+G di khotkeys) | `setShortcut` → `[0]` (rifiutato); `action(tasto)` restituisce il proprietario (`khotkeys`, «Connetti Oakley») |
+| Dopo un rifiuto | la voce resta `switch=,none,…`: quando il tasto si libera, `setShortcut` **con** autoload restituisce ancora `[0]` (ricorda il «nessun tasto»); con il flag 4 (`NoAutoloading`) lo prende |
+| `setInactive(id)` + `unregister(comp, azione)` | voce rimossa dal file |
+
+Conseguenze per la spec 04: su Plasma (5 e 6) la scorciatoia si registra con KGlobalAccel su D-Bus,
+senza dipendenze nuove; il portal resta la via per i desktop senza `org.kde.kglobalaccel` (GNOME ≥ 48,
+non misurato). Per il portal conta l'`app_id` ricavato dall'unità systemd: con l'unità attuale
+`scambio.service` sarebbe vuoto (da verificare su GNOME prima della fase 5).
+
+Ambiente (stessa data): su `casa` mancano `gir1.2-gtk-4.0` (GTK 4.14), `gir1.2-adw-1` (libadwaita
+1.5) e `blueprint-compiler` (0.12), tutti disponibili nei repository di Ubuntu 24.04: prerequisiti
+della finestra della spec 04.
+
+## 2026-10-07 — M17: icona del tray dopo `ui.tray = false` (Claude, senza GM)
+
+Metodo: Scambio a `38ac33f` (nome unico `:1.3389`); copia di `config.toml`, aggiunta di
+`tray = false` in `[ui]`, `systemctl --user reload scambio`, lettura di
+`RegisteredStatusNotifierItems` del watcher (`kded5`) e screenshot del pannello; ripristino del file e
+nuovo reload (file identico all'originale). Poi script usa e getta
+`~/Scrivania/Claude/scambio-misure/sni_release_probe.py`: registrazione con un nome noto
+`org.kde.StatusNotifierItem-<pid>-1`, poi `ReleaseName` con la connessione ancora aperta.
+
+| Prova | Esito |
+|---|---|
+| `ui.tray = false` + reload (registrazione col nome unico, oggetto ritirato) | l'item `:1.3389/StatusNotifierItem` **resta** nel watcher e l'icona resta nel pannello |
+| Registrazione con nome noto, poi `ReleaseName` | l'item sparisce dal watcher entro 1 s, senza chiudere la connessione |
+
+Conseguenza: debito della spec 03 confermato; correzione con la decisione 108.
+
+## 2026-10-07 — M18: KGlobalAccel (cambio dall'esterno, nomi) e riavvio di un servizio `Type=dbus` (Claude, senza GM)
+
+Metodo: script usa e getta in `~/Scrivania/Claude/scambio-misure/` (`kga_foreign.py`,
+`exit75_probe.py`, `restartunit_probe.py`); unità transitorie `systemd-run --user -p Type=dbus
+-p BusName=… -p Restart=on-failure -p RestartSec=1|2` con un nome di prova; `kglobalshortcutsrc`
+confrontato con la copia di M16 alla fine (identico).
+
+**KGlobalAccel (Plasma 5.27, KF5)**
+
+| Prova | Esito |
+|---|---|
+| Un secondo client (come la KCM delle scorciatoie) chiama `setForeignShortcut(actionId, [Meta+F10])` | il proprietario riceve **`yourShortcutsChanged(as actionId, a(ai) keys)`** su `/kglobalaccel` (`org.kde.KGlobalAccel`); `keys` = `[[285212729, 0, 0, 0]]` (una sequenza = 4 interi). Il nome `yourShortcutGotChanged` non compare |
+| Nuova `doRegister` con un nome leggibile diverso, poi `setShortcut(…, 2)` | il file mostra il nome nuovo (`switch=Meta+F10,none,Nome due`) e il tasto scelto dall'altro client resta |
+
+**Riavvio di un servizio `Type=dbus` voluto dal servizio stesso**
+
+| Prova | Esito |
+|---|---|
+| `ReleaseName`, poi uscita con 75 (`Restart=on-failure`, con e senza `RestartForceExitStatus=75`) | systemd vede sparire il nome e **ferma** l'unità (`SIGTERM` prima dell'uscita 75): `Result=success`, nessun riavvio |
+| Uscita con 75 tenendo il nome | nessun riavvio (`Result=success`, `NRestarts=0`): la sparizione del nome vince anche qui |
+| Il servizio chiama `RestartUnit("<propria unità>", "replace")` sul gestore utente di systemd (unità letta dall'ultimo segmento di `/proc/self/cgroup`) | risposta con il job, poi `SIGTERM` (arresto ordinato) e nuovo avvio **50 ms** dopo l'uscita, nella stessa unità |
+
+Conseguenza per la spec 04: il cambio di dispositivo usa `RestartUnit` sulla propria unità, non
+l'uscita con un codice (corregge la decisione 105 prima del `/goal`).

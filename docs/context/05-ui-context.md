@@ -1,9 +1,9 @@
 # 05 — Contesto UI e contratto design ↔ codice
 
 Redatto da Claude il 4 ottobre 2026; completato il 5 ottobre 2026 con il mock approvato da GM
-(tela «Scambio — mock UI», decisioni 70–84). Il design è di Claude (decisione 10): i file stanno
-in `design/` e Codex li collega senza modificarli. Le parti marcate **bozza (spec 04)** danno la
-direzione della finestra e diventano definitive con la spec 04.
+(tela «Scambio — mock UI», decisioni 70–84); finestra impostazioni e scorciatoia definite il 7
+ottobre 2026 con la spec 04 (mock della finestra approvato da GM, decisioni 100–108). Il design è
+di Claude (decisione 10): i file stanno in `design/` e Codex li collega senza modificarli.
 
 ## 1. Principi
 
@@ -14,7 +14,8 @@ direzione della finestra e diventano definitive con la spec 04.
 - **Lo stato si legge dall'icona** senza aprire nulla: dove sta il dispositivo e se la Priorità
   iPhone è attiva (variante B, decisione 72: occhiali + emblema telefono/monitor/lucchetto).
 - **Nativo dove possibile**: icone simboliche che seguono il tema (misurato su Plasma 5.27 scuro,
-  M11); menu e notifiche disegnati dal desktop; finestra libadwaita (spec 04).
+  M11); menu e notifiche disegnati dal desktop; finestra libadwaita (spec 04); scorciatoia nel
+  servizio scorciatoie del desktop, modificabile dalle sue impostazioni (decisione 102).
 - **Tastiera prima del mouse**: ogni azione del tray ha un equivalente da scorciatoia o CLI.
 - **Nessun timer nella UI** (decisione 77): niente animazioni, niente conti alla rovescia che
   ticchettano; i testi che dipendono dall'ora si calcolano quando il menu si apre.
@@ -26,8 +27,9 @@ direzione della finestra e diventano definitive con la spec 04.
 |---|---|---|---|
 | Icona tray + menu | StatusNotifierItem + dbusmenu su Gio, senza GTK | demone (decisione 74) | 03 |
 | Notifiche | `org.freedesktop.Notifications` su Gio | demone | 03 |
-| Finestra impostazioni | GTK4 + libadwaita, Blueprint in `design/ui/` | processo separato, su richiesta | 04 |
-| Scorciatoia | portal GlobalShortcuts, default Meta+G | demone | 04 |
+| Finestra impostazioni | GTK4 + libadwaita ≥ 1.4, Blueprint in `design/ui/` | processo separato `scambio settings` (`app.scambio.Scambio.Settings`), su richiesta | 04 |
+| Lanciatore | file `.desktop` da `design/desktop/` | — | 04 |
+| Scorciatoia | KGlobalAccel su Plasma, portal GlobalShortcuts altrove (decisione 102); default Meta+G | demone | 04 |
 
 Clic sinistro e destro sull'icona aprono lo stesso menu (`ItemIsMenu = true`, decisione 71; su Plasma 5.27
 il clic sinistro passa dall'errore di `Activate`, §5.3, decisione 85).
@@ -63,7 +65,7 @@ di hicolor: da `symbolic/status` Plasma non le trovava e ripiegava sull'icona a 
 | 4 | «Passa al PC» / «Lascia all'iPhone» | normale | disabilitata se non disponibile |
 | 5 | «Priorità iPhone» | casella | |
 | 6 | separatore | | |
-| 7 | «Impostazioni…» | normale | **nascosta** fino alla spec 04 (decisione 81) |
+| 7 | «Impostazioni…» | normale | apre la finestra (spec 04; era nascosta, decisione 81) |
 | 8 | «Esci da Scambio» | normale | ferma il demone (decisione 79) |
 
 Limite accettato: l'API non espone `pending`, quindi durante uno switch annullato a metà
@@ -84,9 +86,13 @@ all'avvio (decisione 75); un campo o un valore fuori dal vocabolario qui sotto �
 | `design/icons/hicolor/scalable/apps/app.scambio.Scambio.svg` | `app_icon` delle notifiche, come percorso assoluto |
 | `design/ui/tray.json` | presentazione |
 | `design/i18n/{it,en,de}.po` | compilati in `.mo` (dominio `scambio`) da `make i18n`; mai a mano |
+| `design/ui/settings-window.blp` | compilato in `build/ui/settings-window.ui` con `blueprint-compiler` 0.12 (`make ui`, dipendenza di sviluppo, decisione 106); la finestra carica il `.ui` |
+| `design/style/scambio.css` | CSS della finestra (`Gtk.CssProvider`, priorità applicazione) |
+| `design/desktop/app.scambio.Scambio.desktop.in` | lanciatore: `make install-user` sostituisce `@EXEC@` (percorso assoluto di `scambio`) e `@ICON@` (percorso assoluto dell'icona a colori) e lo installa come `~/.local/share/applications/app.scambio.Scambio.desktop` |
 
-Nessun file viene installato fuori da `~/.config/scambio/` e `~/.local/share/scambio/`
-(decisione 76): icone e cataloghi si leggono da dove sta il pacchetto. `design/` è fuori dal gate
+Il demone non scrive fuori da `~/.config/scambio/` e `~/.local/share/scambio/` (decisione 76):
+icone, cataloghi e `.ui` si leggono da dove sta il pacchetto. Solo `make install-user` installa
+l'unità systemd, il lanciatore `.desktop` e il file di servizio D-Bus della finestra (decisione 106). `design/` è fuori dal gate
 `make check` (ruff e mypy non lo guardano; i test lo leggono).
 
 ### 5.2 `tray.json`: vocabolario
@@ -140,7 +146,7 @@ markup).
 | 3, 6 | `separator-*` | `type = "separator"` | — | — |
 | 4 | `switch` | `enabled` da `enabled_when` | `tray-action-to-phone` se `State` ∈ {`on_pc`, `connecting`}, altrimenti `tray-action-to-pc` | `app.switch` |
 | 5 | `priority` | `toggle-type = "checkmark"`, `toggle-state` int32 0/1 da `IphonePriority` | `tray-action-priority` | `app.toggle-priority` |
-| 7 | `settings` | `icon-name = "preferences-system"`, `visible = false` | `tray-action-settings` | `app.open-settings` |
+| 7 | `settings` | `icon-name = "preferences-system"` | `tray-action-settings` | `app.open-settings` |
 | 8 | `quit` | `icon-name = "application-exit"` | `tray-action-quit` | `app.quit` |
 
 - Etichette: ogni `_` del testo si raddoppia (dbusmenu lo userebbe come mnemonico).
@@ -157,15 +163,17 @@ Testi calcolati all'apertura: `tray-detail-idle` con `{minutes}` = ⌈(`IdleRele
 rimasti (anche se già nel passato) si usa `detail_soon`. Il tooltip usa `tray-detail-idle-at`
 con `{time}` = `HH:MM` locale di `IdleReleaseAt`, aggiornato ai cambi di proprietà.
 
-### 5.5 Azioni (`Gio.SimpleActionGroup`; nomi condivisi con la finestra della spec 04)
+### 5.5 Azioni (`Gio.SimpleActionGroup` nel demone; `Gio.SimpleAction` dell'applicazione nella finestra)
 
-| GAction | Spec | Effetto (API) |
-|---|---|---|
-| `app.switch` | 03 | `Switch()` |
-| `app.toggle-priority` | 03 | `SetPriority(not IphonePriority)` |
-| `app.quit` | 03 | `Quit()` (metodo nuovo, decisione 79) |
-| `app.open-settings` | 04 | apre la finestra |
-| `app.change-shortcut` | 04 | cambia la scorciatoia |
+| GAction | Dove | Spec | Effetto |
+|---|---|---|---|
+| `app.switch` | tray, finestra | 03, 04 | `Switch()` |
+| `app.toggle-priority` | tray | 03 | `SetPriority(not IphonePriority)` (la finestra usa `priority_row`, §5.10) |
+| `app.quit` | tray | 03 | `Quit()` (decisione 79) |
+| `app.open-settings` | tray | 04 | `org.freedesktop.Application.Activate({})` su `app.scambio.Scambio.Settings`, oggetto `/app/scambio/Scambio/Settings`, con avvio automatico (attivazione D-Bus); se il nome non è attivabile (`ServiceUnknown`) una riga `warning` nel log («eseguire make install-user») e nient'altro: nessun processo lanciato dal demone, che lo legherebbe al proprio gruppo |
+| `app.change-shortcut` | finestra | 04 | apre `systemsettings://kcm_keys/app.scambio.Scambio` con l'app predefinita per l'URI (solo con `ShortcutBackend = kglobalaccel`) |
+| `app.open-config` | finestra | 04 | apre `~/.config/scambio/config.toml` con l'app predefinita (`Gtk.FileLauncher`) |
+| `app.start-daemon` | finestra | 04 | `StartUnit("scambio.service", "replace")` del gestore utente di systemd (`org.freedesktop.systemd1`) |
 
 ### 5.6 Notifiche (`tray.json` → `notifications`, decisione 70)
 
@@ -198,7 +206,8 @@ stessa famiglia (`replaces_id`); l'id si azzera su `NotificationClosed`. `Action
   cambio di `IphonePriority` è «con switch» se l'ultimo segnale ricevuto dal demone prima di
   quel `PropertiesChanged` è un `Transition(_, _, "switch")`. Uno switch durante `connecting` o
   `releasing` cambia la priorità senza `Transition`: vale come «senza switch».
-- **Cambi chiesti dalla UI** (menu, pulsanti delle notifiche; finestra nella spec 04): il demone
+- **Cambi chiesti dalla UI** (menu, pulsanti delle notifiche; la finestra è un altro processo e
+  segue la regola «finestra in primo piano» qui sotto): il demone
   pubblica `PropertiesChanged` prima di rispondere al metodo, quindi un cambio di
   `IphonePriority` ricevuto fra l'invio di una chiamata della UI e la sua risposta è «proprio» e
   non si notifica. Nessun timer.
@@ -211,6 +220,9 @@ stessa famiglia (`replaces_id`); l'id si azzera su `NotificationClosed`. `Action
   **vede** (menu aperto, §5.4; `ActionInvoked` o `NotificationClosed` con motivo 2 della sua
   notifica) o sul **fronte** di `LastError` da non vuoto a `""`. Finché è attivo e non visto,
   lo stesso codice non si rinotifica.
+- **Finestra in primo piano** (decisione 107): finché il nome `app.scambio.Scambio.Settings.Active`
+  ha un proprietario (`Gio.bus_watch_name`; la finestra lo possiede solo mentre è attiva), le
+  notifiche della famiglia `priority` non partono; gli errori sì.
 - **Mai** per prese, rilasci, blocco, sospensione, connessioni dall'applet.
 
 ### 5.7 API D-Bus usata dalle UI
@@ -219,7 +231,22 @@ Tutta `app.scambio.Scambio1` della spec 01 §3.2.1 (invariata dalla spec 02), pi
 
 | Metodo nuovo | Firma | Effetto |
 |---|---|---|
-| `Quit` | `() → ()` | risponde, poi esegue l'arresto ordinato di `SIGTERM` (spec 01 §3.1.6 e spec 02) e termina con 0: systemd non lo riavvia fino al prossimo login |
+| `Quit` | `() → ()` | (spec 03) risponde, poi esegue l'arresto ordinato di `SIGTERM` (spec 01 §3.1.6 e spec 02) e termina con 0: systemd non lo riavvia fino al prossimo login |
+| `SetConfig` | `(a{sv}) → ()` | (spec 04) scrive in `config.toml` le chiavi di §5.8 «finestra» e le applica come `Reload` (spec 04 §3.1.2); errori `ConfigInvalid`, `DeviceBusy`, `RestartRequired` |
+| `ListDevices` | `() → a(ss)` | (spec 04) dispositivi accoppiati con un profilo audio: (indirizzo, nome) |
+| `RetryShortcut` | `() → ()` | (spec 04) ritenta la registrazione della scorciatoia (§5.11) |
+
+| Proprietà nuova (spec 04) | Tipo | Significato |
+|---|---|---|
+| `Config` | a{sv} | valori in vigore delle chiavi «finestra» di §5.8 più `shortcut.preferred` (sola lettura), con il nome completo (`"policy.release_idle_seconds"` → `i`, ecc.) |
+| `Shortcut` | s | tasto legato, come acceleratore GTK (`<Super>g`); `""` se nessuno o non rappresentabile |
+| `ShortcutLabel` | s | testo leggibile quando `Shortcut` non basta: `trigger_description` del portal, oppure (KGlobalAccel) la forma alla Qt di un tasto fuori dalla tabella di conversione; altrimenti `""` |
+| `ShortcutState` | s | `active` \| `conflict` \| `unbound` \| `unsupported` |
+| `ShortcutOwner` | s | con `conflict`, nome dell'azione che usa il tasto preferito; altrimenti `""` |
+| `ShortcutBackend` | s | `kglobalaccel` \| `portal` \| `none` |
+
+Errore nuovo: `app.scambio.Scambio1.Error.DeviceBusy` (cambio di dispositivo con `State` ∈
+{`connecting`, `on_pc`, `releasing`}).
 
 Il client delle UI riceve nome del bus e percorso come parametri (i test usano `app.scambio.Test`).
 
@@ -230,6 +257,11 @@ Il client delle UI riceve nome del bus e percorso come parametri (i test usano `
 | `ui.language` | str | `"auto"` | `auto` = primo valore supportato fra `LANGUAGE` (lista separata da `:`), `LC_ALL`, `LC_MESSAGES`, `LANG`, ignorando `C`/`POSIX`; ripiego `en`. Altrimenti `it`/`en`/`de` |
 | `ui.tray` | bool | `true` | `false` = nessuna icona (es. GNOME senza estensione) |
 | `ui.notifications` | bool | `true` | `false` = nessuna notifica |
+| `shortcut.preferred` | str | `"<Super>g"` | tasto preferito della scorciatoia (§5.11); `""` = nessuna scorciatoia |
+
+Chiavi **«finestra»** (modificabili con `SetConfig`, esposte in `Config`): `device.address`,
+`policy.release_idle_seconds`, `ui.tray`, `ui.notifications`, `ui.language`. `Config` espone anche
+`shortcut.preferred`, ma `SetConfig` non lo accetta. Le altre si cambiano solo nel file.
 
 Su `casa` l'ambiente utente di systemd ha `LANG=it_IT.UTF-8` (verificato il 2026-10-05).
 
@@ -247,19 +279,86 @@ comando, sostituiscono i msgid inglesi della decisione 27; gli errori D-Bus noti
 propria, `cli-dbus-error` resta per quelli imprevisti), `session-inhibit-reason` (motivo
 dell'inibitore di logind), `config-*` (commenti del modello di `config.toml`, nella lingua del
 momento in cui il demone crea il file, decisione 84; una chiave per ogni chiave di configurazione
-commentata, più `config-header` e `config-backend-header`), `settings-*` (finestra, spec 04). Stati, codici d'errore e i valori
+commentata, più `config-header` e `config-backend-header`), `settings-*` (finestra, spec 04),
+`shortcut-*` (nomi registrati nel servizio scorciatoie del desktop, spec 04). Segnaposto nuovi:
+`{shortcut}`, `{owner}`, `{version}`. Stati, codici d'errore e i valori
 stampati da `scambio status/switch/priority` restano stringhe stabili non tradotte.
 
-### 5.10 Finestra impostazioni — bozza (spec 04)
+### 5.10 Finestra impostazioni (definitiva, spec 04)
 
-`design/ui/settings-window.blp` (template `ScambioSettingsWindow`, compila con
-blueprint-compiler 0.12) e `design/style/scambio.css`. ID: `status_row`, `status_icon`,
-`switch_button`, `priority_row`, `device_row`, `release_idle_row`, `shortcut_row`,
-`shortcut_label`, `shortcut_change_button`, `autostart_row`, `tray_row`, `language_row`,
-`advanced_row`, `grab_delay_row`, `ignored_apps_row`, `version_label`. Titolo e sottotitolo di
-`status_row` li imposta il codice con le stesse chiavi del tray. Da decidere nella spec 04: elenco
-dei dispositivi accoppiati (metodo D-Bus nuovo), «Avvia all'accesso», scrittura della
-configurazione, unità del rilascio (la configurazione va da 10 a 3600 s, la bozza mostra minuti).
+Layout `design/ui/settings-window.blp` (template `ScambioSettingsWindow`), stile
+`design/style/scambio.css`, mock approvato il 2026-10-07 (decisione 100). Le modifiche valgono
+subito, senza «Salva» (decisione 107). Nessun timer, nessuna finestra di dialogo modale.
+
+**Avvio.** `scambio settings` chiama `GLib.set_prgname("app.scambio.Scambio.Settings")` prima di
+GTK (classe della finestra = `StartupWMClass` del `.desktop`), crea `Adw.Application`
+`app.scambio.Scambio.Settings` (istanza unica: una seconda apertura presenta la finestra
+esistente) e risolve la lingua da `ui.language` letto da `config.toml` in sola lettura, come la CLI
+(spec 03 §3.1.6). **Traduzione del layout** (decisione 109): legge `build/ui/settings-window.ui`,
+sostituisce il testo di ogni elemento con `translatable="yes"` (proprietà e voci di `StringList`)
+con `Translator.tr(chiave)` (escape XML), toglie gli attributi `translatable`/`context`/`comments` e
+`translation-domain`, poi carica il risultato con `Gtk.Template(string=…)`. Aggiunge `design/icons`
+al percorso delle icone e carica il CSS.
+
+**Client.** Lo stesso `ui/client.py` del tray, esteso (compatibile col tray): `call(method,
+params, on_reply=None, on_error=None)` con le callback di risposta ed errore; lettura iniziale che
+con il demone assente non resta bloccata; un `Gio.bus_watch_name` su `app.scambio.Scambio` che a
+ogni ricomparsa rilegge tutte le proprietà e riaggancia i segnali.
+
+**Chiamate in corso** (niente echi, niente salti all'indietro): per ogni chiave o proprietà con una
+chiamata della finestra in corso si ignorano gli aggiornamenti di quella chiave; alla risposta
+(o all'errore) il widget si riallinea al valore in vigore. Un cambio fatto dal codice per
+riallinearsi non produce chiamate.
+
+| ID | Widget | Regola |
+|---|---|---|
+| `toast_overlay` | `Adw.ToastOverlay` | avvisi brevi (chiavi `settings-device-restarting`, `settings-language-next-open`, `settings-error-*`) |
+| `daemon_banner` | `Adw.Banner` | visibile quando `app.scambio.Scambio` non ha proprietario, **tranne** dopo una risposta di successo a un cambio di dispositivo: allora resta nascosto finché il nome ricompare; pulsante → `app.start-daemon` |
+| `status_icon` | `Gtk.Image` | icona della regola di `tray.json` → `presentation` (stesse regole del tray, **senza** errore sovrapposto); classe `scambio-dim` con l'icona `unavailable`. Demone assente: icona `unavailable` con `scambio-dim` |
+| `status_row` | `Adw.ActionRow` | titolo = `header`, sottotitolo = `detail` della regola (minuti calcolati quando cambia una proprietà e quando la finestra torna attiva). Demone assente: titolo `settings-status-unknown`, sottotitolo vuoto |
+| `switch_button` | `Gtk.Button` | `app.switch`; testo `tray-action-to-phone` se `State` ∈ {`on_pc`, `connecting`}, altrimenti `tray-action-to-pc`; la sensibilità si governa abilitando l'azione `app.switch` quando «available» (§5.2) e il demone c'è |
+| `priority_row` | `Adw.SwitchRow` | `active` = `IphonePriority`; un cambio dell'utente chiama `SetPriority(active)` |
+| `device_row` | `Adw.ComboRow` | modello = nomi di `ListDevices()` (letto all'apertura, alla ricomparsa del demone e quando cambiano `DeviceAddress` o `DeviceName`); se l'indirizzo configurato manca dall'elenco si aggiunge una voce col solo indirizzo; con `DeviceAddress = ""` in testa c'è la voce `settings-device-none`, selezionata e **non sceglibile** (se l'utente la riseleziona non parte nessuna chiamata). Sensibile solo con `State` ∈ {`released`, `unavailable`}, altrimenti sottotitolo `settings-device-busy`; elenco vuoto → sottotitolo `settings-device-empty`. Scelta di un altro dispositivo → `SetConfig({"device.address"})`; successo → avviso `settings-device-restarting` |
+| `release_idle_row` | `Adw.SpinRow` 1–60 | valore = `max(1, (release_idle_seconds + 30) // 60)`; un cambio dell'utente → `SetConfig({"policy.release_idle_seconds": minuti × 60})` |
+| `shortcut_row` | `Adw.ActionRow` | sottotitolo `settings-shortcut-subtitle`; con `conflict` sottotitolo `settings-shortcut-conflict` (`{shortcut}` = `Gtk.accelerator_get_label` di `Config["shortcut.preferred"]`, `{owner}` = `ShortcutOwner`) e classe `scambio-shortcut-conflict`; con `unsupported` sottotitolo `settings-shortcut-unsupported` |
+| `shortcut_label` | `Gtk.ShortcutLabel` | `accelerator` = `Shortcut`; se vuoto mostra `disabled-text`: `ShortcutLabel` se non vuoto, altrimenti `settings-shortcut-unbound`; nascosto con `unsupported` e con il demone assente |
+| `shortcut_change_button` | `Gtk.Button` | `app.change-shortcut`; visibile solo con `ShortcutBackend = kglobalaccel` |
+| `tray_row`, `notifications_row` | `Adw.SwitchRow` | `ui.tray`, `ui.notifications` da `Config`; cambio → `SetConfig` |
+| `language_row` | `Adw.ComboRow` | indici 0–3 = `auto`, `it`, `en`, `de`; cambio → `SetConfig({"ui.language"})` e avviso `settings-language-next-open` |
+| `config_row`, `config_open_button` | riga + pulsante | `app.open-config` |
+| `version_label` | `Gtk.Label` | `settings-version` con `{version}` = `Version` (o la versione del pacchetto se il demone è fermo) |
+| `status_group`, `device_group`, `shortcut_group`, `general_group` | gruppi | non sensibili con il demone assente |
+
+**Finestra in primo piano.** Mentre `is-active` è vero la finestra possiede il nome
+`app.scambio.Scambio.Settings.Active` (lo rilascia quando diventa inattiva e alla chiusura): serve
+alla regola delle notifiche di §5.6. Quando torna attiva, se `ShortcutState = conflict` chiama
+`RetryShortcut()` (anche all'apertura): così, liberato il tasto in Impostazioni di sistema, basta
+tornare alla finestra.
+
+**Errori.** `ConfigInvalid` → avviso `settings-error-invalid` e il widget torna al valore di
+`Config`; `DeviceBusy` → avviso `settings-device-busy` e selezione ripristinata;
+`RestartRequired` → avviso `settings-error-restart-required` (il file è già scritto; la selezione
+resta quella nuova); altri errori → `settings-error-generic` con `{error}` = ultimo segmento del
+nome D-Bus dell'errore.
+
+### 5.11 Scorciatoia globale (spec 04, decisioni 102–103)
+
+- **Scelta del meccanismo** all'avvio del demone: `kglobalaccel` se `org.kde.kglobalaccel` ha un
+  proprietario oppure `XDG_CURRENT_DESKTOP` contiene `KDE`; altrimenti `portal` se il portal espone
+  `org.freedesktop.portal.GlobalShortcuts`; altrimenti `none` (`ShortcutState = unsupported`). Se
+  con `kglobalaccel` i metodi a interi rispondono con un errore di metodo sconosciuto (Plasma 6
+  non misurato) si passa al portal.
+- **Nomi** registrati: componente `app.scambio.Scambio` con nome `shortcut-component-name`; azione
+  `switch` con nome `shortcut-switch-name` (descrizione per il portal), nella lingua del momento
+  (una nuova `doRegister` aggiorna i nomi, M18).
+- **Effetto**: la pressione (`globalShortcutPressed` o `Activated` del portal per `switch`) chiama
+  `Switch()` sull'API pubblica del demone, in modo asincrono e con lo stesso client della UI
+  (invariante di `AGENTS.md`); `DeviceUnavailable` → riga `info` nel log. Le notifiche «con
+  switch» di §5.6 valgono come per `scambio switch`.
+- **`shortcut.preferred = ""`** o non valido: nessuna registrazione (`unbound`; se non valido anche
+  una riga `warning`).
+- Regole di dettaglio (autoload, conflitto, memoria in `state.json`, conversione dei tasti): spec 04
+  §3.1.1.
 
 ## 6. Lingue
 

@@ -13,10 +13,10 @@ ancora. Ogni scostamento introdotto da una spec si registra qui e in `docs/decis
 | Audio | PipeWire tramite il protocollo pulse: `pactl -f json subscribe` + istantanee (decisioni 20–21) | eventi senza polling; nessun binding nativo |
 | Sessione | logind (`org.freedesktop.login1`) + `org.freedesktop.ScreenSaver` | lock/unlock e sospensione su KDE e GNOME |
 | Player | MPRIS (`org.mpris.MediaPlayer2.*`) | pausa/ripresa dei player durante la presa |
-| Scorciatoia | XDG Desktop Portal `GlobalShortcuts`, riserva CLI | standard cross-desktop, funziona in Flatpak |
+| Scorciatoia | KGlobalAccel su D-Bus (Plasma), XDG Desktop Portal `GlobalShortcuts` altrove, riserva CLI (decisione 102) | su Plasma 5.27 il portal non lega scorciatoie (M16) |
 | Tray | StatusNotifierItem + dbusmenu implementati su Gio | nessuna dipendenza da libappindicator |
 | Notifiche | `org.freedesktop.Notifications` | standard |
-| Finestra | GTK4 + libadwaita, layout in Blueprint (`design/ui/`) | layout dichiarativo di proprietà del design |
+| Finestra | GTK4 + libadwaita ≥ 1.4, layout in Blueprint (`design/ui/`, compilato con `blueprint-compiler` in fase di build) | layout dichiarativo di proprietà del design |
 | Configurazione | TOML in `~/.config/scambio/config.toml` | leggibile e modificabile a mano |
 
 Ambiente misurato di GM: vedi `docs/hardware-lab.md`.
@@ -26,8 +26,8 @@ Ambiente misurato di GM: vedi `docs/hardware-lab.md`.
 ```
 src/scambio/
   __main__.py          avvio demone
-  cli.py               comandi (switch, status, priority) → API D-Bus del demone
-  config.py            lettura/scrittura configurazione, valori di default
+  cli.py               comandi (switch, status, priority, settings) → API D-Bus del demone
+  config.py            lettura, validazione e scrittura mirata (SetConfig) della configurazione
   core/
     bluez.py           connect/disconnect, stato e segnali del dispositivo
     audio.py           eventi audio: nuovi stream, uscita BT comparsa, spostamento stream
@@ -35,7 +35,7 @@ src/scambio/
     session.py         lock/unlock, sospensione
     policy.py          macchina a stati: decide presa e rilascio
     service.py         API D-Bus pubblica del demone (`app.scambio.Scambio`, decisione 17)
-    shortcuts.py       portal GlobalShortcuts
+    shortcuts.py       scorciatoia globale: KGlobalAccel o portal GlobalShortcuts (spec 04)
     profiles/          profilo generico + profilo occhiali Meta
     extensions.py      punto di estensione per moduli premium
   i18n.py              lingua e testi (chiavi gettext di design/i18n), usato da UI, CLI e core
@@ -46,11 +46,13 @@ src/scambio/
     actions.py         GAction app.switch, app.toggle-priority, app.quit
     tray.py            StatusNotifierItem + dbusmenu
     notify.py          notifiche + portal OpenURI
-    window.py          finestra impostazioni, processo separato (spec 04)
+    settings_model.py  PURO: proprietà → stato dei widget della finestra (spec 04)
+    window.py          finestra impostazioni GTK4/libadwaita, processo separato (spec 04)
 ```
 
 Regola di dipendenza: `ui/` e `cli.py` dipendono solo dall'API D-Bus del demone (anche se girano
-nello stesso processo, passano dall'interfaccia definita). `core/policy.py` non conosce D-Bus:
+nello stesso processo, passano dall'interfaccia definita). Solo `ui/window.py` importa GTK e
+libadwaita, e solo nel processo `scambio settings`: il demone non li carica mai. `core/policy.py` non conosce D-Bus:
 riceve eventi e restituisce azioni, così è testabile in isolamento.
 
 ## 3. Macchina a stati (fissata nella spec 01, §3.1.5)
@@ -80,10 +82,13 @@ Elenco completo con tipi, default e vincoli in `docs/specs/01-demone-headless.md
 `ui.language = "auto"`, `ui.tray = true`, `ui.notifications = true` (spec 03, decisione 80;
 dettagli in `05-ui-context.md` §5.8). Dalla spec 02 (§3.2.2): `policy.resume_delay_ms` (default
 dal profilo: `generic` 0, `meta_glasses` 2000), `audio.ignore_players`,
-`backend.player_timeout_ms = 1000`.
+`backend.player_timeout_ms = 1000`. Dalla spec 04: `shortcut.preferred` ha effetto (`""` = nessuna
+scorciatoia); la finestra modifica con `SetConfig` solo `device.address`,
+`policy.release_idle_seconds`, `ui.tray`, `ui.notifications`, `ui.language` (decisione 104).
 
 La Priorità iPhone non è configurazione ma stato persistente in
-`~/.local/share/scambio/state.json` (decisione 23).
+`~/.local/share/scambio/state.json` (decisione 23); dalla spec 04 lo stesso file ricorda il tasto
+preferito già imposto alla scorciatoia (`shortcut`, decisione 103).
 
 ## 5. Punto di estensione (open-core)
 
@@ -101,7 +106,9 @@ di PipeWire riagganciandosi ai servizi.
 
 - ~~`Trusted=yes` e riconnessione spontanea~~ — misurato (M3, 2026-10-04): nessuna presa
   spontanea del PC; il demone non tocca `Trusted`.
-- Supporto reale del portal GlobalShortcuts su Plasma 5.27 e su GNOME.
+- ~~Supporto reale del portal GlobalShortcuts su Plasma 5.27~~ — misurato (M16, 2026-10-07): non
+  lega scorciatoie; su Plasma si usa KGlobalAccel. Resta da provare GNOME (portal, `app_id` dell'unità
+  systemd) prima della fase 5.
 - Su GNOME senza estensione AppIndicator il tray non è visibile: la finestra e le notifiche devono
   bastare da sole.
 
@@ -118,3 +125,5 @@ stato aggiornato.
   `resume_players` in `state.json` (decisioni 50–56, 58–66, 68).
 - 2026-10-05 — spec 03: UI nel processo del demone, presentazione da `design/`, chiavi `ui.*`,
   metodo `Quit()` (decisioni 74–81).
+- 2026-10-07 — spec 04: scorciatoia con KGlobalAccel/portal, finestra in processo separato,
+  `SetConfig`/`ListDevices`/`RetryShortcut`, riavvio per cambio dispositivo (decisioni 100–108).

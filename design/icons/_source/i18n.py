@@ -52,29 +52,47 @@ K = [
 ("notify-action-retry", "Riprova", "Try again", "Erneut versuchen", None),
 ("notify-action-undo", "Annulla", "Undo", "Rückgängig", None),
 ("notify-action-open-config", "Apri il file", "Open file", "Datei öffnen", None),
-("settings-priority-subtitle", "Il PC non prende il dispositivo in automatico", "The PC won’t take the device automatically", "Der PC übernimmt das Gerät nicht automatisch", "Finestra impostazioni (spec 04, bozza)."),
+("settings-window-title", "Scambio", "Scambio", "Scambio", "Finestra impostazioni (spec 04). Titolo della finestra."),
+("settings-daemon-down", "Scambio non è in esecuzione", "Scambio isn’t running", "Scambio läuft nicht", "Banner in cima quando il demone non è sul bus."),
+("settings-daemon-start", "Avvia", "Start", "Starten", None),
+("settings-status-unknown", "Stato non disponibile", "Status unavailable", "Status nicht verfügbar", "Riga di stato quando il demone non è in esecuzione."),
+("settings-priority-subtitle", "Il PC non prende il dispositivo in automatico", "The PC won’t take the device automatically", "Der PC übernimmt das Gerät nicht automatisch", None),
 ("settings-group-device", "Dispositivo", "Device", "Gerät", None),
-("settings-device-title", "Dispositivo", "Device", "Gerät", None),
-("settings-group-release", "Ritorno all’iPhone", "Back to the iPhone", "Zurück zum iPhone", None),
-("settings-release-title", "Dopo un silenzio di (minuti)", "After a silence of (minutes)", "Nach einer Stille von (Minuten)", None),
-("settings-release-subtitle", "Subito anche al blocco dello schermo e alla sospensione", "Also right away on screen lock and suspend", "Auch sofort bei Bildschirmsperre und Standby", None),
+("settings-device-title", "Occhiali o cuffie Bluetooth", "Bluetooth glasses or headphones", "Bluetooth-Brille oder -Kopfhörer", None),
+("settings-device-none", "Nessuno", "None", "Keines", "Voce dell’elenco quando non è configurato alcun dispositivo."),
+("settings-device-busy", "Per cambiarlo, prima lascialo all’iPhone", "To change it, hand it back to the iPhone first", "Zum Wechseln zuerst dem iPhone überlassen", "Sottotitolo: elenco bloccato mentre il dispositivo è sul PC o in passaggio."),
+("settings-device-empty", "Nessun dispositivo audio accoppiato: accoppialo nelle impostazioni Bluetooth", "No paired audio device: pair one in the Bluetooth settings", "Kein gekoppeltes Audiogerät: in den Bluetooth-Einstellungen koppeln", None),
+("settings-device-restarting", "Scambio si riavvia con il nuovo dispositivo", "Scambio is restarting with the new device", "Scambio startet mit dem neuen Gerät neu", "Avviso breve (toast)."),
+("settings-release-title", "Torna all’iPhone dopo (minuti)", "Back to the iPhone after (minutes)", "Zurück zum iPhone nach (Minuten)", None),
+("settings-release-subtitle", "Di silenzio sul PC. Subito al blocco dello schermo e in sospensione", "Of silence on the PC. Right away on screen lock and suspend", "Stille am PC. Sofort bei Bildschirmsperre und Standby", None),
 ("settings-group-shortcut", "Scorciatoia", "Shortcut", "Tastenkürzel", None),
 ("settings-shortcut-title", "Switch intelligente", "Smart switch", "Intelligenter Wechsel", None),
 ("settings-shortcut-subtitle", "Sposta il dispositivo e attiva o toglie la Priorità iPhone", "Moves the device and turns iPhone priority on or off", "Wechselt das Gerät und schaltet den iPhone-Vorrang ein oder aus", None),
-("settings-shortcut-change", "Cambia…", "Change…", "Ändern…", None),
+("settings-shortcut-unbound", "Nessun tasto", "No key", "Keine Taste", "Al posto del tasto quando la scorciatoia non ha un tasto."),
+("settings-shortcut-conflict", "{shortcut} è già usata da «{owner}»", "{shortcut} is already used by “{owner}”", "{shortcut} wird bereits von „{owner}“ verwendet", "Sottotitolo in caso di conflitto. {shortcut} = tasto leggibile (es. Meta+G), {owner} = nome dell’azione che lo usa."),
+("settings-shortcut-unsupported", "Questo desktop non offre scorciatoie globali: assegna un tasto al comando «scambio switch»", "This desktop has no global shortcuts: bind a key to the command “scambio switch”", "Dieser Desktop bietet keine globalen Tastenkürzel: eine Taste dem Befehl „scambio switch“ zuweisen", None),
+("settings-shortcut-change", "Cambia…", "Change…", "Ändern…", "Apre Impostazioni di sistema → Scorciatoie (KDE)."),
 ("settings-group-general", "Generale", "General", "Allgemein", None),
-("settings-autostart", "Avvia all’accesso", "Start at login", "Bei der Anmeldung starten", None),
 ("settings-tray", "Icona nella barra di sistema", "Icon in the system tray", "Symbol im Systembereich", None),
+("settings-tray-subtitle", "Su GNOME serve l’estensione AppIndicator", "On GNOME this needs the AppIndicator extension", "Unter GNOME ist die AppIndicator-Erweiterung nötig", None),
+("settings-notifications", "Notifiche", "Notifications", "Benachrichtigungen", None),
+("settings-notifications-subtitle", "Solo errori e cambi della Priorità iPhone fatti da fuori", "Only errors and iPhone priority changes made elsewhere", "Nur Fehler und von außen geänderter iPhone-Vorrang", None),
 ("settings-language", "Lingua", "Language", "Sprache", None),
-("settings-language-auto", "Automatica", "Automatic", "Automatisch", None),
-("settings-advanced-title", "Avanzate", "Advanced", "Erweitert", None),
-("settings-advanced-subtitle", "Ritardo di presa, tempi di attesa, app ignorate", "Grab delay, timeouts, ignored apps", "Übernahmeverzögerung, Zeitlimits, ignorierte Apps", None),
-("settings-grab-delay-title", "Ritardo di presa (secondi)", "Grab delay (seconds)", "Übernahmeverzögerung (Sekunden)", None),
-("settings-grab-delay-subtitle", "Quanto deve durare un audio prima di prendere il dispositivo", "How long audio must play before taking the device", "Wie lange Audio laufen muss, bevor das Gerät übernommen wird", None),
-("settings-ignored-apps-title", "App ignorate", "Ignored apps", "Ignorierte Apps", None),
-("settings-ignored-apps-subtitle", "Il loro audio non fa passare il dispositivo al PC", "Their audio doesn’t move the device to the PC", "Ihr Audio holt das Gerät nicht zum PC", None),
+("settings-language-auto", "Automatica", "Automatic", "Automatisch", "Le altre voci restano nella propria lingua: Italiano, English, Deutsch."),
+("settings-language-next-open", "La finestra cambierà lingua alla prossima apertura", "The window will switch language next time it opens", "Das Fenster wechselt beim nächsten Öffnen die Sprache", "Avviso breve (toast)."),
+("settings-config-title", "File di configurazione", "Configuration file", "Konfigurationsdatei", None),
+("settings-config-subtitle", "Ritardo di presa, app ignorate e altri dettagli", "Grab delay, ignored apps and other details", "Übernahmeverzögerung, ignorierte Apps und weitere Details", None),
+("settings-config-open", "Apri", "Open", "Öffnen", None),
+("settings-version", "Scambio {version}", "Scambio {version}", "Scambio {version}", "Piè di pagina."),
+("settings-error-invalid", "Valore non accettato", "Value not accepted", "Wert nicht übernommen", "Avviso breve (toast) per ConfigInvalid."),
+("settings-error-restart-required", "Salvato: vale dal prossimo avvio di Scambio", "Saved: takes effect when Scambio next starts", "Gespeichert: gilt ab dem nächsten Start von Scambio", "Avviso breve (toast) per RestartRequired (Scambio non avviato da systemd)."),
+("settings-error-generic", "Non riuscito ({error})", "Failed ({error})", "Fehlgeschlagen ({error})", "Avviso breve (toast); {error} = nome dell’errore D-Bus."),
+("shortcut-component-name", "Scambio", "Scambio", "Scambio", "Nome del gruppo in Impostazioni di sistema → Scorciatoie (KDE)."),
+("shortcut-switch-name", "Switch intelligente (PC ↔ iPhone)", "Smart switch (PC ↔ iPhone)", "Intelligenter Wechsel (PC ↔ iPhone)", "Nome dell’azione nelle impostazioni delle scorciatoie del desktop (KDE e portal)."),
+("cli-error-gtk-missing", "La finestra richiede GTK 4 e libadwaita 1.4 o successiva (pacchetti gir1.2-gtk-4.0 e gir1.2-adw-1)", "The window needs GTK 4 and libadwaita 1.4 or later (packages gir1.2-gtk-4.0 and gir1.2-adw-1)", "Das Fenster benötigt GTK 4 und libadwaita 1.4 oder neuer (Pakete gir1.2-gtk-4.0 und gir1.2-adw-1)", "scambio settings senza GTK 4/libadwaita (spec 04)."),
 ("cli-description", "Sposta l’audio Bluetooth fra PC e telefono", "Switch Bluetooth audio between PC and phone", "Bluetooth-Audio zwischen PC und Telefon wechseln", "Riga di comando (decisioni 27 e 29b). Stati e codici restano stringhe stabili non tradotte."),
 ("cli-daemon-help", "Avvia il demone", "Run the daemon", "Dienst starten", None),
+("cli-settings-help", "Apri la finestra delle impostazioni", "Open the settings window", "Einstellungsfenster öffnen", None),
 ("cli-debug-help", "Registro dettagliato (debug)", "Enable debug logging", "Ausführliches Protokoll (Debug)", None),
 ("cli-status-help", "Mostra lo stato del demone", "Show daemon status", "Status des Dienstes anzeigen", None),
 ("cli-json-help", "Uscita in JSON", "Output JSON", "Ausgabe als JSON", None),
@@ -110,11 +128,11 @@ def esc(s): return s.replace('\\','\\\\').replace('"','\\"')
 HDR = '''# Scambio — testi dell'interfaccia ({lang}).
 # Proprietà di Claude (design/). Chiavi simboliche: msgid = chiave del contratto
 # in docs/context/05-ui-context.md; en.po è obbligatorio come gli altri.
-# Segnaposto: {{device}}, {{minutes}}, {{time}}, {{error}} (str.format).
+# Segnaposto: {{device}}, {{minutes}}, {{time}}, {{error}}, {{shortcut}}, {{owner}}, {{version}} (str.format).
 msgid ""
 msgstr ""
 "Project-Id-Version: scambio 0.1\\n"
-"PO-Revision-Date: 2026-10-05 13:30+0200\\n"
+"PO-Revision-Date: 2026-10-07 01:00+0200\\n"
 "Last-Translator: Claude (design di Scambio)\\n"
 "Language-Team: Scambio\\n"
 "Language: {code}\\n"

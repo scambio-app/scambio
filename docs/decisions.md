@@ -383,3 +383,62 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     `~/.config/khotkeysrc.bak-20261007-scambio`): stesso tasto, ora passa dalla policy (Priorità
     iPhone compresa). La spec 04 deve **rimuovere** questa azione khotkeys quando registra Meta+G
     via portal, altrimenti i due binding si contendono il tasto. Fasce: spec 04 usa 100–119.
+
+## 2026-10-07 — Spec 04, scorciatoia e finestra (chat di sviluppo: 100–109; Codex: 110–119)
+
+100. GM — Finestra impostazioni «essenziale»: in cima stato + switch + Priorità iPhone; poi
+     dispositivo (scelto fra quelli accoppiati), minuti di silenzio prima del ritorno all'iPhone,
+     scorciatoia, icona nel tray, notifiche, lingua e un collegamento al file di configurazione.
+     Ritardo di presa, app ignorate, tempi e profilo restano solo nel file. L'avvio all'accesso va
+     con il packaging (fase 5). Mock approvato da GM il 2026-10-07 (chiaro e scuro, su `casa`).
+101. GM — La finestra si apre da «Impostazioni…» nel tray **e** da un'icona «Scambio» nel menu delle
+     applicazioni (file `.desktop`); se il demone è fermo, la finestra lo dice con un banner e il
+     pulsante «Avvia».
+102. Claude — Scorciatoia: su Plasma si registra con **KGlobalAccel su D-Bus**
+     (`org.kde.kglobalaccel`), perché su Plasma 5.27 il portal GlobalShortcuts non lega nessuna
+     scorciatoia (M16); sugli altri desktop si usa il portal GlobalShortcuts v1; senza nessuno dei
+     due la finestra spiega come legare un tasto a `scambio switch`. KGlobalAccel si sceglie solo se
+     il nome ha già un proprietario o se `XDG_CURRENT_DESKTOP` contiene `KDE` (il solo file di
+     attivazione, installato anche su GNOME dalle librerie KDE, non basta). Plasma 6 non è
+     misurato: se i metodi a interi falliscono si ripiega sul portal. Nessuna dipendenza nuova.
+     Supera la decisione 16 nella parte «via portal»; la riserva CLI resta. Registra il demone;
+     la pressione passa dall'API pubblica (`Switch()`, come tray e CLI: invariante di `AGENTS.md`);
+     il file `kglobalshortcutsrc` lo scrive il servizio del desktop, non Scambio.
+     Precisa la 99: l'azione khotkeys la rimuove Claude a mano, con backup, prima della prova
+     reale; il codice di Scambio non tocca mai i binding dell'utente.
+103. Claude — Regole di registrazione con KGlobalAccel (M16, M18): componente
+     `app.scambio.Scambio`, azione `switch`; il tasto preferito (`shortcut.preferred`) si impone
+     senza autoload solo la prima volta o quando cambia (memoria in `state.json`), poi vale quello
+     del desktop; un tasto scelto dall'utente (`yourShortcutsChanged`) conta come «imposto», così
+     non viene mai sovrascritto; tasto occupato → stato `conflict` con il nome di chi lo usa, nuovo
+     tentativo all'apertura e al ritorno del focus della finestra, a `Reload` e su richiesta;
+     all'arresto `setInactive` (il tasto resta all'utente).
+104. Claude — Il demone scrive `config.toml`, ma solo su richiesta della finestra (`SetConfig`) e solo
+     per le chiavi esposte: modifica riga per riga che conserva commenti (anche in coda alla riga)
+     e chiavi non toccate, verifica rileggendo il risultato, scrittura atomica; forme TOML fuori
+     dalla grammatica supportata → rifiuto senza toccare il file. Precisa la spec 01 §3.2.3 («non
+     la riscrive mai»): resta vero per tutto il resto.
+105. Claude — Cambio di dispositivo dalla finestra: permesso solo se il dispositivo non è sul PC né in
+     passaggio (altrimenti errore `DeviceBusy`); il demone scrive il file, risponde e chiede a
+     systemd `RestartUnit` della propria unità (arresto ordinato e nuovo avvio, M18: un'uscita con
+     codice non riavvia un servizio `Type=dbus`). Solo se l'ultimo segmento di `/proc/self/cgroup`
+     è `scambio.service`; altrimenti risponde `RestartRequired` (file già scritto).
+106. Claude (parte sui file fuori dalle cartelle di Scambio approvata da GM il 2026-10-07) — Finestra in un
+     processo separato `scambio settings` (GTK4 + libadwaita ≥ 1.4, unica istanza
+     `app.scambio.Scambio.Settings`); il tray la apre con `org.freedesktop.Application.Activate`
+     tramite attivazione D-Bus, così non vive nel gruppo di processi del demone. `make install-user`
+     installa anche il file `.desktop` e il file di servizio D-Bus in `~/.local/share` (strumento di
+     installazione, come l'unità systemd già in `~/.config/systemd/user`; il demone continua a non
+     scrivere fuori dalle sue cartelle). `blueprint-compiler` (0.12) è una dipendenza di sviluppo:
+     il `.blp` si compila in `build/`.
+107. Claude — Modifiche applicate subito, senza pulsante «Salva» (convenzione libadwaita); la lingua
+     della finestra cambia alla riapertura (tray, notifiche e CLI subito). Mentre la finestra è **in
+     primo piano** (possiede il nome `app.scambio.Scambio.Settings.Active` solo finché è attiva) le
+     notifiche della famiglia `priority` non partono: lo stato si vede già lì. Finestra aperta ma
+     dietro o ridotta → notifiche normali (es. Meta+G mostra «Annulla»).
+108. Claude — Icona del tray che restava visibile dopo `ui.tray = false` + `Reload` (M17): il tray
+     possiede il nome `org.kde.StatusNotifierItem-<pid>-1` e si registra con quello; spegnendo il
+     tray lo rilascia e il watcher lo toglie. Chiude il debito annotato nell'audit della spec 03.
+109. Claude — I testi del `.ui` compilato si traducono con lo stesso `Translator` della UI (proprietà
+     `translatable` sostituite prima del caricamento), non con il gettext di libc di GtkBuilder:
+     così valgono `ui.language` e i cataloghi in `build/locale` anche con `LANG=C`.

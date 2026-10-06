@@ -1,11 +1,11 @@
 # Scambio — testi dell'interfaccia (deutsch).
 # Proprietà di Claude (design/). Chiavi simboliche: msgid = chiave del contratto
 # in docs/context/05-ui-context.md; en.po è obbligatorio come gli altri.
-# Segnaposto: {device}, {minutes}, {time}, {error} (str.format).
+# Segnaposto: {device}, {minutes}, {time}, {error}, {shortcut}, {owner}, {version} (str.format).
 msgid ""
 msgstr ""
 "Project-Id-Version: scambio 0.1\n"
-"PO-Revision-Date: 2026-10-05 13:30+0200\n"
+"PO-Revision-Date: 2026-10-07 01:00+0200\n"
 "Last-Translator: Claude (design di Scambio)\n"
 "Language-Team: Scambio\n"
 "Language: de\n"
@@ -194,7 +194,21 @@ msgstr "Rückgängig"
 msgid "notify-action-open-config"
 msgstr "Datei öffnen"
 
-#. Finestra impostazioni (spec 04, bozza).
+#. Finestra impostazioni (spec 04). Titolo della finestra.
+msgid "settings-window-title"
+msgstr "Scambio"
+
+#. Banner in cima quando il demone non è sul bus.
+msgid "settings-daemon-down"
+msgstr "Scambio läuft nicht"
+
+msgid "settings-daemon-start"
+msgstr "Starten"
+
+#. Riga di stato quando il demone non è in esecuzione.
+msgid "settings-status-unknown"
+msgstr "Status nicht verfügbar"
+
 msgid "settings-priority-subtitle"
 msgstr "Der PC übernimmt das Gerät nicht automatisch"
 
@@ -202,16 +216,28 @@ msgid "settings-group-device"
 msgstr "Gerät"
 
 msgid "settings-device-title"
-msgstr "Gerät"
+msgstr "Bluetooth-Brille oder -Kopfhörer"
 
-msgid "settings-group-release"
-msgstr "Zurück zum iPhone"
+#. Voce dell’elenco quando non è configurato alcun dispositivo.
+msgid "settings-device-none"
+msgstr "Keines"
+
+#. Sottotitolo: elenco bloccato mentre il dispositivo è sul PC o in passaggio.
+msgid "settings-device-busy"
+msgstr "Zum Wechseln zuerst dem iPhone überlassen"
+
+msgid "settings-device-empty"
+msgstr "Kein gekoppeltes Audiogerät: in den Bluetooth-Einstellungen koppeln"
+
+#. Avviso breve (toast).
+msgid "settings-device-restarting"
+msgstr "Scambio startet mit dem neuen Gerät neu"
 
 msgid "settings-release-title"
-msgstr "Nach einer Stille von (Minuten)"
+msgstr "Zurück zum iPhone nach (Minuten)"
 
 msgid "settings-release-subtitle"
-msgstr "Auch sofort bei Bildschirmsperre und Standby"
+msgstr "Stille am PC. Sofort bei Bildschirmsperre und Standby"
 
 msgid "settings-group-shortcut"
 msgstr "Tastenkürzel"
@@ -222,41 +248,86 @@ msgstr "Intelligenter Wechsel"
 msgid "settings-shortcut-subtitle"
 msgstr "Wechselt das Gerät und schaltet den iPhone-Vorrang ein oder aus"
 
+#. Al posto del tasto quando la scorciatoia non ha un tasto.
+msgid "settings-shortcut-unbound"
+msgstr "Keine Taste"
+
+#. Sottotitolo in caso di conflitto. {shortcut} = tasto leggibile (es. Meta+G), {owner} = nome dell’azione che lo usa.
+#. segnaposto: {owner}, {shortcut}
+msgid "settings-shortcut-conflict"
+msgstr "{shortcut} wird bereits von „{owner}“ verwendet"
+
+msgid "settings-shortcut-unsupported"
+msgstr "Dieser Desktop bietet keine globalen Tastenkürzel: eine Taste dem Befehl „scambio switch“ zuweisen"
+
+#. Apre Impostazioni di sistema → Scorciatoie (KDE).
 msgid "settings-shortcut-change"
 msgstr "Ändern…"
 
 msgid "settings-group-general"
 msgstr "Allgemein"
 
-msgid "settings-autostart"
-msgstr "Bei der Anmeldung starten"
-
 msgid "settings-tray"
 msgstr "Symbol im Systembereich"
+
+msgid "settings-tray-subtitle"
+msgstr "Unter GNOME ist die AppIndicator-Erweiterung nötig"
+
+msgid "settings-notifications"
+msgstr "Benachrichtigungen"
+
+msgid "settings-notifications-subtitle"
+msgstr "Nur Fehler und von außen geänderter iPhone-Vorrang"
 
 msgid "settings-language"
 msgstr "Sprache"
 
+#. Le altre voci restano nella propria lingua: Italiano, English, Deutsch.
 msgid "settings-language-auto"
 msgstr "Automatisch"
 
-msgid "settings-advanced-title"
-msgstr "Erweitert"
+#. Avviso breve (toast).
+msgid "settings-language-next-open"
+msgstr "Das Fenster wechselt beim nächsten Öffnen die Sprache"
 
-msgid "settings-advanced-subtitle"
-msgstr "Übernahmeverzögerung, Zeitlimits, ignorierte Apps"
+msgid "settings-config-title"
+msgstr "Konfigurationsdatei"
 
-msgid "settings-grab-delay-title"
-msgstr "Übernahmeverzögerung (Sekunden)"
+msgid "settings-config-subtitle"
+msgstr "Übernahmeverzögerung, ignorierte Apps und weitere Details"
 
-msgid "settings-grab-delay-subtitle"
-msgstr "Wie lange Audio laufen muss, bevor das Gerät übernommen wird"
+msgid "settings-config-open"
+msgstr "Öffnen"
 
-msgid "settings-ignored-apps-title"
-msgstr "Ignorierte Apps"
+#. Piè di pagina.
+#. segnaposto: {version}
+msgid "settings-version"
+msgstr "Scambio {version}"
 
-msgid "settings-ignored-apps-subtitle"
-msgstr "Ihr Audio holt das Gerät nicht zum PC"
+#. Avviso breve (toast) per ConfigInvalid.
+msgid "settings-error-invalid"
+msgstr "Wert nicht übernommen"
+
+#. Avviso breve (toast) per RestartRequired (Scambio non avviato da systemd).
+msgid "settings-error-restart-required"
+msgstr "Gespeichert: gilt ab dem nächsten Start von Scambio"
+
+#. Avviso breve (toast); {error} = nome dell’errore D-Bus.
+#. segnaposto: {error}
+msgid "settings-error-generic"
+msgstr "Fehlgeschlagen ({error})"
+
+#. Nome del gruppo in Impostazioni di sistema → Scorciatoie (KDE).
+msgid "shortcut-component-name"
+msgstr "Scambio"
+
+#. Nome dell’azione nelle impostazioni delle scorciatoie del desktop (KDE e portal).
+msgid "shortcut-switch-name"
+msgstr "Intelligenter Wechsel (PC ↔ iPhone)"
+
+#. scambio settings senza GTK 4/libadwaita (spec 04).
+msgid "cli-error-gtk-missing"
+msgstr "Das Fenster benötigt GTK 4 und libadwaita 1.4 oder neuer (Pakete gir1.2-gtk-4.0 und gir1.2-adw-1)"
 
 #. Riga di comando (decisioni 27 e 29b). Stati e codici restano stringhe stabili non tradotte.
 msgid "cli-description"
@@ -264,6 +335,9 @@ msgstr "Bluetooth-Audio zwischen PC und Telefon wechseln"
 
 msgid "cli-daemon-help"
 msgstr "Dienst starten"
+
+msgid "cli-settings-help"
+msgstr "Einstellungsfenster öffnen"
 
 msgid "cli-debug-help"
 msgstr "Ausführliches Protokoll (Debug)"
