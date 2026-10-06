@@ -2,6 +2,7 @@
 
 import gettext
 import os
+import struct
 import tomllib
 from collections.abc import Mapping
 from pathlib import Path
@@ -34,7 +35,7 @@ class Translator:
                 with (locale_dir() / code / "LC_MESSAGES/scambio.mo").open("rb") as f:
                     self.catalog = gettext.GNUTranslations(f)
                 break
-            except (OSError, EOFError, ValueError) as exc:
+            except (OSError, EOFError, ValueError, struct.error) as exc:
                 if strict:
                     raise ValueError(
                         f"Invalid catalog {code}: run make i18n: {exc}"

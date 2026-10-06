@@ -352,3 +352,17 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     Notify per conoscere l'id di sostituzione anche nelle raffiche; generazioni
     dell'errore impediscono che una vecchia notifica cancelli un errore più recente.
     Nessun timer o dipendenza runtime aggiunta.
+92. Codex — Il servizio avvia sempre la UI alla fine della prima inizializzazione
+    degli adattatori, dopo nome e oggetto API: la prima lettura asincrona include
+    anche `audio_backend_down` iniziale. La UI usa solo il proxy per lo stato;
+    `apply_config` resta l'aggancio diretto previsto. Gli import Gio del lifecycle
+    sono differiti, così importare `ui.presentation` non carica `gi` indirettamente.
+93. Codex — `Quit` restituisce la risposta e percorre lo stesso stop dei segnali;
+    `run` chiude il main loop dopo il completamento di `Gio.DBusConnection.flush`.
+    SNI/dbusmenu si ritirano nel cleanup. XML SNI/dbusmenu nel pacchetto accanto
+    all'XML pubblico; nessuna nuova dipendenza, processo o timer della UI.
+94. Codex — Misura spec 03 con due campioni `/proc` distanti 600 s, come la 38:
+    baseline prima delle modifiche, poi UI attiva con watcher e notifiche dbusmock.
+    Si contano anche le chiamate ai due server durante l'intervallo e si salvano
+    gli hash dei sorgenti UI. Il campione conclusivo viene ripetuto dopo gli
+    ultimi cambi runtime; test umani e verifica visiva restano separati.

@@ -3,6 +3,7 @@
     <method name="Switch"><arg name="state" type="s" direction="out"/></method>
     <method name="SetPriority"><arg name="enabled" type="b" direction="in"/></method>
     <method name="Reload"/>
+    <method name="Quit"/>
     <property name="State" type="s" access="read"/>
     <property name="IphonePriority" type="b" access="read"/>
     <property name="AudioActive" type="b" access="read"/>

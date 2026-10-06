@@ -1,0 +1,36 @@
+.venv/bin/ruff format --check src tests tools
+47 files already formatted
+.venv/bin/ruff check src tests tools
+[1;32mAll checks passed![0m
+.venv/bin/mypy
+Success: no issues found in 24 source files
+.venv/bin/pytest
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0
+rootdir: ~/development/scambio
+configfile: pyproject.toml
+testpaths: tests
+collected 564 items
+
+tests/test_adapters.py ....................                              [  3%]
+tests/test_audio_recovery.py ..................                          [  6%]
+tests/test_config_state.py ......................................        [ 13%]
+tests/test_i18n.py ........................                              [ 17%]
+tests/test_install_user.py ..                                            [ 18%]
+tests/test_notifications.py ..............................               [ 23%]
+tests/test_players.py ....................................               [ 29%]
+tests/test_policy.py ................................................... [ 38%]
+........................................................................ [ 51%]
+.......................                                                  [ 55%]
+tests/test_policy_players.py ........................................... [ 63%]
+..........................................................               [ 73%]
+tests/test_presentation.py ............................................. [ 81%]
+........................                                                 [ 85%]
+tests/test_service.py ...................                                [ 89%]
+tests/test_service_players.py ..................................         [ 95%]
+tests/test_service_unblock.py ..                                         [ 95%]
+tests/test_session_recovery.py ..                                        [ 95%]
+tests/test_tray.py ............                                          [ 98%]
+tests/test_ui_service.py ...........                                     [100%]
+
+======================== 564 passed in 63.69s (0:01:03) ========================

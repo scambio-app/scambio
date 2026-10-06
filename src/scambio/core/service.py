@@ -27,6 +27,7 @@ from scambio.core.ports import (
 )
 from scambio.core.session import Session
 from scambio.state import Store
+from scambio.ui import DisabledUi, Ui, start_ui
 
 LOG = logging.getLogger(__name__)
 ERROR_DETAILS = {
@@ -61,6 +62,8 @@ class Service:
         timer: Schedule = schedule,
         players: PlayersPort | None = None,
     ) -> None:
+        self.ui: Ui | DisabledUi | None = None
+        self.quit_done: Done = lambda: None
         self.bus, self.config, self.store = bus, config, store
         self.config_file, self.schedule = config_file, timer
         self.ctx = Context(priority=store.value.iphone_priority)
@@ -190,6 +193,7 @@ class Service:
             if key in self.initial:
                 self.event(self.initial[key])
         self.initial.clear()
+        self.ui = start_ui(self.bus, self.config, BUS_NAME, PATH, self.config_file)
 
     def _actions(self, actions: list[Action]) -> None:
         release_barrier = 0
@@ -429,6 +433,9 @@ class Service:
             elif method == "SetPriority":
                 self.event(Event("SetPriority", params.unpack()[0]))
                 invocation.return_value(None)
+            elif method == "Quit":
+                invocation.return_value(None)
+                self.stop(self.quit_done)
             elif method == "Reload":
                 self.reload()
                 invocation.return_value(None)
@@ -450,6 +457,8 @@ class Service:
         self.session.reload(config)
         self.audio.reload(config)
         self.players.reload(config)
+        if self.ui:
+            self.ui.apply_config(config)
         self._publish()
 
     def stop(self, done: Done) -> None:
@@ -503,6 +512,8 @@ class Service:
         if self.closed:
             return
         self.closed = True
+        if self.ui:
+            self.ui.stop()
         if self.stop_source:
             GLib.source_remove(self.stop_source)
             self.stop_source = 0
@@ -568,12 +579,25 @@ def run(
 
     service = Service(bus, config, store, config_file, factory, timer)
     loop = GLib.MainLoop()
+
+    def flushed_stop() -> None:
+        def flushed(connection: Gio.DBusConnection, result: Gio.AsyncResult) -> None:
+            try:
+                connection.flush_finish(result)
+            except GLib.Error as exc:
+                LOG.debug("Flush during shutdown: %s", exc)
+            finally:
+                loop.quit()
+
+        bus.flush(None, flushed)
+
+    service.quit_done = flushed_stop
     if not service.start():
         service.close()
         return 1
 
     def stop() -> bool:
-        service.stop(loop.quit)
+        service.stop(flushed_stop)
         return True
 
     def reload_config() -> bool:

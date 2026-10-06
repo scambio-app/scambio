@@ -40,7 +40,9 @@ def main():
     parser.add_argument(
         "--output", type=Path, default=REPO / "docs/verification/01/idle.json"
     )
-    output = parser.parse_args().output
+    parser.add_argument("--ui", action="store_true")
+    args = parser.parse_args()
+    output = args.output
     source_hashes = {
         name: hashlib.sha256((REPO / name).read_bytes()).hexdigest()
         for name in (
@@ -50,6 +52,15 @@ def main():
             "src/scambio/core/players.py",
             "src/scambio/core/service.py",
             "tests/fixtures/run_daemon.py",
+            "src/scambio/i18n.py",
+            "src/scambio/paths.py",
+            "src/scambio/ui/__init__.py",
+            "src/scambio/ui/client.py",
+            "src/scambio/ui/actions.py",
+            "src/scambio/ui/guard.py",
+            "src/scambio/ui/notify.py",
+            "src/scambio/ui/presentation.py",
+            "src/scambio/ui/tray.py",
         )
     }
     with ExitStack() as stack:
@@ -98,6 +109,29 @@ def main():
             "ret = False",
             dbus_interface=dbusmock.MOCK_IFACE,
         )
+        watcher = notifications = None
+        if args.ui:
+            watcher = stack.enter_context(
+                dbusmock.SpawnedMock.spawn_for_name(
+                    "org.kde.StatusNotifierWatcher",
+                    "/StatusNotifierWatcher",
+                    "org.kde.StatusNotifierWatcher",
+                    stdout=subprocess.DEVNULL,
+                )
+            )
+            watcher.obj.AddMethod(
+                "org.kde.StatusNotifierWatcher",
+                "RegisterStatusNotifierItem",
+                "s",
+                "",
+                "",
+                dbus_interface=dbusmock.MOCK_IFACE,
+            )
+            notifications = stack.enter_context(
+                dbusmock.SpawnedMock.spawn_with_template(
+                    "notification_daemon", stdout=subprocess.DEVNULL
+                )
+            )
         player = FakePlayer("idle", "Paused")
         stack.callback(player.close)
         fake = FakePactl(root / "pulse")
@@ -132,6 +166,12 @@ def main():
                 and (root / "pulse/subscriber.pid").exists()
             )
         )
+        if watcher:
+            spin_until(
+                lambda: watcher.obj.GetMethodCalls(
+                    "RegisterStatusNotifierItem", dbus_interface=dbusmock.MOCK_IFACE
+                )
+            )
         # One settling delay, then only the two endpoint samples; no sampling loop.
         loop = GLib.MainLoop()
         GLib.timeout_add_seconds(1, lambda: (loop.quit(), False)[1])
@@ -145,6 +185,11 @@ def main():
         player_calls_before = len(
             player.obj.GetCalls(dbus_interface=dbusmock.MOCK_IFACE)
         )
+        ui_calls_before = {
+            name: len(mock.obj.GetCalls(dbus_interface=dbusmock.MOCK_IFACE))
+            for name, mock in (("watcher", watcher), ("notifications", notifications))
+            if mock is not None
+        }
         start = time.monotonic()
         started = datetime.now(UTC).isoformat()
         print(f"Idle measurement started {started}; daemon={process.pid}", flush=True)
@@ -157,6 +202,7 @@ def main():
             "environment": (
                 "private dbusmock system/session buses; "
                 "bluez5/logind/ScreenSaver/MPRIS; fake pactl; app.scambio.Test"
+                + ("; SNI watcher/notifications mocks" if args.ui else "")
             ),
             "started_utc": started,
             "elapsed_seconds": elapsed,
@@ -177,7 +223,17 @@ def main():
             )
             - player_calls_before,
             "state_after": str(properties()["State"]),
-            "real_measurement": "Pending GM spec 02 checklist 6.1",
+            "ui_enabled": args.ui,
+            "ui_calls_during_idle": {
+                name: len(mock.obj.GetCalls(dbus_interface=dbusmock.MOCK_IFACE))
+                - ui_calls_before[name]
+                for name, mock in (
+                    ("watcher", watcher),
+                    ("notifications", notifications),
+                )
+                if mock is not None
+            },
+            "real_measurement": "Private buses; GM desktop/hardware proof separate",
         }
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(result, indent=2) + "\n")

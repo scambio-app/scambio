@@ -308,3 +308,110 @@ def test_callback_exception_does_not_break_next_listener(ui_client, caplog):
     assert "UI callback failed" in caplog.text
     update(obj, IphonePriority=dbus.Boolean(False))
     spin_until(lambda: len(events) == 2)
+
+
+def test_button_priority_change_is_own(notices):
+    n, client, obj, server, _ = notices
+    emit(obj, INTERFACE, "Transition", "sss", ["on_pc", "releasing", "switch"])
+    update(obj, State="released", IphonePriority=dbus.Boolean(True))
+    spin_until(lambda: "priority" in n.families)
+    obj.AddMethod(
+        INTERFACE,
+        "Switch",
+        "",
+        "s",
+        'self.UpdateProperties("app.scambio.Scambio1", '
+        'dict(IphonePriority=dbus.Boolean(False))); ret = "connecting"',
+        dbus_interface=dbusmock.MOCK_IFACE,
+    )
+    notice_id = n.families["priority"]
+    emit(server, NAME, "ActionInvoked", "us", [notice_id, "undo-switch"])
+    spin_until(lambda: not client.props["IphonePriority"] and client.pending == 0)
+    assert len(calls(server, "Notify")) == 1
+
+
+def test_automatic_transitions_are_silent(notices):
+    n, client, obj, server, _ = notices
+    for before, after, reason in [
+        ("released", "connecting", "audio_started"),
+        ("connecting", "on_pc", "connected"),
+        ("on_pc", "releasing", "idle_timeout"),
+        ("releasing", "released", "locked"),
+        ("on_pc", "released", "sleep"),
+        ("released", "on_pc", "external_connect"),
+    ]:
+        emit(obj, INTERFACE, "Transition", "sss", [before, after, reason])
+        update(obj, State=after)
+    drain()
+    assert not calls(server, "Notify")
+
+
+def test_absent_notification_server_no_retry(ui_client, tmp_path, caplog):
+    import logging
+
+    caplog.set_level(logging.DEBUG)
+    client, obj = ui_client
+    n = Notifications(
+        client,
+        Design.load(design_dir() / "ui/tray.json"),
+        Translator("en"),
+        tmp_path / "config.toml",
+        lambda: None,
+        True,
+    )
+    try:
+        error(obj, "connect_failed")
+        spin_until(lambda: "Notification unavailable" in caplog.text)
+        assert not n.busy and not n.queue and not n.issued
+        with dbusmock.SpawnedMock.spawn_with_template(
+            "notification_daemon", stdout=subprocess.DEVNULL
+        ) as server:
+            drain()
+            assert not calls(server.obj, "Notify")
+            n.seen()
+            error(obj, "connect_failed")
+            spin_until(lambda: calls(server.obj, "Notify"))
+    finally:
+        n.stop()
+
+
+def test_old_error_notification_does_not_clear_new_error(notices):
+    n, client, obj, server, _ = notices
+    error(obj, "connect_failed")
+    spin_until(lambda: "grab" in n.families)
+    old = n.families["grab"]
+    error(obj, "config_invalid")
+    spin_until(lambda: "setup" in n.families)
+    emit(server, NAME, "NotificationClosed", "uu", [old, 2])
+    drain()
+    assert n.active_error == "config_invalid"
+
+
+@pytest.mark.parametrize(
+    "name,key",
+    [
+        ("DeviceUnavailable", "cli-error-device-unavailable"),
+        ("ConfigInvalid", "cli-error-config-invalid"),
+        ("RestartRequired", "cli-error-restart-required"),
+        ("Unexpected", "cli-dbus-error"),
+    ],
+)
+def test_cli_dbus_error_keys(ui_client, tmp_path, monkeypatch, capsys, name, key):
+    from scambio import cli
+
+    client, obj = ui_client
+    error_name = INTERFACE + ".Error." + name
+    obj.AddMethod(
+        INTERFACE,
+        "Switch",
+        "",
+        "s",
+        f'raise dbus.exceptions.DBusException("private details", name={error_name!r})',
+        dbus_interface=dbusmock.MOCK_IFACE,
+    )
+    path = tmp_path / "config.toml"
+    path.write_text('[ui]\nlanguage = "de"\n')
+    monkeypatch.setattr(cli, "BUS_NAME", client.bus_name)
+    monkeypatch.setattr(cli, "config_path", lambda: path)
+    assert cli.main(["switch"]) == 1
+    assert capsys.readouterr().err.strip() == Translator("de").tr(key, error=error_name)

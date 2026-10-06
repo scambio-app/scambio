@@ -187,3 +187,20 @@ def test_pure_and_no_timers():
             assert forbidden not in text
         ast.parse(text)
     assert json.loads((design_dir() / "ui/tray.json").read_text())["schema"] == 1
+
+
+def test_pure_imports_do_not_load_gi():
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; import scambio.i18n; import scambio.ui.presentation; "
+            'assert "gi" not in sys.modules',
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr

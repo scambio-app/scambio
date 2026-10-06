@@ -128,3 +128,13 @@ def test_ui_flags():
     assert parse({}).tray and parse({}).notifications
     assert not parse({"ui": {"tray": False}}).tray
     assert not parse({"ui": {"notifications": False}}).notifications
+
+
+def test_truncated_catalog_falls_back(tmp_path, monkeypatch):
+    monkeypatch.setenv("SCAMBIO_LOCALE_DIR", str(tmp_path))
+    folder = tmp_path / "de/LC_MESSAGES"
+    folder.mkdir(parents=True)
+    (folder / "scambio.mo").write_bytes(b"\x00")
+    assert Translator("de").tr("cli-description") == "cli-description"
+    with pytest.raises(ValueError, match="make i18n"):
+        Translator("de", strict=True)
