@@ -346,3 +346,9 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     conserva una base senza prosa per gli harness e genera i commenti solo alla
     creazione del file. I file esistenti non vengono riscritti. La UI richiede
     cataloghi validi; CLI e inibitore possono ripiegare su inglese o chiavi.
+91. Codex — Presentazione pura con validazione chiusa del vocabolario JSON;
+    adattatori Gio separati. Il proxy mantiene il numero di chiamate proprie in
+    corso e inoltra i segnali in ordine. Le notifiche serializzano le richieste
+    Notify per conoscere l'id di sostituzione anche nelle raffiche; generazioni
+    dell'errore impediscono che una vecchia notifica cancelli un errore più recente.
+    Nessun timer o dipendenza runtime aggiunta.
