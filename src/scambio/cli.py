@@ -29,9 +29,20 @@ def main(argv: list[str] | None = None) -> int:
     status = commands.add_parser("status", help=_("cli-status-help"))
     status.add_argument("--json", action="store_true", help=_("cli-json-help"))
     commands.add_parser("switch", help=_("cli-switch-help"))
+    settings = commands.add_parser("settings", help=_("cli-settings-help"))
+    settings.add_argument(
+        "--gapplication-service", action="store_true", help=argparse.SUPPRESS
+    )
     priority = commands.add_parser("priority", help=_("cli-priority-help"))
     priority.add_argument("value", nargs="?", choices=["on", "off", "toggle"])
     args = parser.parse_args(argv)
+    if args.command == "settings":
+        try:
+            from scambio.ui.window import run as run_settings
+        except (ImportError, ValueError):
+            print(_("cli-error-gtk-missing"), file=sys.stderr)
+            return 1
+        return run_settings(args.gapplication_service)
     if args.command == "daemon":
         from scambio.core.service import run
 

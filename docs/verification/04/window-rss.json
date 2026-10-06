@@ -1,0 +1,27 @@
+{
+  "gtk_real": true,
+  "gtk_version": [
+    4,
+    14,
+    5
+  ],
+  "adw_version": [
+    1,
+    5,
+    0
+  ],
+  "language": "de",
+  "ids": 21,
+  "rss_kib": 157496,
+  "private_buses": true,
+  "display": ":101",
+  "measured_utc": "2026-10-06T23:53:51.538219+00:00",
+  "method": "/proc/self/stat RSS, open real GTK window after integration checks; includes in-process dbusmock and harness imports; GSK_RENDERER=cairo; GTK_A11Y=none; temporary HOME; no installed services activatable",
+  "source_sha256": {
+    "src/scambio/ui/window.py": "e1f04500d18fae3a3d813af60b14b24b5965259f369f9d54e8087a53493c3209",
+    "src/scambio/ui/settings_model.py": "03b3f2fba06acd3caa9d814121733d2060150c69d1b09af4f2d4c14595d58bdf",
+    "src/scambio/ui/client.py": "1e7660c4d30debb0fb8fcbcebdd4724d24fd2d4fb1932a1e902607a0eebf0c6a",
+    "tests/fixtures/run_settings.py": "9eab7b3c6c502173a4505b2d8b9d6a3f437b5feef0052eda406eddf636c75e15",
+    "tests/test_window.py": "37bf21a9ae800b62d075c9064ea2d82e58eee794730d3d74a3779e2f27359fe3"
+  }
+}

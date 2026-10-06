@@ -12,3 +12,7 @@ def design_dir() -> Path:
 
 def locale_dir() -> Path:
     return Path(os.environ.get("SCAMBIO_LOCALE_DIR", ROOT / "build/locale")).resolve()
+
+
+def ui_file() -> Path:
+    return ROOT / "build/ui/settings-window.ui"

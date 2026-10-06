@@ -468,3 +468,23 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
      permessi conservati. Il cgroup è una funzione iniettabile nei test;
      RestartUnit parte dopo la risposta di successo e non applica il nuovo
      dispositivo al processo uscente. Nessuna cache aggiunta a ListDevices.
+113. Codex — La finestra usa un modello puro con un valore inviato e l'ultimo
+     valore desiderato per chiave: i cambi rapidi si serializzano e i segnali
+     intermedi non fanno arretrare i widget. Il client condiviso conserva
+     le callback del tray, osserva il proprietario e rilegge GetAll alla
+     ricomparsa, scartando risposte di generazioni precedenti. Nessun timer.
+     Il template viene tradotto come XML prima di Gtk.Template; sono accettati
+     `yes`, `true` e `1`, perché Blueprint 0.12 emette `true`.
+114. Codex — L'installatore distingue valori stringa di Desktop Entry
+     (`TryExec`, `Icon`) dalla riga di comando (`Exec`): prima quota gli
+     argomenti, poi applica l'escape del valore. Il servizio D-Bus segue il
+     quoting richiesto da spec 04 §3.1.6. Nessuna shell e nessun database del
+     desktop modificato; installazione e rimozione limitate ai tre file.
+     Il limite osservato di Gio con `%` nel percorso è documentato nel report,
+     senza introdurre wrapper o ulteriori file installati.
+115. Codex — I test GTK partono sotto Xvfb/dbus-run-session, poi creano
+     due bus dbusmock senza servizi installati attivabili prima dell'import
+     GTK, con HOME e directory XDG temporanee. Questo impedisce anche
+     l'autoattivazione di portal reali sul bus privato. La misura RSS della
+     finestra riusa lo stesso harness e dichiara il suo overhead; la misura
+     di riposo del demone conta anche le chiamate al KGlobalAccel finto.

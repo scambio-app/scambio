@@ -169,7 +169,11 @@ def test_invalid_vocabulary(design, path, value):
 
 def test_pure_and_no_timers():
     root = Path(__file__).parents[1] / "src/scambio"
-    for path in [root / "i18n.py", root / "ui/presentation.py"]:
+    for path in [
+        root / "i18n.py",
+        root / "ui/presentation.py",
+        root / "ui/settings_model.py",
+    ]:
         tree = ast.parse(path.read_text())
         assert not any(
             isinstance(n, ast.ImportFrom) and n.module and n.module.startswith("gi")
@@ -181,11 +185,17 @@ def test_pure_and_no_timers():
             "scambio.core",
             "timeout_add",
             "time.sleep",
-            "from gi.repository import Gtk",
             "bluetoothctl",
         ):
             assert forbidden not in text
-        ast.parse(text)
+        tree = ast.parse(text)
+        if path.name != "window.py":
+            assert not any(
+                isinstance(node, ast.ImportFrom)
+                and node.module == "gi.repository"
+                and any(alias.name in {"Gtk", "Adw", "Gdk"} for alias in node.names)
+                for node in ast.walk(tree)
+            )
     assert json.loads((design_dir() / "ui/tray.json").read_text())["schema"] == 1
 
 

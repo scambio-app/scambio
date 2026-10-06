@@ -30,6 +30,9 @@ class ScambioClient:
         self.handlers: list[int] = []
         self.pending = 0
         self.closed = False
+        self.available = False
+        self.watch_id = 0
+        self.generation = 0
         self.cancel = Gio.Cancellable()
         info = Gio.DBusNodeInfo.new_for_xml(introspection_xml()).interfaces[0]
         Gio.DBusProxy.new(
@@ -49,6 +52,8 @@ class ScambioClient:
             proxy = Gio.DBusProxy.new_finish(result)
         except GLib.Error as exc:
             LOG.debug("Cannot read daemon properties: %s", exc)
+            if not self.closed:
+                self.ready()
             return
         if self.closed:
             return
@@ -58,14 +63,58 @@ class ScambioClient:
             for key in proxy.get_cached_property_names() or []
             if (value := proxy.get_cached_property(key)) is not None
         }
-        if not self.props:
-            LOG.error("Daemon returned no initial properties")
-            return
+        self.available = bool(proxy.get_name_owner())
         self.handlers = [
             proxy.connect("g-properties-changed", self._properties),
             proxy.connect("g-signal", self._signal),
         ]
         self.ready()
+        self.watch_id = Gio.bus_watch_name_on_connection(
+            self.connection,
+            self.bus_name,
+            Gio.BusNameWatcherFlags.NONE,
+            self._appeared,
+            self._vanished,
+        )
+
+    @guarded
+    def _appeared(self, bus: Gio.DBusConnection, name: str, owner: str) -> None:
+        self.generation += 1
+        generation = self.generation
+
+        @guarded
+        def received(connection: Gio.DBusConnection, result: Gio.AsyncResult) -> None:
+            try:
+                reply = connection.call_finish(result)
+            except GLib.Error as exc:
+                LOG.debug("Cannot refresh daemon properties: %s", exc)
+                return
+            if self.closed or generation != self.generation:
+                return
+            self.props = reply.unpack()[0]
+            self.available = True
+            self.emit("OwnerChanged", True)
+
+        bus.call(
+            owner,
+            self.path,
+            "org.freedesktop.DBus.Properties",
+            "GetAll",
+            GLib.Variant("(s)", (INTERFACE,)),
+            None,
+            Gio.DBusCallFlags.NO_AUTO_START,
+            self.timeout_ms,
+            self.cancel,
+            received,
+        )
+
+    @guarded
+    def _vanished(self, *args: Any) -> None:
+        if not self.closed:
+            self.generation += 1
+            self.available = False
+            self.props.clear()
+            self.emit("OwnerChanged", False)
 
     def emit(self, event: str, value: Any) -> None:
         for listener in tuple(self.listeners):
@@ -75,7 +124,7 @@ class ScambioClient:
     def _properties(
         self, proxy: Gio.DBusProxy, changed: GLib.Variant, invalidated: list[str]
     ) -> None:
-        if self.closed:
+        if self.closed or not proxy.get_name_owner():
             return
         before = self.props.copy()
         self.props.update(changed.unpack())
@@ -98,6 +147,8 @@ class ScambioClient:
         on_error: Callable[[str], None] | None = None,
     ) -> None:
         if self.closed or self.proxy is None:
+            if on_error and not self.closed:
+                on_error("org.freedesktop.DBus.Error.ServiceUnknown")
             return
         self.pending += 1
 
@@ -130,6 +181,9 @@ class ScambioClient:
     def stop(self) -> None:
         self.closed = True
         self.cancel.cancel()
+        if self.watch_id:
+            Gio.bus_unwatch_name(self.watch_id)
+            self.watch_id = 0
         if self.proxy:
             for handler in self.handlers:
                 self.proxy.disconnect(handler)

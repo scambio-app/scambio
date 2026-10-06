@@ -41,6 +41,7 @@ def main():
         "--output", type=Path, default=REPO / "docs/verification/01/idle.json"
     )
     parser.add_argument("--ui", action="store_true")
+    parser.add_argument("--shortcuts", action="store_true")
     args = parser.parse_args()
     output = args.output
     source_hashes = {
@@ -51,6 +52,10 @@ def main():
             "src/scambio/core/policy.py",
             "src/scambio/core/players.py",
             "src/scambio/core/service.py",
+            "src/scambio/core/shortcuts.py",
+            "src/scambio/core/shortcut_keys.py",
+            "src/scambio/core/bluez.py",
+            "src/scambio/api.py",
             "tests/fixtures/run_daemon.py",
             "src/scambio/i18n.py",
             "src/scambio/paths.py",
@@ -132,6 +137,33 @@ def main():
                     "notification_daemon", stdout=subprocess.DEVNULL
                 )
             )
+        kga = None
+        if args.shortcuts:
+            kga = stack.enter_context(
+                dbusmock.SpawnedMock.spawn_for_name(
+                    "org.kde.kglobalaccel",
+                    "/kglobalaccel",
+                    "org.kde.KGlobalAccel",
+                    stdout=subprocess.DEVNULL,
+                )
+            )
+            kga.obj.AddMethods(
+                "org.kde.KGlobalAccel",
+                [
+                    ("doRegister", "as", "", ""),
+                    ("getComponent", "s", "o", 'ret = "/component/test"'),
+                    ("setShortcut", "asaiu", "ai", "ret = args[1]"),
+                    ("setInactive", "as", "", ""),
+                ],
+                dbus_interface=dbusmock.MOCK_IFACE,
+            )
+            kga.obj.AddObject(
+                "/component/test",
+                "org.kde.kglobalaccel.Component",
+                {},
+                [],
+                dbus_interface=dbusmock.MOCK_IFACE,
+            )
         player = FakePlayer("idle", "Paused")
         stack.callback(player.close)
         fake = FakePactl(root / "pulse")
@@ -172,6 +204,8 @@ def main():
                     "RegisterStatusNotifierItem", dbus_interface=dbusmock.MOCK_IFACE
                 )
             )
+        if kga:
+            spin_until(lambda: properties()["ShortcutState"] == "active")
         # One settling delay, then only the two endpoint samples; no sampling loop.
         loop = GLib.MainLoop()
         GLib.timeout_add_seconds(1, lambda: (loop.quit(), False)[1])
@@ -187,7 +221,11 @@ def main():
         )
         ui_calls_before = {
             name: len(mock.obj.GetCalls(dbus_interface=dbusmock.MOCK_IFACE))
-            for name, mock in (("watcher", watcher), ("notifications", notifications))
+            for name, mock in (
+                ("watcher", watcher),
+                ("notifications", notifications),
+                ("kglobalaccel", kga),
+            )
             if mock is not None
         }
         start = time.monotonic()
@@ -203,6 +241,7 @@ def main():
                 "private dbusmock system/session buses; "
                 "bluez5/logind/ScreenSaver/MPRIS; fake pactl; app.scambio.Test"
                 + ("; SNI watcher/notifications mocks" if args.ui else "")
+                + ("; KGlobalAccel mock active" if args.shortcuts else "")
             ),
             "started_utc": started,
             "elapsed_seconds": elapsed,
@@ -224,12 +263,14 @@ def main():
             - player_calls_before,
             "state_after": str(properties()["State"]),
             "ui_enabled": args.ui,
+            "shortcut_state_after": str(properties()["ShortcutState"]),
             "ui_calls_during_idle": {
                 name: len(mock.obj.GetCalls(dbus_interface=dbusmock.MOCK_IFACE))
                 - ui_calls_before[name]
                 for name, mock in (
                     ("watcher", watcher),
                     ("notifications", notifications),
+                    ("kglobalaccel", kga),
                 )
                 if mock is not None
             },

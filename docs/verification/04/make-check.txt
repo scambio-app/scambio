@@ -1,0 +1,43 @@
+blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
+.venv/bin/ruff format --check src tests tools
+59 files already formatted
+.venv/bin/ruff check src tests tools
+All checks passed!
+.venv/bin/mypy
+Success: no issues found in 28 source files
+.venv/bin/pytest
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0
+rootdir: ~/development/scambio
+configfile: pyproject.toml
+testpaths: tests
+collected 710 items
+
+tests/test_adapters.py ....................                              [  2%]
+tests/test_audio_recovery.py ..................                          [  5%]
+tests/test_config_edit.py .............................                  [  9%]
+tests/test_config_state.py ......................................        [ 14%]
+tests/test_i18n.py ........................                              [ 18%]
+tests/test_install_user.py ......                                        [ 19%]
+tests/test_notifications.py ...............................              [ 23%]
+tests/test_players.py .....................................              [ 28%]
+tests/test_policy.py ................................................... [ 35%]
+........................................................................ [ 45%]
+.......................                                                  [ 49%]
+tests/test_policy_players.py ........................................... [ 55%]
+..........................................................               [ 63%]
+tests/test_presentation.py ............................................. [ 69%]
+........................                                                 [ 73%]
+tests/test_service.py ...................                                [ 75%]
+tests/test_service_players.py ..................................         [ 80%]
+tests/test_service_unblock.py ..                                         [ 80%]
+tests/test_session_recovery.py ..                                        [ 81%]
+tests/test_settings_api.py ...................                           [ 83%]
+tests/test_settings_cli.py .....                                         [ 84%]
+tests/test_settings_model.py ...................................         [ 89%]
+tests/test_shortcuts.py ............................................     [ 95%]
+tests/test_tray.py ...................                                   [ 98%]
+tests/test_ui_service.py ...........                                     [ 99%]
+tests/test_window.py .                                                   [100%]
+
+======================== 710 passed in 79.59s (0:01:19) ========================

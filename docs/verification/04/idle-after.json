@@ -1,0 +1,63 @@
+{
+  "source_sha256": {
+    "src/scambio/config.py": "3a2a4bee397d0a341ccfd46aff2fb50c0786d25cbe031bfd10a48233a889e40c",
+    "src/scambio/state.py": "a9736495f4028ecf6360f28584d4a22f98797e3e64ddc077cc7a2e4a6db2c843",
+    "src/scambio/core/policy.py": "a38cd621b297cfced908147d96818b3f24e431fbf5e72e610c8f60c360997c21",
+    "src/scambio/core/players.py": "166e2642cc2f8b03af0cacb28fda7aab3deec5bf5650e803b5c49ef942151b9d",
+    "src/scambio/core/service.py": "87478ad28075797c31f87a4a39561fbf2c34cd99dce288785642cad1d3f44934",
+    "src/scambio/core/shortcuts.py": "07bcca337ce0f425bdd5aea0de33384e0db167e6a12b186d6f17a001387cc0d0",
+    "src/scambio/core/shortcut_keys.py": "89c06af894090be90afb311ea541a83f1695e5aa4a620281457918755034ce61",
+    "src/scambio/core/bluez.py": "56561632d5399c30af8fb6a35bfe35f8170f0dd9f17cbf3bff1cbc5bbfb6c34d",
+    "src/scambio/api.py": "692396d6f65891b3e0d36a048568504002bd78be70171da0f89e12b7e1b8203b",
+    "tests/fixtures/run_daemon.py": "a10a3a31882b3294dc9834048f2059217e14eb662dbd7192a7299e61b30b1729",
+    "src/scambio/i18n.py": "98943583c4aac8dbce0ac377591e26a4c3c03a0ade6d8907e5da7f6412fe74a4",
+    "src/scambio/paths.py": "3eb2fd51b926be686411036f3bc6497b01e6ddb38dc2074b93a9cdc0ffc285ac",
+    "src/scambio/ui/__init__.py": "7d5e6a656a61b7d7173d5ec614603bbb4a1f2722c0afed25c13ec4fd2744ee80",
+    "src/scambio/ui/client.py": "1e7660c4d30debb0fb8fcbcebdd4724d24fd2d4fb1932a1e902607a0eebf0c6a",
+    "src/scambio/ui/actions.py": "0e7cccf1fc53dae06526681f9f6a9f8c9ca99f70964da8a771e03703dca3463a",
+    "src/scambio/ui/guard.py": "244f77f362d00665ec3c930830289af5ef6943a2e61edfa9dfed63a2a878631e",
+    "src/scambio/ui/notify.py": "941479b0e011c6f844e3d72a8e3f0de7fd407bbd555bb69d234e5479535c83ab",
+    "src/scambio/ui/presentation.py": "245b2ac76bf68c6d1dab15de922f54630bea969108ccfc26a3fb0a35ce3042f7",
+    "src/scambio/ui/tray.py": "ed6b9c2de3b32e4541ea1e198258cb49384ae7e1a5f2e0662862ff7919f375f8"
+  },
+  "environment": "private dbusmock system/session buses; bluez5/logind/ScreenSaver/MPRIS; fake pactl; app.scambio.Test; SNI watcher/notifications mocks; KGlobalAccel mock active",
+  "started_utc": "2026-10-06T23:48:54.768309+00:00",
+  "elapsed_seconds": 600.096870807989,
+  "processes": {
+    "daemon": {
+      "pid": 1926735,
+      "before": {
+        "cpu_seconds": 0.12,
+        "rss_kib": 24324
+      },
+      "after": {
+        "cpu_seconds": 0.12,
+        "rss_kib": 24452
+      },
+      "cpu_percent_interval": 0.0
+    },
+    "fake_pactl": {
+      "pid": 1926744,
+      "before": {
+        "cpu_seconds": 0.01,
+        "rss_kib": 11536
+      },
+      "after": {
+        "cpu_seconds": 0.01,
+        "rss_kib": 11536
+      },
+      "cpu_percent_interval": 0.0
+    }
+  },
+  "pactl_calls_during_idle": 0,
+  "mpris_calls_during_idle": 0,
+  "state_after": "released",
+  "ui_enabled": true,
+  "shortcut_state_after": "active",
+  "ui_calls_during_idle": {
+    "watcher": 0,
+    "notifications": 0,
+    "kglobalaccel": 0
+  },
+  "real_measurement": "Private buses; GM desktop/hardware proof separate"
+}
