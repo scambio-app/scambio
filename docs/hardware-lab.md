@@ -276,3 +276,22 @@ sorgente QML del systemtray (`plasma-workspace` 5.27.12,
 | Prese e rilasci reali | GM: icona corretta sia con gli occhiali sul PC sia sull'iPhone |
 
 Conseguenza: decisione 85 (`Activate` risponde con un errore). Non misurati: tema chiaro, GNOME.
+
+## 2026-10-06 — M15: presa subito dopo un rilascio verso l'iPhone (GM + Claude, prova reale spec 03)
+
+Metodo: journal di Scambio (`d33afa1`) e di `bluetoothd` durante il passo 5 della prova reale
+(`scambio switch` dal PC, poi «Annulla» nella notifica).
+
+| Momento | Fatto |
+|---|---|
+| 11:49:11,56 | `on_pc → releasing (switch)` |
+| 11:49:13,80 | rilascio finito; «Annulla» premuto ≈ 2 s dopo lo switch → `releasing → connecting (switch)`; bluetoothd: «No matching connection for device» |
+| 11:49:23,70 | `connect_timeout` dopo 10 s, notifica d'errore |
+| 11:49:32–11:49:54 | tre `Switch` di GM: `connect_failed` in 0,1–1,2 s; bluetoothd: AVDTP «Connection reset by peer (104)», poi «Operation already in progress (114)», SDP HFP non leggibile |
+| 11:50:33 | `Switch` di Claude: `on_pc` in 1,9 s, normale |
+
+Conclusione: per ≈ 30–40 s dopo il rilascio (mentre gli occhiali passano all'iPhone) il PC può
+essere rifiutato; il recupero è spontaneo. In M12 un doppio switch con ≈ 2 s fra i due comandi era
+riuscito: il comportamento non è sistematico. Non è un difetto del tray (il pulsante ha chiamato
+`Switch` come da contratto). Da decidere dopo la ripetizione del passo 5 con un'attesa di 5–10 s
+prima di «Annulla».

@@ -326,6 +326,11 @@ ignora `ItemIsMenu` e apre il menu solo se `Activate` fallisce. Correzione: deci
    nome sparisce dal bus, quindi l'icona potrebbe restare fino al riavvio del demone. Da
    osservare alla prova reale; se succede, si annota come debito per la spec 04.
 
+**Prova reale (in corso, 2026-10-06, `d33afa1`):** passi 0 (clic sinistro dopo la 85), 1
+(Breeze chiaro e scuro), 2, 3, 4 ok, verificati anche nel journal. Passo 5: «Annulla» premuto ≈ 2 s
+dopo lo switch → presa fallita per un rifiuto degli occhiali (M15); va ripetuto aspettando 5–10 s.
+Restano 5 (ripetizione), 6–10. Firma: pendente.
+
 **Visivo:** con Breeze scuro icona «occhiali + telefono» conforme al mock; GM vede le icone
 corrette sul PC e sull'iPhone. Menu, notifiche e tema chiaro alla prova reale (§6.1).
 
