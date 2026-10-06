@@ -374,3 +374,12 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     sinistro chiama `Activate` e apre il menu solo se la chiamata fallisce, quindi con la versione
     consegnata il clic sinistro non faceva nulla e la decisione 71 non era rispettata. È lo stesso
     comportamento delle app basate su libappindicator, che `Activate` non lo implementano.
+
+## 2026-10-07 — Orchestratore (dopo la chiusura della fase 3)
+
+99. Claude — La vecchia scorciatoia khotkeys di GM «Connetti Oakley» era stata spostata da GM su
+    **Meta+G** e chiamava `bluetoothctl` direttamente, scavalcando il demone. Il comando è stato
+    sostituito con `~/development/scambio/.venv/bin/scambio switch` (backup
+    `~/.config/khotkeysrc.bak-20261007-scambio`): stesso tasto, ora passa dalla policy (Priorità
+    iPhone compresa). La spec 04 deve **rimuovere** questa azione khotkeys quando registra Meta+G
+    via portal, altrimenti i due binding si contendono il tasto. Fasce: spec 04 usa 100–119.
