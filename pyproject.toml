@@ -32,7 +32,7 @@ files = ["src"]
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["scambio.core.*", "scambio.config", "scambio.state"]
+module = ["scambio.core.*", "scambio.config", "scambio.state", "scambio.i18n", "scambio.ui.presentation"]
 strict = true
 
 [tool.pytest.ini_options]

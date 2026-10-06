@@ -6,6 +6,8 @@ import tomllib
 from dataclasses import dataclass, field, fields
 from pathlib import Path
 
+from scambio.i18n import Translator
+
 LOG = logging.getLogger(__name__)
 RESUME_DEFAULTS = {"generic": 0, "meta_glasses": 2000}
 
@@ -61,12 +63,13 @@ class Config:
     backend: Backend = field(default_factory=Backend)
     shortcut: str = "<Super>g"
     language: str = "auto"
+    tray: bool = True
+    notifications: bool = True
 
 
-TEMPLATE = """# Scambio configuration. Only already paired devices are supported.
-[device]
-address = "" # Bluetooth address, XX:XX:XX:XX:XX:XX
-profile = "generic" # generic or meta_glasses
+TEMPLATE = """[device]
+address = ""
+profile = "generic"
 
 [policy]
 grab_delay_ms = 500
@@ -75,7 +78,6 @@ connect_timeout_seconds = 10
 sink_timeout_seconds = 5
 sleep_release_timeout_seconds = 4
 unblock_silence_seconds = 10
-# Default follows device.profile: generic 0, meta_glasses 2000 (provisional).
 # resume_delay_ms = 2000
 
 [audio]
@@ -88,8 +90,9 @@ preferred = "<Super>g"
 
 [ui]
 language = "auto"
+tray = true
+notifications = true
 
-# Optional adapter timing; defaults match the measured backend.
 [backend]
 coalesce_ms = 50
 retry_initial_seconds = 1
@@ -99,6 +102,44 @@ dbus_timeout_seconds = 10
 command_timeout_seconds = 10
 player_timeout_ms = 1000
 """
+
+CONFIG_COMMENTS = {
+    "device.address": "config-device-address",
+    "device.profile": "config-device-profile",
+    "policy.grab_delay_ms": "config-policy-grab-delay",
+    "policy.release_idle_seconds": "config-policy-release-idle",
+    "policy.connect_timeout_seconds": "config-policy-connect-timeout",
+    "policy.sink_timeout_seconds": "config-policy-sink-timeout",
+    "policy.sleep_release_timeout_seconds": "config-policy-sleep-timeout",
+    "policy.unblock_silence_seconds": "config-policy-unblock",
+    "policy.resume_delay_ms": "config-policy-resume-delay",
+    "audio.ignore_roles": "config-audio-ignore-roles",
+    "audio.ignore_apps": "config-audio-ignore-apps",
+    "audio.ignore_players": "config-audio-ignore-players",
+    "shortcut.preferred": "config-shortcut-preferred",
+    "ui.language": "config-ui-language",
+    "ui.tray": "config-ui-tray",
+    "ui.notifications": "config-ui-notifications",
+}
+
+
+def template(language: str = "auto") -> str:
+    tr = Translator(language).tr
+    lines = ["# " + tr("config-header")]
+    section = ""
+    for line in TEMPLATE.splitlines():
+        if line.startswith("["):
+            section = line[1:-1]
+            if section == "backend":
+                lines.append("# " + tr("config-backend-header"))
+        elif "=" in line and section != "backend":
+            key = line.lstrip("# ").split("=", 1)[0].strip()
+            lines.extend(
+                "# " + text
+                for text in tr(CONFIG_COMMENTS[section + "." + key]).splitlines()
+            )
+        lines.append(line)
+    return "\n".join(lines) + "\n"
 
 
 def config_path() -> Path:
@@ -111,7 +152,7 @@ def load(path: Path | None = None) -> Config:
         path.parent.mkdir(parents=True, exist_ok=True)
         try:
             with path.open("x") as out:
-                out.write(TEMPLATE)
+                out.write(template())
         except FileExistsError:
             pass
     try:
@@ -194,7 +235,20 @@ def parse(data: dict[str, object]) -> Config:
     if backend.retry_initial_seconds > backend.retry_max_seconds:
         raise ConfigInvalid("retry_initial_seconds exceeds retry_max_seconds")
     shortcut = string(section("shortcut", {"preferred"}), "preferred", "<Super>g")
-    language = string(section("ui", {"language"}), "language", "auto")
+    ui = section("ui", {"language", "tray", "notifications"})
+    language = string(ui, "language", "auto")
+    for key in ("tray", "notifications"):
+        if type(ui.get(key, True)) is not bool:
+            raise ConfigInvalid(f"{key}: expected boolean")
     if language not in {"auto", "it", "en", "de"}:
         raise ConfigInvalid("language: unsupported language")
-    return Config(Device(address, profile), policy, audio, backend, shortcut, language)
+    return Config(
+        Device(address, profile),
+        policy,
+        audio,
+        backend,
+        shortcut,
+        language,
+        bool(ui.get("tray", True)),
+        bool(ui.get("notifications", True)),
+    )

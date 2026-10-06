@@ -4,7 +4,7 @@ VENV = .venv/bin
 venv:
 	$(PYTHON) -m venv --system-site-packages .venv
 	$(VENV)/python -m pip install -e '.[dev]'
-check:
+check: i18n
 	$(VENV)/ruff format --check src tests tools
 	$(VENV)/ruff check src tests tools
 	$(VENV)/mypy
@@ -14,11 +14,16 @@ fmt:
 	$(VENV)/ruff check --fix src tests tools
 test:
 	$(VENV)/pytest
-run:
+run: i18n
 	$(VENV)/scambio daemon --debug
 hooks:
 	git config core.hooksPath .githooks
-install-user:
+install-user: i18n
 	$(VENV)/python tools/install_user.py install
 uninstall-user:
 	$(VENV)/python tools/install_user.py uninstall
+
+.PHONY: i18n
+i18n:
+	@command -v msgfmt >/dev/null || { echo "msgfmt missing: install gettext before make i18n" >&2; exit 1; }
+	@for lang in it en de; do mkdir -p build/locale/$$lang/LC_MESSAGES; msgfmt --check design/i18n/$$lang.po -o build/locale/$$lang/LC_MESSAGES/scambio.mo || exit; done

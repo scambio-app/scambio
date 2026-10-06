@@ -1,7 +1,6 @@
 """Thin D-Bus client. The daemon is imported only by the daemon command."""
 
 import argparse
-import gettext
 import json
 import logging
 import sys
@@ -10,21 +9,27 @@ from typing import Any, cast
 from gi.repository import Gio, GLib
 
 from scambio.api import BUS_NAME, INTERFACE, PATH, introspection_xml
-
-_ = gettext.gettext
+from scambio.config import config_path
+from scambio.i18n import cli_translator
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        prog="scambio", description=_("Switch Bluetooth audio between PC and phone")
-    )
-    commands = parser.add_subparsers(dest="command", required=True)
-    daemon = commands.add_parser("daemon", help=_("Run the daemon"))
-    daemon.add_argument("--debug", action="store_true", help=_("Enable debug logging"))
-    status = commands.add_parser("status", help=_("Show daemon status"))
-    status.add_argument("--json", action="store_true", help=_("Output JSON"))
-    commands.add_parser("switch", help=_("Switch the device destination"))
-    priority = commands.add_parser("priority", help=_("Show or change iPhone priority"))
+    _ = cli_translator(config_path()).tr
+
+    class Parser(argparse.ArgumentParser):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            kwargs["add_help"] = False
+            super().__init__(*args, **kwargs)
+            self.add_argument("-h", "--help", action="help", help=_("cli-help-help"))
+
+    parser = Parser(prog="scambio", description=_("cli-description"))
+    commands = parser.add_subparsers(dest="command", required=True, parser_class=Parser)
+    daemon = commands.add_parser("daemon", help=_("cli-daemon-help"))
+    daemon.add_argument("--debug", action="store_true", help=_("cli-debug-help"))
+    status = commands.add_parser("status", help=_("cli-status-help"))
+    status.add_argument("--json", action="store_true", help=_("cli-json-help"))
+    commands.add_parser("switch", help=_("cli-switch-help"))
+    priority = commands.add_parser("priority", help=_("cli-priority-help"))
     priority.add_argument("value", nargs="?", choices=["on", "off", "toggle"])
     args = parser.parse_args(argv)
     if args.command == "daemon":
@@ -48,7 +53,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         if not proxy.get_name_owner():
             print(
-                _("Scambio is not running; run systemctl --user start scambio"),
+                _("cli-not-running"),
                 file=sys.stderr,
             )
             return 3
@@ -94,7 +99,13 @@ def main(argv: list[str] | None = None) -> int:
                 )
         return 0
     except GLib.Error as exc:
-        print(_("D-Bus error: %(error)s") % {"error": str(exc)}, file=sys.stderr)
+        name = Gio.DBusError.get_remote_error(exc) or str(exc.domain)
+        key = {
+            INTERFACE + ".Error.DeviceUnavailable": "cli-error-device-unavailable",
+            INTERFACE + ".Error.ConfigInvalid": "cli-error-config-invalid",
+            INTERFACE + ".Error.RestartRequired": "cli-error-restart-required",
+        }.get(name, "cli-dbus-error")
+        print(_(key, error=name), file=sys.stderr)
         return 1
 
 

@@ -338,3 +338,11 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
     rispondere a `Disconnect()` prima di emettere `Connected=false`: ripartire subito con la
     presa (doppio switch) faceva leggere quel segnale ritardato come presa fallita. Il default
     `resume_delay_ms = 2000` per `meta_glasses` resta definitivo (M11).
+
+## 2026-10-06 — Spec 03, implementazione (Codex)
+
+90. Codex — Cataloghi compilati in `build/locale`, ignorata da git; risoluzione
+    della lingua pura condivisa da CLI, commenti e inibitore. Il modello TOML
+    conserva una base senza prosa per gli harness e genera i commenti solo alla
+    creazione del file. I file esistenti non vengono riscritti. La UI richiede
+    cataloghi validi; CLI e inibitore possono ripiegare su inglese o chiavi.

@@ -10,6 +10,7 @@ from scambio.config import Config
 from scambio.core.policy import Event
 from scambio.core.ports import Emit
 from scambio.core.transport import BusClient
+from scambio.i18n import Translator
 
 LOG = logging.getLogger(__name__)
 PROPERTIES = "org.freedesktop.DBus.Properties"
@@ -170,7 +171,12 @@ class Session:
             "Inhibit",
             GLib.Variant(
                 "(ssss)",
-                ("sleep", "Scambio", "Release Bluetooth device before sleep", "delay"),
+                (
+                    "sleep",
+                    "Scambio",
+                    Translator(self.config.language).tr("session-inhibit-reason"),
+                    "delay",
+                ),
             ),
             GLib.VariantType.new("(h)"),
             Gio.DBusCallFlags.NO_AUTO_START,
