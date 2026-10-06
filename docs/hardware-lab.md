@@ -293,5 +293,7 @@ Metodo: journal di Scambio (`d33afa1`) e di `bluetoothd` durante il passo 5 dell
 Conclusione: per ≈ 30–40 s dopo il rilascio (mentre gli occhiali passano all'iPhone) il PC può
 essere rifiutato; il recupero è spontaneo. In M12 un doppio switch con ≈ 2 s fra i due comandi era
 riuscito: il comportamento non è sistematico. Non è un difetto del tray (il pulsante ha chiamato
-`Switch` come da contratto). Da decidere dopo la ripetizione del passo 5 con un'attesa di 5–10 s
-prima di «Annulla».
+`Switch` come da contratto). Ripetizione (2026-10-07 00:14): «Annulla» ≈ 6,5 s dopo lo switch →
+`on_pc` in 4,3 s. Il rifiuto si presenta solo con una presa nei primissimi secondi dopo il
+rilascio; nessuna modifica per ora (se dà fastidio nell'uso: ritardo minimo prima di una presa
+che segue un rilascio, da decidere con GM).

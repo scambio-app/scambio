@@ -1,6 +1,6 @@
 # Spec 03 — Tray e notifiche
 
-Stato: approvata (GM, 2026-10-05) · Autore: Claude · Data: 2026-10-05
+Stato: verificata (GM, 2026-10-07) · approvata il 2026-10-05 · Autore: Claude · Data: 2026-10-05
 
 ## 1. Obiettivo
 
@@ -262,20 +262,20 @@ nome d'icona, nessun parametro delle notifiche. `design/ui/settings-window.blp` 
 ## 6. Checklist di done
 
 - [x] Decisioni 70–84 in `docs/decisions.md` e 02 §4 aggiornato (Claude, prima del `/goal`).
-- [ ] Ogni regola di §3.1 e di 05 §5.3–§5.6 ha un test (§3.2.5).
-- [ ] `make check` verde (con `make i18n`); nessun test saltato.
-- [ ] Nessun polling né timer nella UI; misura CPU/RSS a riposo (10 min) prima e dopo, nel report;
+- [x] Ogni regola di §3.1 e di 05 §5.3–§5.6 ha un test (§3.2.5).
+- [x] `make check` verde (con `make i18n`); nessun test saltato.
+- [x] Nessun polling né timer nella UI; misura CPU/RSS a riposo (10 min) prima e dopo, nel report;
       RSS ≤ 40 MB.
-- [ ] Nessun valore personale hardcodato; `ui.tray`, `ui.notifications` nel modello di config.
-- [ ] Nessun testo visibile, nome d'icona o parametro di notifica nel codice; CLI, motivo
+- [x] Nessun valore personale hardcodato; `ui.tray`, `ui.notifications` nel modello di config.
+- [x] Nessun testo visibile, nome d'icona o parametro di notifica nel codice; CLI, motivo
       dell'inibitore e commenti del modello di configurazione con chiavi.
-- [ ] `design/` non modificato; richieste di design elencate nel report.
-- [ ] Nessun file scritto fuori da `~/.config/scambio/` e `~/.local/share/scambio/`.
-- [ ] Prove automatiche con `ui.tray = false` e `ui.notifications = false`.
-- [ ] `docs/verification/03/report.md` scritto (GNOME dichiarato non verificato); decisioni
+- [x] `design/` non modificato; richieste di design elencate nel report.
+- [x] Nessun file scritto fuori da `~/.config/scambio/` e `~/.local/share/scambio/`.
+- [x] Prove automatiche con `ui.tray = false` e `ui.notifications = false`.
+- [x] `docs/verification/03/report.md` scritto (GNOME dichiarato non verificato); decisioni
       tecniche da 90 in `docs/decisions.md`.
-- [ ] Checklist di prova reale per GM preparata (§6.1), con i comandi esatti.
-- [ ] Prova reale eseguita da GM: … · Firma: GM, data.
+- [x] Checklist di prova reale per GM preparata (§6.1), con i comandi esatti.
+- [x] Prova reale eseguita da GM: passi 0–10 superati (§7) · Firma: GM, 2026-10-07.
 
 ### 6.1 Checklist di prova reale per GM (traccia; Codex la completa nel report)
 
@@ -326,10 +326,23 @@ ignora `ItemIsMenu` e apre il menu solo se `Activate` fallisce. Correzione: deci
    nome sparisce dal bus, quindi l'icona potrebbe restare fino al riavvio del demone. Da
    osservare alla prova reale; se succede, si annota come debito per la spec 04.
 
-**Prova reale (in corso, 2026-10-06, `d33afa1`):** passi 0 (clic sinistro dopo la 85), 1
-(Breeze chiaro e scuro), 2, 3, 4 ok, verificati anche nel journal. Passo 5: «Annulla» premuto ≈ 2 s
-dopo lo switch → presa fallita per un rifiuto degli occhiali (M15); va ripetuto aspettando 5–10 s.
-Restano 5 (ripetizione), 6–10. Firma: pendente.
+**Prova reale (GM, 2026-10-06 e 2026-10-07, `d33afa1`): superata, passi 0–10.** Verificata
+passo per passo anche nel journal.
+- 0 clic sinistro apre il menu (dopo la decisione 85); 1 Breeze chiaro e scuro ok; 2 «sul PC»,
+  «Torna all'iPhone tra 2 min», tooltip con l'ora, nessuna notifica; 3 «Lascia all'iPhone»:
+  lucchetto e casella, nessuna notifica; 4 `scambio switch` → notifica «… sul PC — Priorità
+  iPhone disattivata.».
+- 5 «Annulla» premuto ≈ 2 s dopo lo switch: presa rifiutata dagli occhiali (M15); ripetuto con
+  ≈ 6 s di attesa: occhiali sul PC in 4,3 s, nessuna altra notifica. Limite hardware annotato.
+- 6 custodia chiusa: rilascio esterno silenzioso; il video riavviato va sulla Scarlett senza
+  presa (anti ping-pong della spec 02, come previsto); lo switch dal menu fallisce con la
+  notifica «non raggiungibile» + «Riprova» e l'icona d'errore. Presa automatica dopo il
+  silenzio non ripetuta (stesso percorso d'errore).
+- 7 Bluetooth spento: «non disponibile», switch grigio, nessuna notifica; 8 `ui.language = "de"`
+  + reload: menu e `--help` in tedesco, poi `auto`; 9 riavvio di plasmashell: icona registrata di
+  nuovo nello stato giusto; 10 «Esci da Scambio»: demone fermo, occhiali ancora collegati,
+  ripartito con `systemctl --user start scambio`.
+- Firma: **GM, 2026-10-07**.
 
 **Visivo:** con Breeze scuro icona «occhiali + telefono» conforme al mock; GM vede le icone
 corrette sul PC e sull'iPhone. Menu, notifiche e tema chiaro alla prova reale (§6.1).

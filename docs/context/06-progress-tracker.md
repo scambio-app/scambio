@@ -16,7 +16,7 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 | 0 | Fondazioni documentali e misure iniziali | ✅ chiusa |
 | 1 | Spec 01 — demone headless: tooling, config, BlueZ, eventi audio, sessione, macchina a stati, instradamento, API D-Bus, CLI `switch/status/priority`, servizio utente | ✅ verificata 2026-10-05 (237 test, prova reale GM ok; sospensione n/a su casa) |
 | 2 | Spec 02 — pausa MPRIS durante presa e rilascio (decisioni 50–56; niente muto, M10); l'instradamento e il rilascio a tempo sono già nella spec 01 | ✅ verificata 2026-10-05 (418 test, prova reale GM ok dopo la correzione 68; annuncio misurato M11b; Q4 chiusa senza misura, decisione 67) |
-| 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | consegnata da Codex il 2026-10-06 (commit 52a300b, 5bfe574, 0c1aea3; 564 test, CPU 0 %, RSS 24 MB; decisioni 90–94); audit 1 di Claude fatto il 2026-10-06 (codice conforme; difetto del clic sinistro su Plasma, M14 → decisione 85, corretto da Codex in d33afa1, 569 test); prova reale di GM in corso: passi 0–4 ok, 5 da ripetere (M15), 6–10 da fare |
+| 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | ✅ verificata 2026-10-07 (569 test; audit 1 di Claude: codice conforme, clic sinistro su Plasma corretto con la decisione 85, d33afa1; prova reale GM passi 0–10 ok; misure M14, M15) |
 | 4 | Spec 04 — scorciatoia globale (portal) + finestra impostazioni | da fare |
 | 5 | Avvio automatico, packaging (Flatpak), prima release | da fare |
 | 6+ | Premium: widget Plasma/GNOME, ponte fotocamera iPhone, agenti | futuro |
@@ -43,3 +43,4 @@ Vedi `docs/decisions.md`, voci 1–29.
 5. Prossime unità (decisione 49, 2026-10-05): **in parallelo** chat di design (mock UI → spec 03
    tray) e chat di sviluppo (spec 02 pausa MPRIS). Avvio automatico al login attivo (decisione 48).
 4. ~~Misure aperte: Firefox in pausa (M5), Q4~~ — chiuse il 2026-10-05 (M9, decisione 67). **Fase 2 chiusa il 2026-10-05.**
+6. **Fase 3 chiusa il 2026-10-07** (spec 03 verificata). Prossima unità: spec 04 (scorciatoia globale + finestra impostazioni).
