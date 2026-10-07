@@ -298,13 +298,16 @@ def apt_repo():
     repository = SITE / "apt"
     pool = repository / "pool/main/s/scambio"
     pool.mkdir(parents=True, exist_ok=True)
+    copied = {}
     for source in [*archived(), DIST]:
         value = version() if source == DIST else source.name
         for package in [source / f"scambio_{value}_all.deb"]:
             signer.verify(package, Path(str(package) + ".asc"))
             destination = pool / package.name
-            if destination.exists() and digest(destination) != digest(package):
+            checksum = digest(package)
+            if package.name in copied and copied[package.name] != checksum:
                 raise ValueError("Refusing to replace an existing package version")
+            copied[package.name] = checksum
             shutil.copyfile(package, destination)
     binary = repository / "dists/stable/main/binary-all"
     binary.mkdir(parents=True, exist_ok=True)
