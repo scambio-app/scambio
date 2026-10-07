@@ -1,7 +1,10 @@
 """One GLib loop: policy executor, public D-Bus service and lifecycle."""
 
 import logging
+import os
+import shutil
 import signal
+import sys
 from collections import deque
 from collections.abc import Callable, Sequence
 from dataclasses import replace
@@ -21,6 +24,7 @@ from scambio.config import (
     window_values,
 )
 from scambio.core.audio import Audio
+from scambio.core.background import Background
 from scambio.core.bluez import BlueZ
 from scambio.core.players import Players
 from scambio.core.policy import Action, Context, Event, step
@@ -34,6 +38,7 @@ from scambio.core.ports import (
 )
 from scambio.core.session import Session
 from scambio.core.shortcuts import Shortcuts
+from scambio.i18n import Translator
 from scambio.state import Store
 from scambio.ui import DisabledUi, Ui, start_ui
 
@@ -81,6 +86,8 @@ class Service:
         self.ui: Ui | DisabledUi | None = None
         self.shortcuts: Shortcuts | None = None
         self.quit_done: Done = lambda: None
+        self.restart_done: Done = lambda: None
+        self.background = Background(bus, config.backend.dbus_timeout_seconds * 1000)
         self.bus, self.config, self.store = bus, config, store
         self.config_file, self.schedule = config_file, timer
         self.cgroup = cgroup
@@ -126,9 +133,10 @@ class Service:
             None,
         )
         if result.unpack()[0] != 1:
-            LOG.error("Scambio is already running")
+            LOG.error(Translator(self.config.language).tr("daemon-already-running"))
             return False
         self.owned = True
+        self.background.start(self.config.language)
         self.registration = self.bus.register_object(
             PATH, self.info, self._method, self._get, None
         )
@@ -535,16 +543,17 @@ class Service:
         except OSError as exc:
             raise ConfigInvalid(str(exc)) from exc
         if device_changed:
-            if any(
-                line.rsplit("/", 1)[-1] == "scambio.service"
-                for line in self.cgroup().splitlines()
-            ):
-                return True
-            raise RestartRequired("Configuration saved; restart required")
+            return True
         self._apply_config(edit.config)
         return False
 
     def _restart(self) -> None:
+        if Path("/.flatpak-info").is_file() or not any(
+            line.rsplit("/", 1)[-1] == "scambio.service"
+            for line in self.cgroup().splitlines()
+        ):
+            self.stop(self.restart_done)
+            return
         LOG.info("Restarting scambio.service after configured device change")
 
         def finished(bus: Gio.DBusConnection, result: Gio.AsyncResult) -> None:
@@ -641,6 +650,7 @@ class Service:
         if self.closed:
             return
         self.closed = True
+        self.background.close()
         if self.shortcuts:
             self.shortcuts.close()
         if self.ui:
@@ -688,12 +698,26 @@ class DeviceBusy(ValueError):
     """Changing the configured device is unsafe in the current state."""
 
 
+def reexec() -> None:
+    executable = os.path.abspath(sys.executable)
+    args = [executable, "-I", "-m", "scambio", "daemon"]
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
+        args.append("--debug")
+    os.execv(executable, args)
+
+
+def pactl_command() -> tuple[str, ...]:
+    search = "/usr/bin" if Path("/.flatpak-info").is_file() else "/usr/bin:/bin"
+    return (shutil.which("pactl", path=search) or "/usr/bin/pactl",)
+
+
 def run(
     config_file: Path | None = None,
     state_file: Path | None = None,
-    pactl: Sequence[str] = ("pactl",),
+    pactl: Sequence[str] | None = None,
     timer: Schedule = schedule,
 ) -> int:
+    pactl = pactl_command() if pactl is None else pactl
     config_file = config_file or config_path()
     try:
         config = load(config_file)
@@ -714,6 +738,7 @@ def run(
 
     service = Service(bus, config, store, config_file, factory, timer)
     loop = GLib.MainLoop()
+    restarting = False
 
     def flushed_stop() -> None:
         def flushed(connection: Gio.DBusConnection, result: Gio.AsyncResult) -> None:
@@ -727,6 +752,13 @@ def run(
         bus.flush(None, flushed)
 
     service.quit_done = flushed_stop
+
+    def restart() -> None:
+        nonlocal restarting
+        restarting = True
+        flushed_stop()
+
+    service.restart_done = restart
     if not service.start():
         service.close()
         return 1
@@ -754,4 +786,6 @@ def run(
         loop.run()  # type: ignore[no-untyped-call]  # PyGObject 3.48 stub
     finally:
         service.close()
+    if restarting:
+        reexec()
     return 0

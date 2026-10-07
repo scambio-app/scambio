@@ -133,13 +133,13 @@ def test_busy_checks_merged_device(running_executor, state, external):
     assert service.config_file.read_bytes() == before
 
 
-def test_restart_required_keeps_running_config(running_executor):
+def test_device_change_shuts_down_before_reexec_without_systemd(running_executor):
     service, _ = running_executor
-    with pytest.raises(GLib.Error) as exc:
-        set_config(
-            service.bus, {"device.address": GLib.Variant("s", "11:22:33:44:55:66")}
-        )
-    assert Gio.DBusError.get_remote_error(exc.value).endswith(".RestartRequired")
+    restarted = []
+    service.restart_done = lambda: restarted.append((service.closed, service.owned))
+    set_config(service.bus, {"device.address": GLib.Variant("s", "11:22:33:44:55:66")})
+    spin_until(lambda: restarted)
+    assert restarted == [(True, False)]
     assert service.config.device.address == ADDRESS
     assert load(service.config_file).device.address == "11:22:33:44:55:66"
 

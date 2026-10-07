@@ -140,7 +140,10 @@ def test_reload_and_duplicate_and_shutdown(daemon, fake_pactl, tmp_path):
         text=True,
         timeout=5,
     )
-    assert other.returncode == 1 and "already running" in other.stderr
+    from scambio.i18n import Translator
+
+    assert other.returncode == 1
+    assert Translator().tr("daemon-already-running") in other.stderr
     fake_pactl.add_sink()
     fake_pactl.event()
     client("switch")

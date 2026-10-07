@@ -4,4 +4,4 @@ import sys
 
 from scambio.cli import main
 
-raise SystemExit(main(["daemon", *sys.argv[1:]]))
+raise SystemExit(main(sys.argv[1:] or ["daemon"]))
