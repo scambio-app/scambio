@@ -91,3 +91,34 @@ def test_manifest_permissions_are_exact():
     }
     assert set(permissions) == expected
     assert len(permissions) == len(expected)
+
+
+def test_apt_discards_untrusted_staging_packages(release_tools, monkeypatch, tmp_path):
+    release = release_tools
+    site, dist, previous = (tmp_path / name for name in ("site", "dist", "0.9.0"))
+    for directory in (site, dist, previous):
+        directory.mkdir()
+    pool = site / "apt/pool/unexpected"
+    pool.mkdir(parents=True)
+    (pool / "injected_99_all.deb").write_bytes(b"untrusted staging")
+    (dist / "scambio_1.0.0_all.deb").write_bytes(b"current authenticated package")
+    (previous / "scambio_0.9.0_all.deb").write_bytes(b"previous authenticated package")
+    monkeypatch.setattr(release, "SITE", site)
+    monkeypatch.setattr(release, "DIST", dist)
+    monkeypatch.setattr(release, "check", lambda: "1.0.0")
+    monkeypatch.setattr(release, "version", lambda: "1.0.0")
+    monkeypatch.setattr(release, "archived", lambda: [previous])
+    monkeypatch.setattr(release, "latest", lambda: None)
+    monkeypatch.setattr(release.Signing, "__init__", lambda self: None)
+    monkeypatch.setattr(release.Signing, "verify", lambda *args, **kwargs: None)
+    monkeypatch.setattr(release.Signing, "sign", lambda *args, **kwargs: None)
+
+    def run(*args, **kwargs):
+        assert sorted(path.name for path in (site / "apt/pool").rglob("*.deb")) == [
+            "scambio_0.9.0_all.deb",
+            "scambio_1.0.0_all.deb",
+        ]
+        return ""
+
+    monkeypatch.setattr(release, "run", run)
+    release.apt_repo()

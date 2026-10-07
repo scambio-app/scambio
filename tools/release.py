@@ -297,6 +297,9 @@ def apt_repo():
     signer = Signing()
     repository = SITE / "apt"
     pool = repository / "pool/main/s/scambio"
+    # Staging is derived output, never a source of packages to be signed.
+    if (repository / "pool").exists():
+        shutil.rmtree(repository / "pool")
     pool.mkdir(parents=True, exist_ok=True)
     copied = {}
     for source in [*archived(), DIST]:
