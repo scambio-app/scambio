@@ -597,3 +597,11 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      inglobare codice GPL in un'app chiusa senza pubblicarla tutta. PolyForm Shield aggiungeva poca
      protezione in più e toglieva i vantaggi dell'open source (fiducia, contributi, visibilità).
      Restano: CLA (Fermich titolare, per riusare il codice nell'app Mac chiusa) e marchio (dec. 133).
+138. GM — **Deposito del marchio rinviato**: per ora nessuna spesa per la registrazione (stima
+     700–900 €); la 133 resta l'obiettivo, da eseguire quando c'è budget. Nel frattempo: niente ® o ™,
+     marchi Meta solo descrittivi (dec. 134).
+139. GM — **Lista d'attesa su scambio.app** prima del lancio, per misurare la domanda per
+     piattaforma (Mac/Windows/Linux e iPhone/Android). Pagina unica in EN/IT/DE, lingua dal browser
+     con inglese come predefinita. Anteprima: https://claude.ai/artifact/44UmbRNbQZMbayNU8HYmov.
+     Prima della messa online servono: backend del modulo, informativa privacy completata (sede,
+     P. IVA, fornitore email) e doppio opt-in. Account social più avanti.
