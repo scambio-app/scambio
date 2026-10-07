@@ -69,7 +69,10 @@ def install(prefix: Path, destdir: Path, systemd: bool, python_lib: str) -> None
     tree(ROOT / "design", "share/scambio/design")
     tree(ROOT / "build/locale", "share/scambio/locale")
     tree(ROOT / "build/ui", "share/scambio/ui")
-    tree(ROOT / "design/icons/hicolor", "share/icons/hicolor")
+    icons = ROOT / "design/icons/hicolor"
+    for icon in sorted(icons.rglob("*")):
+        if icon.suffix in {".svg", ".png"}:
+            copy(icon, str(Path("share/icons/hicolor") / icon.relative_to(icons)))
     desktop = (ROOT / f"design/desktop/{APP}.desktop.in").read_text()
     write(
         f"share/applications/{APP}.desktop",
