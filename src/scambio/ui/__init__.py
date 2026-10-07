@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """UI lifecycle; all daemon state arrives through its asynchronous D-Bus proxy."""
 
 from __future__ import annotations

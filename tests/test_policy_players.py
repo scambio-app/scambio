@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Spec 02 §3.1.4: exact effects, flows and exhaustive finite traces."""
 
 from collections import defaultdict

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scambio"
-version = "0.1.0"
+version = "1.0.0"
 requires-python = ">=3.11"
 dependencies = []
 
@@ -16,6 +16,13 @@ scambio = "scambio.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.cmdclass]
+build_py = "tools.build.BuildPy"
+
+[tool.setuptools.package-dir]
+"" = "src"
+tools = "tools"
 
 [tool.setuptools.package-data]
 scambio = ["core/dbus/*.xml"]

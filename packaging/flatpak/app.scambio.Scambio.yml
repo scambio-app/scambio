@@ -1,0 +1,28 @@
+app-id: app.scambio.Scambio
+runtime: org.gnome.Platform
+runtime-version: '51'
+sdk: org.gnome.Sdk
+command: scambio
+branch: stable
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --socket=pulseaudio
+  - --system-talk-name=org.bluez
+  - --system-talk-name=org.freedesktop.login1
+  - --talk-name=org.mpris.MediaPlayer2.*
+  - --talk-name=org.kde.kglobalaccel
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.ScreenSaver
+modules:
+  - name: scambio
+    buildsystem: simple
+    build-commands:
+      - make install PREFIX=/app
+    sources:
+      - type: archive
+        path: '@ARCHIVE@'
+        sha256: '@SHA256@'

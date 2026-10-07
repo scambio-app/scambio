@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Pulse events via async Gio subprocesses; no work without events or recovery."""
 
 import codecs

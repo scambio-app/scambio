@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Replaceable adapter boundaries; no transport types leak into the policy."""
 
 from collections.abc import Callable

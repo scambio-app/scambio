@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Pure settings presentation and per-key serialization of immediate edits."""
 
 from collections.abc import Callable

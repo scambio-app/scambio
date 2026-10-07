@@ -1,0 +1,6 @@
+Types: deb
+URIs: https://scambio.app/apt
+Suites: stable
+Components: main
+Architectures: all
+Signed-By: /usr/share/keyrings/scambio-archive-keyring.gpg

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Thin D-Bus client. The daemon is imported only by the daemon command."""
 
 import argparse
@@ -8,6 +10,7 @@ from typing import Any, cast
 
 from gi.repository import Gio, GLib
 
+from scambio import __version__
 from scambio.api import BUS_NAME, INTERFACE, PATH, introspection_xml
 from scambio.config import config_path
 from scambio.i18n import cli_translator
@@ -24,6 +27,9 @@ def main(argv: list[str] | None = None) -> int:
             self.add_argument("-h", "--help", action="help", help=_("cli-help-help"))
 
     parser = Parser(prog="scambio", description=_("cli-description"))
+    parser.add_argument(
+        "--version", action="version", version=__version__, help=_("cli-version-help")
+    )
     commands = parser.add_subparsers(dest="command", required=True, parser_class=Parser)
     daemon = commands.add_parser("daemon", help=_("cli-daemon-help"))
     daemon.add_argument("--debug", action="store_true", help=_("cli-debug-help"))

@@ -48,7 +48,7 @@ if [ -n "$_GFY_COMMONDIR" ] && [ "$_GFY_GITDIR" != "$_GFY_COMMONDIR" ]; then
     exit 0
 fi
 # Detect the correct Python interpreter (handles uv tool, pipx, venv, system installs).
-# _PINNED was recorded at hook-install time; tried first so the hook works even
+# Try the repository environment first so the hook works even
 # when the graphify launcher is not on PATH (common in GUI clients and CI).
 #
 # Probes check availability with importlib.util.find_spec instead of importing
@@ -60,7 +60,9 @@ fi
 # fails loudly in the log if the package is broken under that interpreter.
 _GFY_PROBE="import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('graphify') else 1)"
 GRAPHIFY_PYTHON=""
-_PINNED='~/.local/share/uv/tools/graphifyy/bin/python'
+_GFY_ROOT=$(git rev-parse --show-toplevel)
+cd "$_GFY_ROOT" || exit 1
+_PINNED="$_GFY_ROOT/.venv/bin/python"
 if [ -n "$_PINNED" ] && [ -x "$_PINNED" ] && "$_PINNED" -c "$_GFY_PROBE" 2>/dev/null; then
     GRAPHIFY_PYTHON="$_PINNED"
 fi

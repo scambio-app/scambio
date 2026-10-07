@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Measure 10 idle minutes on two newly created private buses and fake pactl."""
 
 import argparse

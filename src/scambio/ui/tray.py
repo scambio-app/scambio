@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """SNI and dbusmenu exports on a dedicated session bus connection."""
 
 from collections.abc import Callable
@@ -6,6 +8,7 @@ from typing import Any
 
 from gi.repository import Gio, GLib
 
+from scambio.gio import register_object
 from scambio.paths import design_dir, host_path
 from scambio.text import logger
 from scambio.ui.guard import guarded
@@ -62,7 +65,7 @@ class Tray:
                 )
                 info = Gio.DBusNodeInfo.new_for_xml(xml).interfaces[0]
                 self.registrations.append(
-                    self.bus.register_object(path, info, self._method, self._get, None)
+                    register_object(self.bus, path, info, self._method, self._get, None)
                 )
             self.watch = Gio.bus_watch_name_on_connection(
                 self.bus,

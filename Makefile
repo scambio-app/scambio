@@ -1,5 +1,9 @@
 PYTHON ?= /usr/bin/python3
 VENV = .venv/bin
+PREFIX ?= /usr/local
+DESTDIR ?= /
+SYSTEMD_USER_UNIT ?= 0
+PYTHON_LIB ?=
 .PHONY: venv check fmt test run hooks install-user uninstall-user
 venv:
 	$(PYTHON) -m venv --system-site-packages .venv
@@ -33,3 +37,17 @@ ui:
 	@command -v blueprint-compiler >/dev/null || { echo "blueprint-compiler missing: install blueprint-compiler before make ui" >&2; exit 1; }
 	@mkdir -p build/ui
 	blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
+
+.PHONY: install uninstall dist deb apt-repo flatpak flatpak-site release-check
+install: i18n ui
+	$(PYTHON) tools/install.py install --prefix "$(PREFIX)" --destdir "$(DESTDIR)" --python-lib "$(PYTHON_LIB)" $(if $(filter 1,$(SYSTEMD_USER_UNIT)),--systemd,)
+uninstall:
+	$(PYTHON) tools/install.py uninstall --prefix "$(PREFIX)" --destdir "$(DESTDIR)"
+dist deb apt-repo flatpak flatpak-site:
+	$(VENV)/python tools/release.py $@
+release-check:
+	$(VENV)/python tools/release.py check
+
+.PHONY: verify
+verify:
+	$(VENV)/python tools/verify_release.py

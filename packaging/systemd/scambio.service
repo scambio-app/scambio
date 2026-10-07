@@ -10,6 +10,8 @@ ExecStart="@REPO@/.venv/bin/scambio" daemon
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 RestartSec=2
+NoNewPrivileges=yes
+LockPersonality=yes
 
 [Install]
 WantedBy=graphical-session.target

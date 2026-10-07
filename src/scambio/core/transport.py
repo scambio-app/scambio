@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Gio boundary: asynchronous D-Bus calls and owned subscriptions."""
 
 from collections.abc import Callable

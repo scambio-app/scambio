@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Asynchronous client, preserving the daemon's signal order and own-call window."""
 
 from collections.abc import Callable

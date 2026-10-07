@@ -1,0 +1,13 @@
+Package: scambio
+Version: @VERSION@
+Section: sound
+Priority: optional
+Architecture: all
+Maintainer: Fermich srl <hello@scambio.app>
+Installed-Size: @SIZE@
+Depends: python3 (>= 3.11), python3-gi (>= 3.42), gir1.2-glib-2.0, gir1.2-gtk-4.0, gir1.2-adw-1 (>= 1.4), pulseaudio-utils (>= 16)
+Recommends: bluez, xdg-desktop-portal
+Homepage: https://scambio.app
+Description: Hand Bluetooth audio between computer and phone
+ Scambio manages the Bluetooth audio connection of configured devices
+ through an event-driven desktop daemon, a tray icon and a settings window.

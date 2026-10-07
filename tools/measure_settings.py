@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """One RSS sample of the real settings window on private buses and Xvfb."""
 
 import argparse

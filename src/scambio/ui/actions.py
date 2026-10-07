@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Shared GActions dispatch only through the public daemon client."""
 
 from gi.repository import Gio, GLib

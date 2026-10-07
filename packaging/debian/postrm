@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+case "${1:-}" in
+    remove|purge)
+        if [ -x /usr/bin/gtk-update-icon-cache ]; then
+            /usr/bin/gtk-update-icon-cache -q -t /usr/share/icons/hicolor
+        fi
+        ;;
+esac

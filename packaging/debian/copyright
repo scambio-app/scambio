@@ -1,0 +1,22 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Scambio
+Upstream-Contact: Fermich srl <hello@scambio.app>
+Source: https://github.com/scambio-app/scambio
+
+Files: *
+Copyright: 2026 Fermich srl
+License: GPL-3.0-or-later
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ On Debian systems the complete text of the GNU General Public License
+ version 3 can be found in /usr/share/common-licenses/GPL-3.
+
+Files: design/metainfo/* share/metainfo/*
+Copyright: 2026 Fermich srl
+License: CC0-1.0
+ To the extent possible under law, Fermich srl has waived all copyright
+ and related or neighboring rights to the AppStream metadata.
+ See https://creativecommons.org/publicdomain/zero/1.0/legalcode

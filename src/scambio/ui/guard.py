@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Exception boundaries for callbacks invoked by Gio/GLib."""
 
 from collections.abc import Callable

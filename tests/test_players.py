@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Real Gio RPCs to disposable MPRIS mocks on conftest's private session bus."""
 
 import subprocess

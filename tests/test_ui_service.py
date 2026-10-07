@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """UI commands exercise the real daemon process on isolated mock buses."""
 
 import json
@@ -18,6 +20,7 @@ from test_service import daemon as daemon
 
 from scambio.api import BUS_NAME, INTERFACE, PATH
 from scambio.config import TEMPLATE
+from scambio.gio import register_object
 from scambio.i18n import Translator
 from scambio.ui.tray import MENU, MENU_PATH, SNI_PATH, WATCHER
 
@@ -40,8 +43,8 @@ def tray_watcher():
         TRAY_NAMES.append(sender)
         invocation.return_value(None)
 
-    registration = bus.register_object(
-        "/StatusNotifierWatcher", info, registered, None, None
+    registration = register_object(
+        bus, "/StatusNotifierWatcher", info, registered, None, None
     )
     acquired = []
     owner = Gio.bus_own_name_on_connection(

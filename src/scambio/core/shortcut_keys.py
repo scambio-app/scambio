@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """The bounded GTK/Qt/XDG key vocabulary, without importing GTK."""
 
 import re

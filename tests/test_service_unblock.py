@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Real service/adapters on private buses; policy time advances only in the test."""
 
 from dataclasses import replace

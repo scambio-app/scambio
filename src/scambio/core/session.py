@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Deduplicated lock sources and logind delay inhibitor on the Gio main loop."""
 
 import os

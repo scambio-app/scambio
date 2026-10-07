@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """One GLib loop: policy executor, public D-Bus service and lifecycle."""
 
 import logging
@@ -38,6 +40,7 @@ from scambio.core.ports import (
 )
 from scambio.core.session import Session
 from scambio.core.shortcuts import Shortcuts
+from scambio.gio import register_object, signal_add
 from scambio.i18n import Translator
 from scambio.state import Store
 from scambio.text import logger
@@ -138,8 +141,8 @@ class Service:
             return False
         self.owned = True
         self.background.start(self.config.language)
-        self.registration = self.bus.register_object(
-            PATH, self.info, self._method, self._get, None
+        self.registration = register_object(
+            self.bus, PATH, self.info, self._method, self._get, None
         )
         self.shortcuts = Shortcuts(self.bus, self.config, self.store, self._publish)
         self.shortcuts.start()
@@ -780,7 +783,7 @@ def run(
         return True
 
     service.signals = [
-        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signum, callback)
+        signal_add(GLib.PRIORITY_DEFAULT, signum, callback)
         for signum, callback in (
             (signal.SIGTERM, stop),
             (signal.SIGINT, stop),

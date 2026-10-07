@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Executor ordering and lifecycle against private-bus MPRIS servers."""
 
 import json

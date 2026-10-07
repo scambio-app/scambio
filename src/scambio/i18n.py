@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Pure language resolution and symbolic gettext keys shared by all surfaces."""
 
 import gettext

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Only the configured, paired BlueZ device is ever acted on."""
 
 from collections.abc import Callable

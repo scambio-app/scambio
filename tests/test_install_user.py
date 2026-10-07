@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Exercise uninstall entirely with a temporary destination and fake systemctl."""
 
 import importlib.util
@@ -14,6 +16,48 @@ from gi.repository import Gio, GLib
 from helpers import spin_until
 
 
+def installer():
+    spec = importlib.util.spec_from_file_location(
+        "install_user", Path(__file__).parents[1] / "tools/install_user.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize("control", ["\r", "\n", "\0"])
+def test_reject_injected_paths(tmp_path, control):
+    module = installer()
+    path = tmp_path / ("checkout" + control + "suffix")
+    for render in (module.render, module.render_desktop, module.render_dbus_service):
+        with pytest.raises(ValueError, match="CR, LF or NUL"):
+            render(path)
+
+
+def test_package_conflict_requires_explicit_force(tmp_path, monkeypatch):
+    module = installer()
+    monkeypatch.setattr(module.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(module, "packaged_installation", lambda: True)
+    monkeypatch.setattr(sys, "argv", ["install_user", "install"])
+    with pytest.raises(SystemExit):
+        module.main()
+    assert not (tmp_path / ".config").exists()
+
+
+def test_installer_refuses_destination_symlink(tmp_path, monkeypatch):
+    module = installer()
+    monkeypatch.setattr(module.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(sys, "argv", ["install_user", "install", "--force"])
+    outside = tmp_path / "outside"
+    outside.write_text("untouched")
+    target = tmp_path / ".config/systemd/user/scambio.service"
+    target.parent.mkdir(parents=True)
+    target.symlink_to(outside)
+    with pytest.raises(OSError, match="symlink"):
+        module.main()
+    assert outside.read_text() == "untouched"
+
+
 @pytest.mark.parametrize("installed", [False, True])
 def test_uninstall_is_idempotent_without_systemctl(tmp_path, monkeypatch, installed):
     path = Path(__file__).parents[1] / "tools/install_user.py"
@@ -27,7 +71,7 @@ def test_uninstall_is_idempotent_without_systemctl(tmp_path, monkeypatch, instal
     calls = []
 
     def run(args, *, check):
-        assert args[:2] == ["systemctl", "--user"]
+        assert args[:2] == ["/usr/bin/systemctl", "--user"]
         command = args[2]
         assert command in {"stop", "disable", "daemon-reload"}
         calls.append((command, check))
@@ -85,7 +129,7 @@ def test_install_launcher_and_activation_service(tmp_path, monkeypatch, folder):
         "run",
         lambda args, check: subprocess.CompletedProcess(args, 0),
     )
-    monkeypatch.setattr(sys, "argv", ["install_user", "install"])
+    monkeypatch.setattr(sys, "argv", ["install_user", "install", "--force"])
     module.main()
     desktop = home / ".local/share/applications/app.scambio.Scambio.desktop"
     service = home / ".local/share/dbus-1/services/app.scambio.Scambio.Settings.service"
@@ -93,7 +137,11 @@ def test_install_launcher_and_activation_service(tmp_path, monkeypatch, folder):
         ["desktop-file-validate", str(desktop)], capture_output=True, text=True
     )
     assert validation.returncode == 0, validation.stdout + validation.stderr
-    launcher = Gio.DesktopAppInfo.new_from_filename(str(desktop))
+    try:
+        from gi.repository import GioUnix
+    except ImportError:
+        GioUnix = Gio
+    launcher = GioUnix.DesktopAppInfo.new_from_filename(str(desktop))
     assert launcher is not None
     assert launcher.launch([], None)
     spin_until(marker.exists)

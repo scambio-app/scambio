@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Fermich srl
 """Pure state machine. Timing and all effects belong to the executor."""
 
 from dataclasses import dataclass, replace
