@@ -112,6 +112,7 @@ def uninstall(prefix: Path, destdir: Path) -> None:
 
 
 def main() -> None:
+    os.umask(0o022)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["install", "uninstall"])
     parser.add_argument("--prefix", type=Path, default=Path("/usr/local"))

@@ -144,8 +144,7 @@ class Audio:
         if self.closed:
             return
         if len(self.commands) >= self.config.backend.command_max_processes:
-            LOG.warning("Audio command concurrency limit exceeded")
-            self._down(self.generation)
+            self._down(self.generation, "command concurrency limit exceeded")
             callback("", False)
             return
         try:
@@ -213,8 +212,7 @@ class Audio:
                         failed = True
                         output.clear()
                         child.force_exit()
-                        LOG.warning("Audio command output exceeds size limit")
-                        self._down(generation)
+                        self._down(generation, "command output exceeds size limit")
                     else:
                         output.extend(data)
             except GLib.Error:
@@ -277,9 +275,8 @@ class Audio:
                     if event.get("on") in {"sink-input", "sink", "server"}:
                         self._schedule()
                 source.read_bytes_async(65536, GLib.PRIORITY_DEFAULT, None, read)
-            except Exception:
-                LOG.exception("Cannot read audio subscription")
-                self._down(generation)
+            except Exception as exc:
+                self._down(generation, str(exc))
 
         def exited(process: Gio.Subprocess, result: Gio.AsyncResult) -> None:
             process.wait_finish(result)
@@ -291,7 +288,7 @@ class Audio:
         stream.read_bytes_async(65536, GLib.PRIORITY_DEFAULT, None, read)
         self.refresh()
 
-    def _down(self, generation: int) -> None:
+    def _down(self, generation: int, reason: str = "connection lost") -> None:
         if self.closed or self.backend_down or generation != self.generation:
             return
         self.backend_down = True
@@ -310,7 +307,7 @@ class Audio:
         self.emit(Event("AudioBackend", False))
         delay = self.retry_delay
         self.retry_delay = min(delay * 2, self.config.backend.retry_max_seconds)
-        LOG.warning("Audio backend down; retry in %s seconds", delay)
+        LOG.warning("Audio backend down: %s; retry in %s seconds", reason, delay)
         self.retry = GLib.timeout_add_seconds(delay, self._retry)
 
     def _retry(self) -> bool:
@@ -364,7 +361,15 @@ class Audio:
             if ok:
                 try:
                     streams, sinks = json.loads(results[0]), json.loads(results[1])
-                    if not isinstance(streams, list) or not isinstance(sinks, list):
+                    if (
+                        not isinstance(streams, list)
+                        or not isinstance(sinks, list)
+                        or any(
+                            not isinstance(item, dict)
+                            or not isinstance(item.get("properties", {}), dict)
+                            for item in streams + sinks
+                        )
+                    ):
                         raise ValueError("Invalid snapshot")
                     self.streams, self.sinks, self.default = (
                         streams,
@@ -376,8 +381,8 @@ class Audio:
                         self.emit(Event("AudioBackend", True))
                     self._publish()
                     self.retry_delay = self.config.backend.retry_initial_seconds
-                except Exception:
-                    LOG.exception("Cannot process audio snapshot")
+                except Exception as exc:
+                    self._down(generation, str(exc))
                     ok = False
             if not ok:
                 self._down(generation)
@@ -508,8 +513,7 @@ class Audio:
                 old_indices = {s["index"] for s in self.sinks if s.get("name") == old}
                 moving = [s for s in self.streams if s.get("sink") in old_indices]
                 if len(moving) > self.config.backend.route_max_streams:
-                    LOG.warning("Audio stream routing limit exceeded")
-                    self._down(self.generation)
+                    self._down(self.generation, "stream routing limit exceeded")
                     return False
                 commands = [["set-default-sink", target]] + [
                     ["move-sink-input", str(s["index"]), target] for s in moving

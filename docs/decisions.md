@@ -723,3 +723,33 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      (stesso utente); si mettono solo limiti di dimensione e si evitano scritture ripetute;
      (d) S9 — `config.toml` può restare un collegamento simbolico (dotfile gestiti dall'utente);
      `state.json` e le cartelle invece no.
+169. Codex — **Implementazione tecnica della spec 05** (2026-10-08).
+     (a) Percorsi XDG letti da GLib; dati installati cercati in `/app`, `sys.prefix`, `/usr`.
+     La versione proviene dai metadati Python; `build_py` genera la riserva dal solo
+     `pyproject.toml`. Il target offline `make install` serve sia Debian sia Flatpak.
+     (b) Il tray possiede una connessione dedicata e si registra col percorso; chiuderla
+     rimuove l'icona. La finestra usa `StartServiceByName`. Background è una richiesta per
+     avvio; la ri-esecuzione usa interprete assoluto, `-I`, argv fisso, dopo flush e chiusura.
+     (c) Letture limitate e scritture atomiche con directory aperta, `O_NOFOLLOW`, file 0600,
+     fsync del file e della directory. Resta consentito il symlink del solo config (168d).
+     Limiti backend richiesti da §3.1.10.5: snapshot 4 MiB, subscribe 64 KiB, 256 stream,
+     quattro comandi oltre al subscribe, latenza massima 2000 ms; massimo 16 player.
+     Questo requisito specifico precisa «nessuna chiave nuova» del riepilogo §3.2.
+     (d) Il `.deb` abilita globalmente il servizio con `systemctl --global`, senza avviarlo;
+     l'installer di sviluppo mantiene i tre file della decisione 106. Due override lintian
+     documentano la sorgente apt inclusa e non-conffile, entrambe imposte dalla decisione 157:
+     il pacchetto upstream non è destinato all'archivio Debian. Permessi normalizzati in build.
+     (e) Il repository apt usa SHA256/by-hash e firme della sottochiave fissata; niente download
+     di vecchi binari. Archivio locale verificato contro manifest firmato, senza sostituzione
+     di versioni esistenti; conservati anche commit e oggetti OSTree. La copia nel sito segue
+     le verifiche degli artefatti e delle installazioni temporanee.
+     (f) Il manifest concede letteralmente i soli permessi della 153. `flatpak info` rappresenta
+     `fallback-x11` anche con il bit `x11`: il golden test confronta quella rappresentazione,
+     mentre un test separato confronta l'elenco letterale del manifest. Prove negative su bus
+     privati con nomi presenti; runtime condiviso in lettura nelle installazioni temporanee.
+     (g) Per GLib recenti si usano `register_object_with_closures2`, `GLibUnix.signal_add` e,
+     nei test, `GioUnix.DesktopAppInfo`; restano fallback per Ubuntu 24.04. I warning interni
+     di PyGObject sono separati dai punti di chiamata del progetto nel report.
+     (h) Le misure dei pacchetti usano il codice installato, bus privati e pactl simulato stabile,
+     senza dispositivo configurato: due campioni `/proc/self/stat` a distanza di dieci minuti,
+     senza ciclo di campionamento. Non sostituiscono la prova Bluetooth/desktop di GM.

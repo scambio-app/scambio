@@ -182,6 +182,10 @@ def deb():
         )
         for origin, relative in (
             (
+                source / "packaging/debian/lintian-overrides",
+                "usr/share/lintian/overrides/scambio",
+            ),
+            (
                 source / "packaging/debian/scambio.sources",
                 "etc/apt/sources.list.d/scambio.sources",
             ),
@@ -207,12 +211,19 @@ def deb():
             f"scambio ({value}) stable; urgency=medium\n\n"
             "  * Package the public Linux release.\n\n"
             " -- Fermich srl <hello@scambio.app>  "
-            f"{formatdate(int(epoch), usegmt=True)}\n"
+            f"{formatdate(int(epoch))}\n"
         )
         (target / "usr/share/doc/scambio/changelog.gz").write_bytes(
             gzip.compress(changelog.encode(), mtime=0)
         )
         package = DIST / f"scambio_{value}_all.deb"
+        for item in target.rglob("*"):
+            if item.is_dir():
+                item.chmod(0o755)
+            elif item.parent == metadata or item == target / "usr/bin/scambio":
+                item.chmod(0o644 if item.name == "control" else 0o755)
+            else:
+                item.chmod(0o644)
         run(
             "dpkg-deb",
             "--root-owner-group",
@@ -239,7 +250,17 @@ def archived():
             raise ValueError("Unexpected entry in immutable release archive")
         manifest = directory / "manifest.json"
         Signing.verify(manifest, directory / "manifest.json.asc")
-        entries = json.loads(manifest.read_text())["sha256"]
+        record = json.loads(manifest.read_text())
+        if record["version"] != directory.name:
+            raise ValueError("Archived version does not match its directory")
+        entries = record["sha256"]
+        actual = {
+            str(path.relative_to(directory))
+            for path in directory.rglob("*")
+            if path.is_file() or path.is_symlink()
+        } - {"manifest.json", "manifest.json.asc"}
+        if actual != set(entries):
+            raise ValueError("Archive has missing or unlisted artifacts")
         for relative, expected in entries.items():
             path = Path(relative)
             if path.is_absolute() or ".." in path.parts:
@@ -278,7 +299,8 @@ def apt_repo():
     pool = repository / "pool/main/s/scambio"
     pool.mkdir(parents=True, exist_ok=True)
     for source in [*archived(), DIST]:
-        for package in source.glob("scambio_*_all.deb"):
+        value = version() if source == DIST else source.name
+        for package in [source / f"scambio_{value}_all.deb"]:
             signer.verify(package, Path(str(package) + ".asc"))
             destination = pool / package.name
             if destination.exists() and digest(destination) != digest(package):
@@ -302,6 +324,8 @@ def apt_repo():
     for path in (binary / "Packages", binary / "Packages.gz"):
         shutil.copyfile(path, by_hash / digest(path))
     stable = repository / "dists/stable"
+    for name in ("Release", "InRelease", "Release.gpg"):
+        (stable / name).unlink(missing_ok=True)
     release = run(
         "apt-ftparchive",
         "-o",
@@ -342,9 +366,12 @@ def flatpak():
         template.replace("@ARCHIVE@", str(source)).replace("@SHA256@", digest(source))
     )
     repository = DIST / "flatpak-repo"
-    if not repository.exists():
-        for previous in archived():
-            shutil.copytree(previous / "ostree", repository, dirs_exist_ok=True)
+    for previous in archived():
+        shutil.copytree(previous / "ostree", repository, dirs_exist_ok=True)
+    if repository.exists():
+        for directory in [repository, *repository.rglob("*")]:
+            if directory.is_dir():
+                directory.chmod(0o755)
     epoch = run("git", "show", "-s", "--format=%ct", "HEAD", capture=True).strip()
     run("flatpak-builder", "--show-manifest", manifest)
     run(

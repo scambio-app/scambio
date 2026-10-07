@@ -8,10 +8,13 @@ import http.server
 import json
 import os
 import shutil
+import subprocess
 import tempfile
 import threading
+from contextlib import ExitStack
 from pathlib import Path
 
+import dbusmock
 from release import APP, DIST, KEY, ROOT, SITE, Signing, digest, run, seal, version
 
 DOCKER_SCRIPT = r"""
@@ -53,6 +56,7 @@ test "$(cat /root/.config/scambio/config.toml)" = sentinel
 
 def permissions(text):
     config = configparser.ConfigParser(interpolation=None)
+    config.optionxform = str
     config.read_string(text)
     observed = {
         section: {
@@ -64,7 +68,9 @@ def permissions(text):
     expected = {
         "Context": {
             "shared": {"ipc"},
-            "sockets": {"wayland", "fallback-x11", "pulseaudio"},
+            # Flatpak renders fallback-x11 as both bits; the manifest permits
+            # only fallback-x11, and this exact rendering is the golden result.
+            "sockets": {"wayland", "fallback-x11", "x11", "pulseaudio"},
             "devices": {"dri"},
         },
         "Session Bus Policy": {
@@ -195,6 +201,61 @@ def flatpak():
             capture=True,
         )
         assert result.strip() == version(), result
+        negative_bus_access(env)
+
+
+def negative_bus_access(environment):
+    """Prove denial even when the forbidden names exist on the host test buses."""
+    with (
+        dbusmock.PrivateDBus(dbusmock.BusType.SYSTEM) as system,
+        dbusmock.PrivateDBus(dbusmock.BusType.SESSION) as session,
+    ):
+        with ExitStack() as mocks:
+            names = [
+                ("--system", "org.freedesktop.UPower", dbusmock.BusType.SYSTEM),
+                ("--session", "org.freedesktop.systemd1", dbusmock.BusType.SESSION),
+                ("--session", "org.freedesktop.Flatpak", dbusmock.BusType.SESSION),
+            ]
+            for _scope, name, bustype in names:
+                mocks.enter_context(
+                    dbusmock.SpawnedMock.spawn_for_name(
+                        name, "/", name, bustype=bustype, stdout=subprocess.DEVNULL
+                    )
+                )
+            env = {
+                **environment,
+                "DBUS_SYSTEM_BUS_ADDRESS": system.address,
+                "DBUS_SESSION_BUS_ADDRESS": session.address,
+            }
+            for scope, name, _bus in names:
+                result = subprocess.run(
+                    [
+                        "flatpak",
+                        "run",
+                        "--user",
+                        "--no-documents-portal",
+                        "--command=gdbus",
+                        APP + "//stable",
+                        "call",
+                        scope,
+                        "--dest",
+                        name,
+                        "--object-path",
+                        "/",
+                        "--method",
+                        "org.freedesktop.DBus.Peer.Ping",
+                    ],
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                )
+                assert result.returncode != 0
+                assert any(
+                    error in result.stderr
+                    for error in ("ServiceUnknown", "AccessDenied")
+                ), result.stderr
+                print(f"Denied {scope} {name}: {result.stderr.strip()}")
 
 
 def main():

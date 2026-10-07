@@ -1,0 +1,5 @@
+# Spec 05 §3.1.4 / decision 157: this upstream package bootstraps its own apt
+# repository. It is not intended for inclusion in the Debian archive.
+scambio: package-installs-apt-sources [etc/apt/sources.list.d/scambio.sources]
+# The source is package-owned, deliberately not a conffile, so remove removes it.
+scambio: file-in-etc-not-marked-as-conffile [etc/apt/sources.list.d/scambio.sources]
