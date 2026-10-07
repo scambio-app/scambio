@@ -2,7 +2,9 @@ import itertools
 import json
 import logging
 import subprocess
+import sys
 from dataclasses import replace
+from pathlib import Path
 
 import dbus
 import dbusmock
@@ -15,7 +17,7 @@ from test_service import daemon as shared_daemon
 from test_service import properties
 
 from scambio.api import BUS_NAME, INTERFACE, PATH
-from scambio.config import Config, parse
+from scambio.config import TEMPLATE, Config, parse
 from scambio.core.shortcut_keys import KEYS, MODIFIERS, from_qt, parse_key
 from scambio.core.shortcuts import (
     COMPONENT,
@@ -558,3 +560,81 @@ def test_service_shortcut_properties_reload_retry_and_quit(kga, daemon, tmp_path
     obj.Quit(dbus_interface=INTERFACE)
     daemon.wait(timeout=5)
     assert calls(kga, "setInactive")
+
+
+def test_foreign_unbind_after_conflict_persists_desktop_choice(kga, shortcut_factory):
+    set_result(kga, [0])
+    adapter = shortcut_factory()
+    state(adapter, "conflict")
+    assert adapter.store.value.shortcut is None
+    emit(
+        kga,
+        KIFACE,
+        "yourShortcutsChanged",
+        "asa(ai)",
+        [[COMPONENT, "switch"], dbus.Array([], signature="(ai)")],
+    )
+    state(adapter, "unbound")
+    saved = Store(adapter.store.path).load().shortcut
+    assert saved == Shortcut("<Super>g")
+    adapter.close()
+    second = shortcut_factory(saved=saved)
+    state(second, "unbound")
+    spin_until(lambda: len(calls(kga, "setShortcut")) == 2)
+    assert calls(kga, "setShortcut")[-1][1][2] == 2
+
+
+@pytest.mark.parametrize("preferred", ["", "Meta+G"])
+def test_no_backend_is_unsupported_for_disabled_preference(shortcut_factory, preferred):
+    adapter = shortcut_factory(replace(Config(), shortcut=preferred))
+    spin_until(lambda: not adapter.selecting)
+    assert adapter.values["ShortcutBackend"] == "none"
+    assert adapter.values["ShortcutState"] == "unsupported"
+    adapter.retry()
+    assert adapter.values["ShortcutState"] == "unsupported"
+
+
+@pytest.mark.parametrize("method", ["Quit", "SIGTERM"])
+def test_shutdown_inactive_no_auto_start_before_flush(
+    kga, fake_pactl, bluez_server, tmp_path, method
+):
+    (tmp_path / "config.toml").write_text(TEMPLATE)
+    with (tmp_path / "audit-daemon.log").open("w") as log:
+        process = subprocess.Popen(
+            [
+                sys.executable,
+                str(Path(__file__).parent / "fixtures/run_daemon.py"),
+                str(tmp_path),
+                "--audit-shutdown",
+            ],
+            stdout=log,
+            stderr=log,
+        )
+        try:
+            spin_until(
+                lambda: dbusmock.BusType.SESSION.get_connection().name_has_owner(
+                    BUS_NAME
+                )
+            )
+            spin_until(lambda: properties()["ShortcutState"] == "active")
+            if method == "Quit":
+                dbusmock.BusType.SESSION.get_connection().get_object(
+                    BUS_NAME, PATH
+                ).Quit(dbus_interface=INTERFACE)
+            else:
+                process.terminate()
+            process.wait(timeout=5)
+            assert process.returncode == 0, (tmp_path / "audit-daemon.log").read_text()
+            events = [
+                json.loads(line)
+                for line in (tmp_path / "shutdown.jsonl").read_text().splitlines()
+            ]
+            assert events == [
+                {"event": "setInactive", "flags": int(Gio.DBusCallFlags.NO_AUTO_START)},
+                {"event": "flush"},
+            ]
+            assert calls(kga, "setInactive")
+        finally:
+            if process.poll() is None:
+                process.terminate()
+                process.wait(timeout=5)

@@ -488,3 +488,33 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
      l'autoattivazione di portal reali sul bus privato. La misura RSS della
      finestra riusa lo stesso harness e dichiara il suo overhead; la misura
      di riposo del demone conta anche le chiamate al KGlobalAccel finto.
+116. Codex — Audit 1, scelta del desktop: anche la rimozione esplicita del
+     tasto tramite `yourShortcutsChanged` memorizza il preferito corrente in
+     state.json, inclusa la rimozione dopo un conflitto senza preferito già
+     salvato. Il riavvio usa quindi autoload (flag 2) e rispetta la rimozione.
+     Comportamento già presente, accettato nell'audit di Claude del 2026-10-07
+     e ora fissato da un test che parte da conflict.
+117. Codex — Audit 1, errori delle impostazioni: una risposta d'errore scarta
+     anche l'ultimo valore in attesa per la chiave; non si reinvia e si torna
+     al valore in vigore, salvo la selezione già salvata di RestartRequired.
+     Precisa la serializzazione della 113. I launcher ignorano annullamento
+     e chiusura del dialogo; per errori locali mostrano il messaggio GLib,
+     preservandolo anche se contiene punti. Il controllo del display precede
+     Application.run e produce la diagnostica CLI tradotta con uscita 1.
+     Chiarimento Claude trasmesso da GM: la prima scomparsa dopo un cambio
+     dispositivo riuscito consuma `restarting` e resta senza banner fino al
+     ritorno del nome o alla riapertura della finestra; le successive mostrano
+     il banner. Vale anche per RestartUnit fallito seguito più tardi da Quit,
+     limite accettato senza timer o segnali nuovi.
+118. Codex — Audit 1, corregge la 114 per i servizi D-Bus secondo spec 04
+     §3.1.6 aggiornata in `0c84d9a`: Exec del `.service` quota il percorso e
+     applica una sola volta l'escape di virgolette, backslash, dollaro e
+     backtick; `%` resta letterale. L'escape aggiuntivo Desktop Entry e `%%`
+     restano esclusivamente nel `.desktop`. Test con esecuzione reale del
+     programma finto da dbus-daemon privato in un percorso con `%` e backslash.
+119. Codex — Audit 1, ConfigEdit risolve il percorso con `resolve()` al momento
+     della scrittura: temporaneo e sostituzione atomica sono nella directory
+     del file puntato, con permessi conservati; il symlink resta invariato.
+     SetConfig diagnostica le eccezioni inattese con traceback nel log e
+     risponde Failed; se la risposta è già partita prima di RestartUnit,
+     registra il problema senza inviare una seconda risposta.

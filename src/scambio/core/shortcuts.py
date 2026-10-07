@@ -42,7 +42,7 @@ class Shortcuts:
         self.values = dict(
             Shortcut="",
             ShortcutLabel="",
-            ShortcutState="unbound",
+            ShortcutState="unsupported",
             ShortcutOwner="",
             ShortcutBackend="none",
         )
@@ -246,7 +246,10 @@ class Shortcuts:
         except ValueError:
             LOG.warning("Invalid shortcut.preferred; shortcut disabled")
             key = None
-        if key is None:
+        if self.values["ShortcutBackend"] == "none":
+            self._state("unsupported")
+            self._finish()
+        elif key is None:
             if self.values["ShortcutBackend"] == "kglobalaccel":
                 self._inactive()
                 self._clear_kga()

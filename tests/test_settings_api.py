@@ -300,3 +300,23 @@ def test_list_devices_without_bluez():
         assert found == [[]]
     finally:
         bluez.close()
+
+
+def test_unexpected_set_config_exception_returns_failed(
+    running_executor, monkeypatch, caplog
+):
+    service, _ = running_executor
+
+    def fail(changes):
+        raise RuntimeError("unexpected write failure")
+
+    monkeypatch.setattr(service, "set_config", fail)
+    with pytest.raises(GLib.Error) as error:
+        set_config(service.bus, {"ui.tray": GLib.Variant("b", False)})
+    assert (
+        Gio.DBusError.get_remote_error(error.value)
+        == "org.freedesktop.DBus.Error.Failed"
+    )
+    assert any(
+        record.exc_info and "SetConfig" in record.message for record in caplog.records
+    )

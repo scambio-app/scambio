@@ -4,17 +4,19 @@ Data: 2026-10-07 · Codex · Base: `9e89ce4` · branch `main`, nessun remote.
 
 ## Stato e commit
 
-Implementazione delle tre tappe pronta per audit Claude e prova GM. Il goal
-**non è chiuso**: la prova reale firmata di §6 resta necessaria.
+Le tre tappe sono state sottoposte all’audit 1 di Claude; codice in larga
+parte conforme e visivo conforme al mock, secondo la consegna GM e §7 della
+spec. Correzioni audit 1 completate (vedi sezione dedicata). Il goal **non è
+chiuso**: resta anche la prova reale firmata di §6.
 
 | Tappa | Consegna | Commit | Verifica |
 |---|---|---|---|
 | (a) | Scorciatoia, stato, API e debito MPRIS | `881f494` | `make check`: 614 passati |
 | (b) | Configurazione, dispositivi, tray e notifiche | `88ea326` | `make check`: 665 passati |
-| (c) | Modello, finestra, CLI, build, installazione e misure | commit contenente questo report, `Add settings window and desktop integration` | `make check`: 710 passati |
+| (c) | Modello, finestra, CLI, build, installazione e misure | `5e5a3a9` | `make check`: 710 passati |
 
-Nessun hook aggirato. Nessun push. Decisioni tecniche **110–115**;
-116–119 non usate. Nessuna nuova dipendenza runtime.
+Nessun hook aggirato. Nessun push. Decisioni tecniche **110–119**,
+incluse le correzioni dell’audit 1. Nessuna nuova dipendenza runtime.
 
 ## Cosa è cambiato
 
@@ -126,8 +128,9 @@ la sparizione visibile nel pannello resta nel punto 6 della prova GM.
   quando **l'eseguibile stesso** contiene `%` nel percorso (anche eliminando
   TryExec). Limitazione osservata, non aggirata con wrapper o altri file.
   Spazi, backslash, virgolette, dollaro e backtick sono provati tramite Gio;
-  l'attivazione D-Bus è provata con spazi. I caratteri speciali nel servizio
-  D-Bus seguono letteralmente §3.1.6; non sono dichiarati verificati tutti.
+  l'attivazione D-Bus era inizialmente provata con spazi. Le correzioni audit 1
+  recepiscono §3.1.6 aggiornata e provano anche `%` e backslash nel servizio
+  D-Bus (decisione 118), senza alterare il quoting del `.desktop`.
 - Durante uno smoke test preliminare sotto Xvfb e bus privato, prima
   dell'isolamento aggiuntivo, GTK ha tentato di attivare i portal installati
   **su quel bus privato**. Questo non rispettava il divieto operativo sui
@@ -142,7 +145,7 @@ la sparizione visibile nel pannello resta nel punto 6 della prova GM.
 ## Checklist §6
 
 - [x] Prerequisiti di prodotto/design forniti da Claude (baseline `9e89ce4`).
-- [x] Implementazione e copertura delle regole di §3.1 / 05 §5.10–§5.11,
+- [x] Correzioni audit 1 completate; implementazione e copertura di §3.1 / 05 §5.10–§5.11,
   secondo la matrice dei test sopra; limiti desktop reali dichiarati.
 - [x] Verifica finale `make check`, cataloghi e Blueprint, nessun test saltato.
 - [x] Nessun polling/timer nuovo; CPU/RSS prima-dopo entro soglia, RSS finestra documentato.
@@ -151,7 +154,7 @@ la sparizione visibile nel pannello resta nel punto 6 della prova GM.
 - [x] Design preservato, con la sola copia autorizzata §3.1.6, nessuna richiesta nuova.
 - [x] Confini di scrittura rispettati; installatore limitato ai tre file.
 - [x] Due debiti §3.1.8 corretti con test.
-- [x] Report, GNOME/Plasma 6 non verificati, decisioni 110–115.
+- [x] Report, GNOME/Plasma 6 non verificati, decisioni 110–119.
 - [x] Checklist GM preparata qui sotto.
 - [ ] Prova reale GM eseguita e firmata.
 
@@ -212,3 +215,73 @@ A Claude: audit codice e visivo, compilazione del tracker/spec al completamento,
 promozione delle misure pertinenti in hardware-lab e, alla milestone verificata,
 brain `scambio_brain` secondo §6 del workflow. Codex non modifica quei file
 né scrive sul brain. GNOME e Plasma 6 restano per Q6, prima della fase 5.
+
+
+## Correzioni audit 1
+
+Base dell’audit: `881f494`, `88ea326`, `5e5a3a9`; base di questa correzione:
+`0c84d9a`, che corregge §3.1.6 per il quoting del servizio D-Bus.
+Scope esclusivo: i tredici punti consegnati da GM. Nessuna modifica a design,
+nessuna nuova API, dipendenza o timer. Le note d’audit aggiunte da Claude alla
+spec durante il lavoro sono modifiche esterne e restano fuori dal commit Codex.
+
+### Correzioni e prove
+
+| # | Esito / modifica | Test |
+|---|---|---|
+| 1 | Rimozione esplicita dopo conflict conservata, decisione 116 | `test_foreign_unbind_after_conflict_persists_desktop_choice`: stato iniziale senza preferito, rimozione, rilettura store e nuovo avvio con flag 2 |
+| 2 | Errore → scarto del valore in coda, un solo avviso e riallineamento | `test_rapid_edits_are_discarded_after_error`, ConfigInvalid e DeviceBusy, tre incrementi rapidi |
+| 3 | Prima perdita del nome consuma restarting; soppressione mantenuta per quella sola assenza, secondo il chiarimento Claude | `test_restart_failure_then_quit_suppresses_only_first_absence`: caso RestartUnit fallito → Quit, riapertura e perdite successive |
+| 4 | Backend none → unsupported anche con preferito vuoto/non valido | `test_no_backend_is_unsupported_for_disabled_preference`, anche Retry |
+| 5 | Quoting D-Bus distinto da Desktop Entry, decisione 118 | `test_dbus_activation_executes_path_with_spaces`: file esatto e argv dell’eseguibile finto, anche `%` e backslash, su dbus-daemon privato |
+| 6 | Scrittura atomica sul target risolto, symlink e permessi preservati | `test_write_preserves_relative_symlink_and_target_permissions` |
+| 7 | Eccezione inattesa di SetConfig → LOG.exception e risposta Failed | `test_unexpected_set_config_exception_returns_failed`: RPC sul bus e verifica del traceback nel record di log |
+| 8 | Proprietario iniziale già disponibile ignorato dalla prima callback appeared | `test_audit_window_boundaries[startup-counts]`: una ListDevices e una RetryShortcut con focus simulato |
+| 9 | Tutte le chiavi .pot; proprietà, disabled-text e modelli; traduzioni del layout confrontate col .po tedesco | `test_text_check_detects_any_catalog_key` in quattro superfici e `test_layout_translation_check_detects_wrong_language` con testo inglese iniettato |
+| 10 | Mock completamente pronto prima della finestra; nessuna chiamata privata a appeared | `test_window_harness_uses_public_owner_lifecycle`; percorso reale di apertura, perdita/ritorno, anche apertura inizialmente senza owner |
+| 11 | Flag NO_AUTO_START e chiamata prima del flush confermati | `test_shutdown_inactive_no_auto_start_before_flush`, Quit e SIGTERM in sottoprocesso, osservando le chiamate Gio effettive |
+| 12 | DISMISSED/CANCELLED ignorati; altri errori locali mostrano exc.message intero | `test_audit_window_boundaries[desktop-errors]`: FileLauncher e URI, compreso messaggio contenente un punto |
+| 13 | Senza display: diagnostica cli-error-gtk-missing, stderr e uscita 1, senza traceback | `test_audit_window_boundaries[no-display]`, con DISPLAY/WAYLAND_DISPLAY rimossi nel figlio sotto Xvfb e bus privati |
+
+Prove rosso → verde: prima delle correzioni sono stati riprodotti sette
+fallimenti nel gruppo core/config/API/installazione e sette nella finestra;
+separatamente è fallito il controllo della traduzione inglese iniettata.
+I punti 1 e 11 erano già conformi: i nuovi test passavano anche prima e non
+vengono presentati come difetti corretti. Su copie temporanee del codice
+sono stati verificati i controlli negativi: omettere la persistenza, togliere
+NO_AUTO_START o anticipare il flush fa fallire i test corrispondenti. Il
+controllo del punto 10 fallisce sul fixture originale con la chiamata privata.
+Nessuna mutazione sperimentale è stata applicata al codice della working tree.
+
+### Chiarimento del punto 3 recepito
+
+Decisione di Claude trasmessa da GM: la prima scomparsa del nome dopo il
+successo del cambio dispositivo consuma `restarting`, mantenendo nascosto
+il banner per quella sola assenza. Il banner resta nascosto anche se altri
+aggiornamenti fanno ridisegnare la finestra o ripetono lo stato assente.
+Al ritorno del nome la soppressione finisce; ogni perdita successiva mostra
+il banner. Una finestra riaperta senza demone mostra il banner normalmente.
+
+Nel caso raro RestartUnit fallito senza perdita del nome, un Quit successivo
+è quella prima scomparsa e resta quindi senza banner: limite esplicitamente
+accettato, senza introdurre timer, segnali o API. Decisione 117 aggiornata.
+Il test nuovo fallisce prima della modifica sul mancato consumo di
+`restarting` e passa dopo, verificando anche persistenza della soppressione,
+riapertura e due perdite successive.
+
+### Verifiche e file
+
+`make check`: **731 passati, nessuno saltato**, 85,30 s; lint, format,
+mypy (28 file), cataloghi e Blueprint verdi:
+[audit1-make-check.txt](audit1-make-check.txt).
+Riproduzioni e controlli negativi: [audit1-regressions.txt](audit1-regressions.txt).
+Tutti i tredici punti sono inclusi nel commit unico `Fix spec 04 audit findings`
+contenente questo report. Le misure CPU/RSS sopra
+restano evidenza dei commit dell’implementazione iniziale; non vengono
+attribuite ai sorgenti modificati dall’audit.
+
+File di produzione: `config.py`, `core/{service,shortcuts}.py`,
+`ui/{client,settings_model,window}.py`, `tools/install_user.py`.
+Test: config_edit, install_user, settings_api, settings_model, shortcuts,
+window e fixture run_daemon/run_settings. Documenti: decisioni 116–119 e
+questo report. Nessuna richiesta per design. Prova GM ancora da eseguire.

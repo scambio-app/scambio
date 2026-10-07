@@ -54,9 +54,14 @@ def render_desktop(repo: Path) -> str:
 
 
 def render_dbus_service(repo: Path) -> str:
+    executable = str(repo.resolve() / ".venv/bin/scambio")
+    for char in ("\\", '"', "$", "`"):
+        executable = executable.replace(char, "\\" + char)
     return (
         "[D-BUS Service]\nName=app.scambio.Scambio.Settings\nExec="
-        + desktop_exec(repo / ".venv/bin/scambio")
+        + '"'
+        + executable
+        + '"'
         + " settings --gapplication-service\n"
     )
 

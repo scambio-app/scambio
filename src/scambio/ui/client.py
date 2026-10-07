@@ -31,6 +31,7 @@ class ScambioClient:
         self.pending = 0
         self.closed = False
         self.available = False
+        self.owner = ""
         self.watch_id = 0
         self.generation = 0
         self.cancel = Gio.Cancellable()
@@ -63,7 +64,8 @@ class ScambioClient:
             for key in proxy.get_cached_property_names() or []
             if (value := proxy.get_cached_property(key)) is not None
         }
-        self.available = bool(proxy.get_name_owner())
+        self.owner = proxy.get_name_owner() or ""
+        self.available = bool(self.owner)
         self.handlers = [
             proxy.connect("g-properties-changed", self._properties),
             proxy.connect("g-signal", self._signal),
@@ -79,6 +81,8 @@ class ScambioClient:
 
     @guarded
     def _appeared(self, bus: Gio.DBusConnection, name: str, owner: str) -> None:
+        if self.closed or (self.available and owner == self.owner):
+            return
         self.generation += 1
         generation = self.generation
 
@@ -92,6 +96,7 @@ class ScambioClient:
             if self.closed or generation != self.generation:
                 return
             self.props = reply.unpack()[0]
+            self.owner = owner
             self.available = True
             self.emit("OwnerChanged", True)
 
@@ -113,6 +118,7 @@ class ScambioClient:
         if not self.closed:
             self.generation += 1
             self.available = False
+            self.owner = ""
             self.props.clear()
             self.emit("OwnerChanged", False)
 

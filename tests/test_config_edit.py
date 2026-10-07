@@ -134,3 +134,18 @@ def test_merge_reads_file_and_preserves_unknowns(tmp_path):
     edit.write()
     assert tomllib.loads(path.read_text())["future"] == {"v": {"a": 1}}
     assert path.read_text().startswith(source)
+
+
+def test_write_preserves_relative_symlink_and_target_permissions(tmp_path):
+    target = tmp_path / "actual" / "settings.toml"
+    target.parent.mkdir()
+    target.write_text("[ui]\ntray = true # preserved\n")
+    target.chmod(0o640)
+    link = tmp_path / "config.toml"
+    link.symlink_to("actual/settings.toml")
+    prepare_update(link, {"ui.tray": False}).write()
+    assert link.is_symlink()
+    assert os.readlink(link) == "actual/settings.toml"
+    assert target.read_text() == "[ui]\ntray = false # preserved\n"
+    assert stat.S_IMODE(target.stat().st_mode) == 0o640
+    assert list(target.parent.iterdir()) == [target]

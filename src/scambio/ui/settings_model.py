@@ -52,15 +52,21 @@ class SettingsModel:
         self.props: dict[str, object] = {}
         self.available = False
         self.restarting = False
+        self.restart_absence = False
         self.devices: list[tuple[str, str]] = []
         self.pending: dict[str, Pending] = {}
         self.saved_device: str | None = None
         self.toasts: list[str] = []
 
     def presence(self, available: bool) -> None:
-        self.available = available
         if available:
+            self.restart_absence = False
+        elif self.available:
+            # Consume the expected restart only on the first owner loss; keep
+            # that absence quiet until the owner returns or this model closes.
+            self.restart_absence = self.restarting
             self.restarting = False
+        self.available = available
 
     def update(self, props: dict[str, object]) -> bool:
         """Return whether the device list needs a fresh snapshot."""
@@ -116,7 +122,7 @@ class SettingsModel:
         ):
             widgets[group] = {"sensitive": self.available}
         widgets["daemon_banner"] = {
-            "revealed": not self.available and not self.restarting
+            "revealed": not self.available and not self.restart_absence
         }
         widgets["status_icon"] = {
             "icon-name": status.icon
@@ -245,6 +251,7 @@ class SettingsModel:
             self.toasts.append(self.tr.tr(text, error=code))
             if code == "RestartRequired" and key == "device.address" and pending:
                 self.saved_device = str(pending.sent)
+            return None
         elif key == "device.address":
             self.restarting = True
             if pending:

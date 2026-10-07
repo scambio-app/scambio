@@ -457,6 +457,7 @@ class Service:
         params: GLib.Variant,
         invocation: Gio.DBusMethodInvocation,
     ) -> None:
+        replied = False
         try:
             if method == "Switch":
                 unavailable = self.ctx.state == "unavailable"
@@ -506,6 +507,7 @@ class Service:
                     changes[key] = value.unpack()
                 restart = self.set_config(changes)
                 invocation.return_value(None)
+                replied = True
                 if restart:
                     self._restart()
         except ConfigInvalid as exc:
@@ -514,6 +516,14 @@ class Service:
             invocation.return_dbus_error(INTERFACE + ".Error.RestartRequired", str(exc))
         except DeviceBusy as exc:
             invocation.return_dbus_error(INTERFACE + ".Error.DeviceBusy", str(exc))
+        except Exception:
+            if method != "SetConfig":
+                raise
+            LOG.exception("Unexpected SetConfig failure")
+            if not replied:
+                invocation.return_dbus_error(
+                    "org.freedesktop.DBus.Error.Failed", "Unexpected SetConfig failure"
+                )
 
     def set_config(self, changes: dict[str, object]) -> bool:
         edit = prepare_update(self.config_file, changes, self.config.language)

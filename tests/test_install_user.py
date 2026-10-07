@@ -119,13 +119,14 @@ def test_literal_percent_is_escaped_per_desktop_entry_spec(tmp_path):
     assert module.desktop_exec(path) == '"' + str(path).replace("%", "%%") + '"'
 
 
-def test_dbus_activation_executes_path_with_spaces(tmp_path, monkeypatch):
+@pytest.mark.parametrize("folder", ["repo with spaces", "repo%with\\backslash"])
+def test_dbus_activation_executes_path_with_spaces(tmp_path, monkeypatch, folder):
     spec = importlib.util.spec_from_file_location(
         "install_user", Path(__file__).parents[1] / "tools/install_user.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    repo = tmp_path / "repo with spaces"
+    repo = tmp_path / folder
     executable = repo / ".venv/bin/scambio"
     executable.parent.mkdir(parents=True)
     marker = tmp_path / "activation.json"
@@ -140,8 +141,13 @@ def test_dbus_activation_executes_path_with_spaces(tmp_path, monkeypatch):
 
     address = os.environ["DBUS_SESSION_BUS_ADDRESS"]
     private = dbusmock.PrivateDBus(dbusmock.BusType.SESSION)
+    service_text = module.render_dbus_service(repo)
+    expected_path = str(executable).replace("\\", "\\\\")
+    assert service_text.endswith(
+        f'Exec="{expected_path}" settings --gapplication-service\n'
+    )
     (private.servicedir / "app.scambio.Scambio.Settings.service").write_text(
-        module.render_dbus_service(repo)
+        service_text
     )
     try:
         with private:

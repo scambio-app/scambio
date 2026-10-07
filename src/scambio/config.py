@@ -362,15 +362,16 @@ class ConfigEdit:
 
     def write(self) -> None:
         """Commit only after the service's DeviceBusy check."""
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        fd, name = tempfile.mkstemp(prefix=".config-", dir=self.path.parent)
+        path = self.path.resolve()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, name = tempfile.mkstemp(prefix=".config-", dir=path.parent)
         try:
             with os.fdopen(fd, "wb") as out:
                 os.fchmod(out.fileno(), self.mode)
                 out.write(self.text.encode("utf-8"))
                 out.flush()
                 os.fsync(out.fileno())
-            os.replace(name, self.path)
+            os.replace(name, path)
         finally:
             if os.path.exists(name):
                 os.unlink(name)

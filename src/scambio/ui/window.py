@@ -261,9 +261,19 @@ def window_class(tr: Translator) -> Any:
             self.client.call(command.method, params, lambda reply: finished(), finished)
 
         def _desktop_error(self, exc: GLib.Error) -> None:
-            self.model.complete(
-                "", Gio.DBusError.get_remote_error(exc) or str(exc.domain)
-            )
+            if (
+                exc.matches(Gio.io_error_quark(), Gio.IOErrorEnum.CANCELLED)
+                or exc.matches(Gtk.dialog_error_quark(), Gtk.DialogError.DISMISSED)
+                or exc.matches(Gtk.dialog_error_quark(), Gtk.DialogError.CANCELLED)
+            ):
+                return
+            remote = Gio.DBusError.get_remote_error(exc)
+            if remote:
+                self.model.complete("", remote)
+            else:
+                self.model.toasts.append(
+                    tr.tr("settings-error-generic", error=exc.message)
+                )
             self.render()
 
         @guarded
@@ -382,6 +392,11 @@ class Application(Adw.Application):
 
 
 def run(service: bool = False) -> int:
+    if not Gtk.init_check() or Gdk.Display.get_default() is None:
+        print(
+            cli_translator(config_path()).tr("cli-error-gtk-missing"), file=sys.stderr
+        )
+        return 1
     return int(
         Application().run(
             [sys.argv[0], *(["--gapplication-service"] if service else [])]

@@ -1,0 +1,126 @@
+red-core
+=========================== short test summary info ============================
+FAILED tests/test_settings_model.py::test_rapid_edits_are_discarded_after_error[ConfigInvalid]
+FAILED tests/test_settings_model.py::test_rapid_edits_are_discarded_after_error[DeviceBusy]
+FAILED tests/test_config_edit.py::test_write_preserves_relative_symlink_and_target_permissions
+FAILED tests/test_shortcuts.py::test_no_backend_is_unsupported_for_disabled_preference[]
+FAILED tests/test_shortcuts.py::test_no_backend_is_unsupported_for_disabled_preference[Meta+G]
+FAILED tests/test_settings_api.py::test_unexpected_set_config_exception_returns_failed
+FAILED tests/test_install_user.py::test_dbus_activation_executes_path_with_spaces[repo%with\\backslash]
+7 failed, 134 passed in 13.19s
+
+
+red-window
+=========================== short test summary info ============================
+FAILED tests/test_window.py::test_audit_window_boundaries[startup-counts] - A...
+FAILED tests/test_window.py::test_audit_window_boundaries[desktop-errors] - A...
+FAILED tests/test_window.py::test_audit_window_boundaries[no-display] - Asser...
+FAILED tests/test_window.py::test_text_check_detects_any_catalog_key[title]
+FAILED tests/test_window.py::test_text_check_detects_any_catalog_key[disabled-text]
+FAILED tests/test_window.py::test_text_check_detects_any_catalog_key[language_row]
+FAILED tests/test_window.py::test_text_check_detects_any_catalog_key[device_row]
+7 failed, 3 passed in 4.97s
+
+
+red-language
+=========================== short test summary info ============================
+FAILED tests/test_window.py::test_layout_translation_check_detects_wrong_language
+1 failed in 0.54s
+
+
+Negative controls in disposable copies; repository sources untouched
+1: omitted persistence of explicit unbind
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_foreign_unbind_after_conflict_persists_desktop_choice __________
+tests/test_shortcuts.py:579: in test_foreign_unbind_after_conflict_persists_desktop_choice
+    assert saved == Shortcut("<Super>g")
+E   AssertionError: assert None == Shortcut(preferred='<Super>g')
+E    +  where Shortcut(preferred='<Super>g') = Shortcut('<Super>g')
+------------------------------ Captured log call -------------------------------
+WARNING  scambio.state:state.py:95 Cannot load state; using defaults: [Errno 2] No such file or directory: '/tmp/pytest-of-vax/pytest-152/test_foreign_unbind_after_conf0/state0.json'
+=========================== short test summary info ============================
+FAILED tests/test_shortcuts.py::test_foreign_unbind_after_conflict_persists_desktop_choice
+1 failed in 0.47s
+
+11: omitted NO_AUTO_START
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_shutdown_inactive_no_auto_start_before_flush[Quit] ____________
+tests/test_shortcuts.py:632: in test_shutdown_inactive_no_auto_start_before_flush
+    assert events == [
+E   AssertionError: assert [{'event': 's...nt': 'flush'}] == [{'event': 's...nt': 'flush'}]
+E
+E     At index 0 diff: {'event': 'setInactive', 'flags': 0} != {'event': 'setInactive', 'flags': 1}
+E     Use -v to get more diff
+__________ test_shutdown_inactive_no_auto_start_before_flush[SIGTERM] __________
+tests/test_shortcuts.py:632: in test_shutdown_inactive_no_auto_start_before_flush
+    assert events == [
+E   AssertionError: assert [{'event': 's...nt': 'flush'}] == [{'event': 's...nt': 'flush'}]
+E
+E     At index 0 diff: {'event': 'setInactive', 'flags': 0} != {'event': 'setInactive', 'flags': 1}
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/test_shortcuts.py::test_shutdown_inactive_no_auto_start_before_flush[Quit]
+FAILED tests/test_shortcuts.py::test_shutdown_inactive_no_auto_start_before_flush[SIGTERM]
+2 failed in 0.76s
+
+11: flush before close
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_shutdown_inactive_no_auto_start_before_flush[Quit] ____________
+tests/test_shortcuts.py:632: in test_shutdown_inactive_no_auto_start_before_flush
+    assert events == [
+E   AssertionError: assert [{'event': 'f..., 'flags': 1}] == [{'event': 's...nt': 'flush'}]
+E
+E     At index 0 diff: {'event': 'flush'} != {'event': 'setInactive', 'flags': 1}
+E     Use -v to get more diff
+__________ test_shutdown_inactive_no_auto_start_before_flush[SIGTERM] __________
+tests/test_shortcuts.py:632: in test_shutdown_inactive_no_auto_start_before_flush
+    assert events == [
+E   AssertionError: assert [{'event': 'f..., 'flags': 1}] == [{'event': 's...nt': 'flush'}]
+E
+E     At index 0 diff: {'event': 'flush'} != {'event': 'setInactive', 'flags': 1}
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/test_shortcuts.py::test_shutdown_inactive_no_auto_start_before_flush[Quit]
+FAILED tests/test_shortcuts.py::test_shutdown_inactive_no_auto_start_before_flush[SIGTERM]
+2 failed in 0.76s
+
+10: original private owner callback in GTK harness
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_window_harness_uses_public_owner_lifecycle ________________
+tests/test_window.py:78: in test_window_harness_uses_public_owner_lifecycle
+    assert not any(
+E   assert not True
+E    +  where True = any(<generator object test_window_harness_uses_public_owner_lifecycle.<locals>.<genexpr> at 0x71a83eec6880>)
+=========================== short test summary info ============================
+FAILED tests/test_window.py::test_window_harness_uses_public_owner_lifecycle
+1 failed in 0.02s
+
+
+
+3: restart suppression not consumed before fix
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_restart_failure_then_quit_suppresses_only_first_absence _________
+
+model = <scambio.ui.settings_model.SettingsModel object at 0x738db764fe60>
+
+    def test_restart_failure_then_quit_suppresses_only_first_absence(model):
+        command = model.change("device_row", 1)
+        assert model.complete(command.key) is None
+        assert model.restarting
+        # RestartUnit fails: no owner event reaches the window. Later Quit is
+        # the first disappearance, deliberately indistinguishable from a restart.
+        model.update(BASE)
+        model.presence(False)
+>       assert not model.restarting
+E       assert not True
+E        +  where True = <scambio.ui.settings_model.SettingsModel object at 0x738db764fe60>.restarting
+
+tests/test_settings_model.py:243: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_settings_model.py::test_restart_failure_then_quit_suppresses_only_first_absence
+1 failed in 0.05s

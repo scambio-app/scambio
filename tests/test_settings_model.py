@@ -212,3 +212,47 @@ def test_actions_and_pure_import(model):
                 and node.value.startswith("settings-")
             ):
                 assert node.value in keys
+
+
+@pytest.mark.parametrize("error", ["ConfigInvalid", "DeviceBusy"])
+def test_rapid_edits_are_discarded_after_error(model, error):
+    first = model.change("release_idle_row", 3)
+    assert first == Command("SetConfig", "policy.release_idle_seconds", 180)
+    assert model.change("release_idle_row", 4) is None
+    assert model.change("release_idle_row", 5) is None
+    assert model.complete(first.key, error) is None
+    assert not model.pending
+    assert model.view(0).widgets["release_idle_row"]["value"] == 2
+    assert model.toasts == [
+        model.tr.tr(
+            "settings-error-invalid"
+            if error == "ConfigInvalid"
+            else "settings-device-busy"
+        )
+    ]
+
+
+def test_restart_failure_then_quit_suppresses_only_first_absence(model):
+    command = model.change("device_row", 1)
+    assert model.complete(command.key) is None
+    assert model.restarting
+    # RestartUnit fails: no owner event reaches the window. Later Quit is
+    # the first disappearance, deliberately indistinguishable from a restart.
+    model.update(BASE)
+    model.presence(False)
+    assert not model.restarting
+    assert not model.view(0).widgets["daemon_banner"]["revealed"]
+    # Rendering or a duplicate absence event must not reveal it mid-absence.
+    model.update({})
+    model.presence(False)
+    assert not model.view(0).widgets["daemon_banner"]["revealed"]
+    reopened = SettingsModel(model.design, model.tr)
+    reopened.presence(False)
+    assert reopened.view(0).widgets["daemon_banner"]["revealed"]
+    # No new device-change success: every later disappearance shows the banner.
+    for _ in range(2):
+        model.presence(True)
+        model.update(BASE)
+        assert not model.view(0).widgets["daemon_banner"]["revealed"]
+        model.presence(False)
+        assert model.view(0).widgets["daemon_banner"]["revealed"]
