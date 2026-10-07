@@ -9,6 +9,7 @@ import re
 import sqlite3
 import subprocess
 import tempfile
+import tomllib
 import uuid
 from pathlib import Path
 
@@ -105,6 +106,11 @@ def signup(email, lang="en"):
 
 
 def main():
+    config = tomllib.loads((SITE / "wrangler.toml").read_text())
+    assert "migrations_dir" not in config["d1_databases"][0]
+    assert config["send_email"] == [
+        {"name": "EMAIL", "allowed_sender_addresses": ["hello@scambio.app"]}
+    ]
     # Migration preserves all existing fields and requires fresh confirmation.
     db = sqlite3.connect(":memory:")
     db.executescript((SITE / "schema.sql").read_text())
@@ -112,7 +118,8 @@ def main():
         "INSERT INTO waitlist VALUES (?,?,?,?,?,?,?,?)",
         ("legacy@example.test", "Mac", "Android", None, "en", "old", "old", "old"),
     )
-    db.executescript((ROOT / "packaging/site/0003_double_opt_in.sql").read_text())
+    for migration in sorted((SITE / "migrations").glob("*.sql")):
+        db.executescript(migration.read_text())
     assert db.execute(
         "SELECT status, consent_at, token_hash FROM waitlist"
     ).fetchone() == ("legacy_unconfirmed", "old", None)
