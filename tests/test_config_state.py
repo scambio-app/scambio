@@ -17,6 +17,17 @@ def test_template_and_readonly(tmp_path):
     assert path.read_bytes() == original
 
 
+def test_dummy_audio_defaults_and_explicit_override(tmp_path):
+    expected = ("sd_dummy", "speech-dispatcher-dummy")
+    assert Config().audio.ignore_apps == expected
+    assert parse({}).audio.ignore_apps == expected
+    assert load(tmp_path / "config.toml").audio.ignore_apps == expected
+    assert parse({"audio": {"ignore_apps": []}}).audio.ignore_apps == ()
+    assert parse({"audio": {"ignore_apps": ["Custom"]}}).audio.ignore_apps == (
+        "custom",
+    )
+
+
 @pytest.mark.parametrize(
     "data",
     [

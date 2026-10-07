@@ -50,7 +50,7 @@ class Policy:
 @dataclass(frozen=True)
 class Audio:
     ignore_roles: tuple[str, ...] = ("event", "notification", "test")
-    ignore_apps: tuple[str, ...] = ()
+    ignore_apps: tuple[str, ...] = ("sd_dummy", "speech-dispatcher-dummy")
     ignore_players: tuple[str, ...] = (
         "kdeconnect",
         "plasma-browser-integration",
@@ -102,7 +102,7 @@ unblock_silence_seconds = 10
 
 [audio]
 ignore_roles = ["event", "notification", "test"]
-ignore_apps = []
+ignore_apps = ["sd_dummy", "speech-dispatcher-dummy"]
 ignore_players = ["kdeconnect", "plasma-browser-integration", "playerctld"]
 
 [shortcut]
@@ -240,7 +240,7 @@ def parse(data: dict[str, object]) -> Config:
 
     audio = Audio(
         strings("ignore_roles", Audio().ignore_roles),
-        strings("ignore_apps", ()),
+        strings("ignore_apps", Audio().ignore_apps),
         strings("ignore_players", Audio().ignore_players),
     )
     b = section("backend", {f.name for f in fields(Backend)})

@@ -48,6 +48,17 @@ def test_active(props, corked, expected):
     assert active_stream({"corked": corked, "properties": props}, config) is expected
 
 
+@pytest.mark.parametrize("app", ["sd_dummy", "speech-dispatcher-dummy"])
+@pytest.mark.parametrize("key", ["application.name", "application.process.binary"])
+def test_dummy_audio_is_ignored_by_default(app, key):
+    stream = {"corked": False, "properties": {key: app.upper()}}
+    assert not active_stream(stream, cfg())
+    assert active_stream(stream, replace(cfg(), audio=AudioConfig(ignore_apps=())))
+    assert active_stream(
+        {"corked": False, "properties": {key: "speech-dispatcher"}}, cfg()
+    )
+
+
 def test_audio_snapshot_coalescing_routing_restore(fake_pactl, tmp_path):
     events = []
     store = Store(tmp_path / "state.json")
