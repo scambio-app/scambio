@@ -588,3 +588,5 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      **mai «open source»** (PolyForm Shield non è una licenza approvata OSI). Su Flathub l'app va
      dichiarata non libera. Prima della pubblicazione: verifica con un legale del testo della
      licenza e del CLA rispetto all'obiettivo.
+136. GM — Un eventuale **porting Windows** (oggi escluso, dec. 120) sarà **a pagamento** come il Mac.
+     Solo Linux è gratuito.
