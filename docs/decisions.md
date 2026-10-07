@@ -577,3 +577,14 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      (c) **marchio**: ricerca TMview/WIPO prima del deposito; rischio percepito «scam» in inglese
      da tenere presente nel naming del messaggio.
      Messaggio proposto (non ancora deciso): «L'audio ti segue» / «Your audio follows you».
+
+135. GM — **Supera la 132 sulla licenza.** Obiettivo esplicito di GM: guadagnare con Scambio;
+     gratuito su Linux, **a pagamento su Mac, e nessun altro deve poterlo vendere**. La GPL non lo
+     garantisce (è solo un deterrente), quindi il core Linux pubblicato userà **PolyForm Shield
+     1.0.0**: codice pubblico, uso, modifica e redistribuzione gratuiti su Linux, ma vietato usarlo
+     per prodotti che fanno concorrenza a Scambio (porting commerciali su Mac/Windows compresi).
+     Restano: **CLA** per i contributi (Fermich titolare dei diritti), **marchio** (dec. 133),
+     pubblicazione al rilascio di Linux v1. Comunicazione: «codice pubblico e gratuito su Linux»,
+     **mai «open source»** (PolyForm Shield non è una licenza approvata OSI). Su Flathub l'app va
+     dichiarata non libera. Prima della pubblicazione: verifica con un legale del testo della
+     licenza e del CLA rispetto all'obiettivo.
