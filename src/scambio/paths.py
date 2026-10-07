@@ -4,6 +4,7 @@
 
 import os
 import sys
+from configparser import ConfigParser, Error
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,3 +58,18 @@ def user_data_dir() -> Path:
     from gi.repository import GLib
 
     return Path(GLib.get_user_data_dir()) / "scambio"
+
+
+def host_path(path: Path, info_file: Path = Path("/.flatpak-info")) -> Path:
+    """Translate exported icon paths to the deployment visible to the host."""
+    if not path.is_relative_to("/app"):
+        return path
+    info = ConfigParser(interpolation=None)
+    try:
+        info.read_string(info_file.read_text())
+        app_path = Path(info.get("Instance", "app-path"))
+        if app_path.is_absolute() and ".." not in app_path.parts:
+            return app_path / path.relative_to("/app")
+    except (OSError, Error):
+        pass
+    return path

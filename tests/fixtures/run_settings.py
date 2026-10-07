@@ -146,6 +146,17 @@ self.UpdateProperties("{INTERFACE}",
     )
     if scenario == "initially-absent":
         mock.obj.Vanish(dbus_interface=INTERFACE)
+    activation_calls = []
+    original_call = Gio.DBusConnection.call
+
+    def record_call(connection, destination, path, interface, method, params, *args):
+        if method in {"StartServiceByName", "StartUnit"}:
+            activation_calls.append((destination, path, interface, method, params))
+        return original_call(
+            connection, destination, path, interface, method, params, *args
+        )
+
+    stack.enter_context(patch.object(Gio.DBusConnection, "call", record_call))
     app = Application(config, bus_name=name)
     app.register(None)
     if scenario == "startup-counts":
@@ -164,10 +175,20 @@ self.UpdateProperties("{INTERFACE}",
             assert window.daemon_banner.get_revealed()
             assert not window.status_group.get_sensitive()
             assert config.read_bytes() == initial
+            assert len(activation_calls) == 1
+            destination, path, interface, method, params = activation_calls[0]
+            assert destination == interface == "org.freedesktop.DBus"
+            assert path == "/org/freedesktop/DBus"
+            assert method == "StartServiceByName"
+            assert params.get_type_string() == "(su)"
+            assert params.unpack() == (name, 0)
+            app.lookup_action("start-daemon").activate(None)
+            assert len(activation_calls) == 2
             mock.obj.Return(dbus_interface=INTERFACE)
         spin_until(lambda: window.client.available and window.model.devices)
         drain()
     if scenario == "startup-counts":
+        assert not activation_calls
         counts = {
             method: len(
                 mock.obj.GetMethodCalls(method, dbus_interface=dbusmock.MOCK_IFACE)
@@ -338,6 +359,7 @@ self.UpdateProperties("{INTERFACE}",
     assert len(app.get_windows()) == 1
     mock.obj.Vanish(dbus_interface=INTERFACE)
     spin_until(lambda: window.daemon_banner.get_revealed())
+    assert len(activation_calls) == (2 if scenario == "initially-absent" else 0)
     mock.obj.Return(dbus_interface=INTERFACE)
     spin_until(lambda: not window.daemon_banner.get_revealed())
     assert window.release_idle_row.get_value() == 5

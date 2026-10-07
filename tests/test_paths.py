@@ -66,3 +66,25 @@ def test_xdg_paths_use_glib_and_keep_explicit_overrides(tmp_path, monkeypatch):
     assert config_path() == tmp_path / "config/scambio/config.toml"
     assert Store().path == tmp_path / "data/scambio/state.json"
     assert Store(tmp_path / "explicit.json").path == tmp_path / "explicit.json"
+
+
+def test_flatpak_icons_use_host_deployment(tmp_path):
+    info = tmp_path / "flatpak-info"
+    info.write_text("[Instance]\napp-path=/deployment/files\n")
+    assert paths.host_path(Path("/app/share/scambio/design/icons"), info) == Path(
+        "/deployment/files/share/scambio/design/icons"
+    )
+    assert paths.host_path(Path("/usr/share/scambio/design/icons"), info) == Path(
+        "/usr/share/scambio/design/icons"
+    )
+
+
+@pytest.mark.parametrize(
+    "content", [None, "broken", "[Instance]", "[Instance]\napp-path=relative"]
+)
+def test_missing_or_invalid_flatpak_info_preserves_path(tmp_path, content):
+    info = tmp_path / "flatpak-info"
+    if content is not None:
+        info.write_text(content)
+    path = Path("/app/share/scambio/design/icons")
+    assert paths.host_path(path, info) == path

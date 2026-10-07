@@ -1,14 +1,13 @@
-"""SNI and dbusmenu exports on the daemon's single Gio connection."""
+"""SNI and dbusmenu exports on a dedicated session bus connection."""
 
 import logging
-import os
 from collections.abc import Callable
 from importlib.resources import files
 from typing import Any
 
 from gi.repository import Gio, GLib
 
-from scambio.paths import design_dir
+from scambio.paths import design_dir, host_path
 from scambio.ui.guard import guarded
 from scambio.ui.presentation import Design, Model
 
@@ -39,15 +38,21 @@ class Tray:
         opened: Callable[[], None],
         timeout_ms: int,
     ) -> None:
-        self.bus, self.design, self.model = connection, design, model
+        self.bus = Gio.DBusConnection.new_for_address_sync(
+            Gio.dbus_address_get_for_bus_sync(Gio.BusType.SESSION, None),
+            Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT
+            | Gio.DBusConnectionFlags.MESSAGE_BUS_CONNECTION,
+            None,
+            None,
+        )
+        self.bus.set_exit_on_close(False)
+        self.design, self.model = design, model
         self.actions, self.opened, self.timeout_ms = actions, opened, timeout_ms
         self.revision = 1
         self.registrations: list[int] = []
         self.watch = 0
-        self.owner_id = 0
-        self.owned = False
         self.watcher_owner = ""
-        self.name = f"org.kde.StatusNotifierItem-{os.getpid()}-1"
+        self.name = self.bus.get_unique_name()
         self.closed = False
         self.cancel = Gio.Cancellable()
         try:
@@ -66,13 +71,6 @@ class Tray:
                 self._appeared,
                 self._vanished,
             )
-            self.owner_id = Gio.bus_own_name_on_connection(
-                self.bus,
-                self.name,
-                Gio.BusNameOwnerFlags.DO_NOT_QUEUE,
-                self._name_acquired,
-                self._name_lost,
-            )
         except Exception:
             self.stop()
             raise
@@ -82,17 +80,8 @@ class Tray:
         self.watcher_owner = owner
         self._register()
 
-    @guarded
-    def _name_acquired(self, bus: Gio.DBusConnection, name: str) -> None:
-        self.owned = True
-        self._register()
-
-    @guarded
-    def _name_lost(self, bus: Gio.DBusConnection, name: str) -> None:
-        self.owned = False
-
     def _register(self) -> None:
-        if self.closed or not self.owned or not self.watcher_owner:
+        if self.closed or not self.watcher_owner:
             return
 
         @guarded
@@ -107,7 +96,7 @@ class Tray:
             "/StatusNotifierWatcher",
             WATCHER,
             "RegisterStatusNotifierItem",
-            GLib.Variant("(s)", (self.name,)),
+            GLib.Variant("(s)", (SNI_PATH,)),
             None,
             Gio.DBusCallFlags.NO_AUTO_START,
             self.timeout_ms,
@@ -131,7 +120,7 @@ class Tray:
                 "Title": model.title,
                 "Status": model.status,
                 "IconName": model.icon,
-                "IconThemePath": str(design_dir() / "icons"),
+                "IconThemePath": str(host_path(design_dir() / "icons")),
                 "OverlayIconName": "",
                 "AttentionIconName": model.attention,
                 "AttentionMovieName": "",
@@ -338,6 +327,8 @@ class Tray:
             )
 
     def stop(self) -> None:
+        if self.closed:
+            return
         self.closed = True
         self.cancel.cancel()
         if self.watch:
@@ -346,6 +337,5 @@ class Tray:
         for registration in self.registrations:
             self.bus.unregister_object(registration)
         self.registrations.clear()
-        if self.owner_id:
-            Gio.bus_unown_name(self.owner_id)
-            self.owner_id = 0
+        if not self.bus.is_closed():
+            self.bus.close_sync(None)

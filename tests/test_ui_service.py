@@ -19,11 +19,52 @@ from test_service import daemon as daemon
 from scambio.api import BUS_NAME, INTERFACE, PATH
 from scambio.config import TEMPLATE
 from scambio.i18n import Translator
-from scambio.ui.tray import MENU, MENU_PATH
+from scambio.ui.tray import MENU, MENU_PATH, SNI_PATH, WATCHER
+
+TRAY_NAMES = []
+
+
+@pytest.fixture(autouse=True)
+def tray_watcher():
+    """Discover the real daemon's dedicated tray connection as a desktop does."""
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    info = Gio.DBusNodeInfo.new_for_xml(
+        '<node><interface name="org.kde.StatusNotifierWatcher">'
+        '<method name="RegisterStatusNotifierItem">'
+        '<arg type="s" direction="in"/></method></interface></node>'
+    ).interfaces[0]
+    TRAY_NAMES.clear()
+
+    def registered(connection, sender, path, interface, method, params, invocation):
+        assert params.unpack() == (SNI_PATH,)
+        TRAY_NAMES.append(sender)
+        invocation.return_value(None)
+
+    registration = bus.register_object(
+        "/StatusNotifierWatcher", info, registered, None, None
+    )
+    acquired = []
+    owner = Gio.bus_own_name_on_connection(
+        bus,
+        WATCHER,
+        Gio.BusNameOwnerFlags.NONE,
+        lambda *args: acquired.append(True),
+        None,
+    )
+    spin_until(lambda: acquired)
+    yield
+    Gio.bus_unown_name(owner)
+    bus.unregister_object(registration)
+    TRAY_NAMES.clear()
+    drain()
 
 
 def menu():
-    return dbusmock.BusType.SESSION.get_connection().get_object(BUS_NAME, MENU_PATH)
+    if not TRAY_NAMES:
+        raise dbus.DBusException("Tray not registered")
+    return dbusmock.BusType.SESSION.get_connection().get_object(
+        TRAY_NAMES[-1], MENU_PATH
+    )
 
 
 def wait_tray():

@@ -86,7 +86,7 @@ def test_watcher_registers_and_restarts(tray):
     for _ in range(2):
         with watcher() as server:
             spin_until(lambda: calls(server.obj, "RegisterStatusNotifierItem"))
-            assert calls(server.obj, "RegisterStatusNotifierItem")[0][1] == [tray.name]
+            assert calls(server.obj, "RegisterStatusNotifierItem")[0][1] == [SNI_PATH]
         drain()
 
 
@@ -131,14 +131,20 @@ def test_tray_name_disappears_and_returns(ui_client, tmp_path):
             )
             name = ui.tray.name
             assert bus.name_has_owner(name)
+            assert name != client.connection.get_unique_name()
+            connection = ui.tray.bus
             ui.apply_config(replace(config, tray=False))
             spin_until(lambda: not bus.name_has_owner(name))
+            assert connection.is_closed()
+            assert not client.connection.is_closed()
             ui.apply_config(config)
             spin_until(
                 lambda: len(calls(server.obj, "RegisterStatusNotifierItem")) == 2
             )
+            assert ui.tray.name != name
+            name = ui.tray.name
             assert bus.name_has_owner(name)
-            assert calls(server.obj, "RegisterStatusNotifierItem")[-1][1] == [name]
+            assert calls(server.obj, "RegisterStatusNotifierItem")[-1][1] == [SNI_PATH]
     finally:
         ui.stop()
     spin_until(lambda: not bus.name_has_owner(name))
@@ -146,7 +152,7 @@ def test_tray_name_disappears_and_returns(ui_client, tmp_path):
 
 def test_properties_layout_and_methods(tray):
     tray, client, obj, opened = tray
-    bus, dest = client.connection, client.connection.get_unique_name()
+    bus, dest = client.connection, tray.name
     props = rpc(
         bus, dest, "org.freedesktop.DBus.Properties", "GetAll", "(s)", (SNI,), SNI_PATH
     ).unpack()[0]
@@ -196,7 +202,7 @@ def test_activate_not_supported_without_side_effects(tray, state):
         tray.design, client.props | {"State": state}, "", 0, Translator("en")
     )
     tray.update(model)
-    bus, dest = client.connection, client.connection.get_unique_name()
+    bus, dest = client.connection, tray.name
     for coordinates in ((0, 0), (-1, 42)):
         with pytest.raises(GLib.Error) as exc:
             rpc(bus, dest, SNI, "Activate", "(ii)", coordinates, SNI_PATH)
@@ -220,7 +226,7 @@ def test_menu_actions(tray, item, method):
     tray, client, obj, _ = tray
     rpc(
         client.connection,
-        client.connection.get_unique_name(),
+        tray.name,
         MENU,
         "Event",
         "(isvu)",
@@ -244,7 +250,7 @@ def test_disabled_hidden_group_and_opened(tray):
     )
     rpc(
         client.connection,
-        client.connection.get_unique_name(),
+        tray.name,
         MENU,
         "Event",
         "(isvu)",
@@ -252,7 +258,7 @@ def test_disabled_hidden_group_and_opened(tray):
     )
     result = rpc(
         client.connection,
-        client.connection.get_unique_name(),
+        tray.name,
         MENU,
         "EventGroup",
         "(a(isvu))",
@@ -273,7 +279,7 @@ def test_update_signals_and_revision(tray):
     events = []
     bus = client.connection
     sub = bus.signal_subscribe(
-        bus.get_unique_name(),
+        tray.name,
         None,
         None,
         None,
@@ -322,7 +328,7 @@ def test_ui_error_seen_and_dynamic_minutes(ui_client, tmp_path, opened_method):
         error(obj, "connect_failed")
         spin_until(lambda: ui.notifications.active_error == "connect_failed")
         assert ui.tray.model.status == "NeedsAttention"
-        bus, dest = client.connection, client.connection.get_unique_name()
+        bus, dest = client.connection, ui.tray.name
         with pytest.raises(GLib.Error) as exc:
             rpc(bus, dest, SNI, "Activate", "(ii)", (0, 0), SNI_PATH)
         assert Gio.DBusError.get_remote_error(exc.value) == (

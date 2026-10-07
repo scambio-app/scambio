@@ -138,6 +138,8 @@ def window_class(tr: Translator) -> Any:
             self.model.update(self.client.props)
             if self.client.available:
                 self._devices()
+            else:
+                self.dispatch(Command("start-daemon"))
             self.render()
             if self.is_active():
                 self.dispatch(self.model.activated())
@@ -227,11 +229,11 @@ def window_class(tr: Translator) -> Any:
                 return
             if command.method == "start-daemon":
                 self.client.connection.call(
-                    "org.freedesktop.systemd1",
-                    "/org/freedesktop/systemd1",
-                    "org.freedesktop.systemd1.Manager",
-                    "StartUnit",
-                    GLib.Variant("(ss)", ("scambio.service", "replace")),
+                    "org.freedesktop.DBus",
+                    "/org/freedesktop/DBus",
+                    "org.freedesktop.DBus",
+                    "StartServiceByName",
+                    GLib.Variant("(su)", (self.client.bus_name, 0)),
                     None,
                     Gio.DBusCallFlags.NONE,
                     self.client.timeout_ms,
