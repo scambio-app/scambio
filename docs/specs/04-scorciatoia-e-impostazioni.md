@@ -439,6 +439,44 @@ c'è, si chiede nel report: mai inventare una chiave.
 
 ## 7. Note di revisione (Claude, dopo la consegna)
 
+### Audit 1 (2026-10-07, chat di sviluppo)
+
+**Codice** (commit `881f494`, `88ea326`, `5e5a3a9`; 710 test, nessuno saltato) contro §3, 05
+§5.5–§5.11 e M16–M18, letto da me e da un agente di controllo indipendente. Conformi: scelta del
+meccanismo (proprietario o `XDG_CURRENT_DESKTOP`, `UnknownMethod` → portal), flag 6/2 con memoria in
+`state.json`, conflitto con `ShortcutOwner`, preferito non valido senza bloccare l'avvio,
+pressione → `Switch()` dall'API pubblica, `setInactive` con `NO_AUTO_START` e mai `unregister`;
+`SetConfig` (riga per riga con commenti in coda e CRLF, rifiuti senza `Error`/`LastError`, unione
+col file e indirizzo in vigore, `DeviceBusy`, `RestartUnit` dopo la risposta); finestra
+(traduzione del `.ui`, `set_prgname`, istanza unica, `…Settings.Active` legato al focus, «Nessuno»
+non sceglibile, minuti, chiavi degli avvisi); tray (nome SNI noto rilasciato) e notifiche sospese
+in primo piano; invarianti (nessun timer o polling nuovo, demone senza GTK, installatore limitato
+ai tre file). Misura a riposo: CPU 0,0 %, RSS 23,9 → 24,5 MB.
+
+Punti affidati a Codex (correzioni audit 1): reinvio di un valore dopo un errore della finestra
+(due avvisi, nuovo tentativo non chiesto); banner che non ricompare dopo un `RestartUnit` fallito;
+`unbound` invece di `unsupported` con meccanismo `none`; quoting del file di servizio D-Bus (errore
+mio nella spec: dbus-daemon non usa i codici `%`; §3.1.6 corretta); `config.toml` symlink
+sostituito; `SetConfig` senza risposta su un'eccezione imprevista; doppio `ListDevices` /
+`RetryShortcut` all'apertura; test dei testi tradotti troppo stretti e una chiamata privata nel
+test GTK; test mancante su `NO_AUTO_START`; errori di `FileLauncher` con il nome del dominio GLib;
+traceback senza display. Accettato ma da dichiarare: anche la **rimozione** del tasto da parte
+dell'utente conta come scelta del desktop (memorizzata in `state.json`).
+
+**Installazione su `casa`** (`make install-user`, `0c84d9a`): lanciatore e servizio D-Bus con
+percorsi assoluti corretti; dopo il riavvio `ShortcutState: active`, `ShortcutBackend:
+kglobalaccel`, `Shortcut: <Super>g`.
+
+**Visivo**: finestra reale (`scambio settings` collegata al demone vero, display Xvfb, tema
+chiaro e scuro forzati) conforme al mock: riga di stato, pulsante, gruppi, tasti, testi italiani;
+il carattere è quello di GM. Con un solo dispositivo accoppiato `Adw.ComboRow` nasconde la freccia
+(comportamento nativo). Screenshot sul pannello reale di Plasma e focus da tray alla prova reale.
+
+**Correzioni audit 1** (`0ef473b`, 731 test, nessuno saltato; decisioni 116–119): verificate nel
+diff tutte e 13. Decisione mia sul punto 3: la prima scomparsa del nome dopo un cambio di
+dispositivo riuscito resta senza banner, anche nel caso raro di `RestartUnit` fallito seguito da
+«Esci» (la riapertura della finestra lo risolve); nessun timer o segnale nuovo.
+
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
 Riletta da me e poi da un agente di controllo indipendente contro `AGENTS.md`, 02, 05, le
