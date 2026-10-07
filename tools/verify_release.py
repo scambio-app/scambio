@@ -28,6 +28,11 @@ apt-get install -y --no-install-recommends ca-certificates
 if [ "$SCAMBIO_TEST_SYSTEMD" = yes ]; then
     apt-get install -y --no-install-recommends systemd
 else
+    # dconf accepts either session-bus provider; select the non-systemd one.
+    printf '%s\n' 'Package: systemd systemd-sysv libpam-systemd' \
+        'Pin: version *' 'Pin-Priority: -1' \
+        > /etc/apt/preferences.d/scambio-test-no-systemd
+    apt-get install -y --no-install-recommends dbus-x11
     test ! -e /usr/bin/systemctl
 fi
 dpkg-deb -R /artifacts/scambio_*_all.deb /tmp/old-scambio
