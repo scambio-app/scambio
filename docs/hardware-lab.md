@@ -9,6 +9,17 @@ PC `casa`: Kubuntu 24.04.5, KDE Plasma 5.27.12, xdg-desktop-portal-kde 5.27.11, 
 PipeWire con pipewire-pulse, Python 3.12.3, PyGObject presente. Dispositivo: Oakley Meta 002Z,
 già accoppiato e `Trusted=yes`; profili A2DP (SBC, SBC-XQ), HFP/HSP (CVSD, mSBC), AVRCP.
 Telefono: iPhone di GM.
+
+> **Cambio di ambiente — 2026-10-07 11:43 (misurato dall'orchestratore alle 13:45):** `casa` è stata
+> aggiornata a **Ubuntu 26.04.1 LTS, KDE Plasma 6.6.6, BlueZ 5.85, pactl 17.0, Python 3.14.4**
+> (`/etc/os-release`, `plasmashell --version`, `bluetoothctl --version`, `pactl --version`, log in
+> `/var/log/dist-upgrade/`). Tutte le misure precedenti (M1–M19) sono state fatte su Ubuntu 24.04 /
+> Plasma 5.27 / BlueZ 5.72 / Python 3.12: dove dipendono da Plasma, dal portal o da BlueZ (in
+> particolare M13 portal, M14 clic sinistro del tray e decisione 85, comportamento di
+> Disconnect/Connected della decisione 68) vanno **rivalidate** su questo ambiente. La `.venv` è stata
+> ricreata con Python 3.14 alle 11:48 senza i console script di sviluppo: l'orchestratore ha
+> reinstallato `pytest` nella venv; `make check` di nuovo verde (731 test).
+
 Aggiornamento 2026-10-05 (orchestratore): installato `gettext` 0.21 (`msgfmt`, `xgettext`) via
 `apt-get`, prerequisito della spec 03.
 

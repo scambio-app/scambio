@@ -534,3 +534,8 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
      premium future (ponte fotocamera, agenti) a pagamento su entrambe le piattaforme.
      Da decidere prima della fase Mac: titolare del prodotto e dell'account Apple Developer
      (Fermich o GM personale).
+
+123. Claude — Con Plasma 6 (aggiornamento di casa del 2026-10-07) `khotkeys` non esiste più: la
+     scorciatoia «Connetti Oakley» di GM è sparita insieme al servizio e la decisione 99 è superata
+     da sola. Meta+G resta solo a Scambio (gruppo `[app.scambio.Scambio]` in
+     `kglobalshortcutsrc`). Su casa la «verifica di Plasma 6» del Q6 si fa ora in locale, non in VM.
