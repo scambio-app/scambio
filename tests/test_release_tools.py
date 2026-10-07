@@ -93,6 +93,41 @@ def test_manifest_permissions_are_exact():
     assert len(permissions) == len(expected)
 
 
+def test_review_candidate_does_not_share_release_directories(release_tools):
+    release = release_tools
+    dist, archive = release.release_directories()
+    candidate_dist, candidate_archive = release.release_directories("audit-1")
+    assert dist == release.ROOT / "dist"
+    assert archive == Path.home() / ".local/share/scambio-release/archive"
+    assert candidate_dist == dist / "candidates/audit-1"
+    assert candidate_archive == archive.parent / "candidates/audit-1"
+    assert not candidate_archive.is_relative_to(archive)
+
+
+@pytest.mark.parametrize(
+    "candidate", ["", "../archive", "/tmp/release", "x/y", "a" * 65]
+)
+def test_review_candidate_rejects_invalid_paths(release_tools, candidate):
+    with pytest.raises(ValueError, match="identifier"):
+        release_tools.release_directories(candidate)
+
+
+def test_seal_never_replaces_existing_version(release_tools, monkeypatch, tmp_path):
+    release = release_tools
+    existing, dist = tmp_path / "1.0.0", tmp_path / "dist"
+    existing.mkdir()
+    dist.mkdir()
+    name = "scambio_1.0.0_all.deb"
+    (existing / name).write_bytes(b"original sealed candidate")
+    (dist / name).write_bytes(b"corrected candidate")
+    monkeypatch.setattr(release, "DIST", dist)
+    monkeypatch.setattr(release, "check", lambda: "1.0.0")
+    monkeypatch.setattr(release, "archived", lambda: [existing])
+    with pytest.raises(ValueError, match="Immutable release version"):
+        release.seal()
+    assert (existing / name).read_bytes() == b"original sealed candidate"
+
+
 def test_apt_discards_untrusted_staging_packages(release_tools, monkeypatch, tmp_path):
     release = release_tools
     site, dist, previous = (tmp_path / name for name in ("site", "dist", "0.9.0"))

@@ -764,3 +764,19 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      `make verify` verifica senza congelare; `make stage-site` ripete le verifiche, controlla
      l'albero pulito, sigilla l'archivio firmato e copia gli asset nel checkout del sito.
      Non pubblica, non crea tag e non modifica servizi o installazioni reali dell'utente.
+     (k) Audit 1, M35: `sd_dummy` e `speech-dispatcher-dummy` entrano nei default
+     `audio.ignore_apps` e nel modello generato. Una lista esplicita, anche vuota, resta
+     una scelta dell'utente: nessuna riscrittura automatica delle configurazioni esistenti.
+     (l) Gli script Debian chiamano `systemctl --global` solo se l'eseguibile è presente.
+     `verify` prova install/upgrade/remove/purge su Ubuntu 24.04 e Debian 13 sia con systemd
+     sia senza il suo pacchetto, controllando l'assenza effettiva di `/usr/bin/systemctl`.
+     (m) Con l'autorizzazione dell'audit 1, la migrazione passa in `scambio-site/migrations/`;
+     questo supera il percorso provvisorio del punto (i). Il binding EMAIL limita il mittente
+     a `hello@scambio.app` e non imposta `remote`; le prove usano `wrangler dev --local`.
+     L'onboarding del dominio resta di Claude, senza invii reali nelle prove di Codex.
+     (n) L'archivio 1.0.0 già sigillato resta intatto. `SCAMBIO_RELEASE_CANDIDATE=audit-1`
+     separa sia gli output (`dist/candidates/audit-1/`) sia l'archivio firmato della candidata
+     (`~/.local/share/scambio-release/candidates/audit-1/1.0.0/`). Identificatori limitati,
+     stessa verifica di firme/hash e stesso rifiuto di sovrascrivere una versione sigillata.
+     Il sito locale riceve solo la candidata verificata. Nessuna promozione automatica,
+     mescolanza fra archivi o sostituzione di versioni pubblicate: il rilascio resta a Claude/GM.

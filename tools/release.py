@@ -21,9 +21,21 @@ from email.utils import formatdate
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DIST = ROOT / "dist"
+
+
+def release_directories(candidate=None):
+    """Keep review candidates separate from the immutable release archive."""
+    home = Path.home() / ".local/share/scambio-release"
+    if candidate is None:
+        return ROOT / "dist", home / "archive"
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,63}", candidate):
+        raise ValueError("Invalid SCAMBIO_RELEASE_CANDIDATE identifier")
+    return ROOT / "dist/candidates" / candidate, home / "candidates" / candidate
+
+
+CANDIDATE = os.environ.get("SCAMBIO_RELEASE_CANDIDATE")
+DIST, ARCHIVE = release_directories(CANDIDATE)
 SITE = DIST / "site"
-ARCHIVE = Path.home() / ".local/share/scambio-release/archive"
 PRIMARY = "24A30DBED8973273A486CC7386C8855E1251E7E2"
 SIGNER = "4C23A6729A5750DDFC8745E305499CD6ECB01DE7"
 KEY = ROOT / "packaging/keys/scambio-archive-keyring.gpg"
@@ -138,7 +150,7 @@ class Signing:
 
 def dist():
     value = check()
-    DIST.mkdir(exist_ok=True)
+    DIST.mkdir(parents=True, exist_ok=True)
     tarball = DIST / f"scambio-{value}.tar.gz"
     raw = subprocess.check_output(
         ["git", "archive", "--format=tar", f"--prefix=scambio-{value}/", "HEAD"],
@@ -456,6 +468,7 @@ def seal():
     (destination / "ostree.commit").write_text(commit + "\n")
     manifest = {
         "version": value,
+        "candidate": CANDIDATE,
         "source_commit": run("git", "rev-parse", "HEAD", capture=True).strip(),
         "ostree_commit": commit,
         "sha256": {

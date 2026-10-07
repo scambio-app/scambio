@@ -24,36 +24,54 @@ export DEBIAN_FRONTEND=noninteractive
 printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d
 chmod 755 /usr/sbin/policy-rc.d
 apt-get update
-apt-get install -y --no-install-recommends systemd ca-certificates
+apt-get install -y --no-install-recommends ca-certificates
+if [ "$SCAMBIO_TEST_SYSTEMD" = yes ]; then
+    apt-get install -y --no-install-recommends systemd
+else
+    test ! -e /usr/bin/systemctl
+fi
 dpkg-deb -R /artifacts/scambio_*_all.deb /tmp/old-scambio
 sed -i 's/^Version: .*/Version: 0.9.0/' /tmp/old-scambio/DEBIAN/control
 dpkg-deb --root-owner-group --build /tmp/old-scambio /tmp/scambio_0.9.0_all.deb
 mkdir -p /root/.config/scambio /root/.local/share/scambio
 printf 'sentinel\n' > /root/.config/scambio/config.toml
 printf 'sentinel\n' > /root/.local/share/scambio/state.json
-apt-get install -y /tmp/scambio_0.9.0_all.deb
-apt-get install -y /artifacts/scambio_*_all.deb
+apt-get install -y --no-install-recommends /tmp/scambio_0.9.0_all.deb
+apt-get install -y --no-install-recommends /artifacts/scambio_*_all.deb
 test "$(scambio --version)" = "$SCAMBIO_EXPECTED_VERSION"
-test -L /etc/systemd/user/graphical-session.target.wants/scambio.service
+python3 -I -c '
+from scambio.config import Config
+assert Config().audio.ignore_apps == ("sd_dummy", "speech-dispatcher-dummy")
+'
+if [ "$SCAMBIO_TEST_SYSTEMD" = yes ]; then
+    test -L /etc/systemd/user/graphical-session.target.wants/scambio.service
+else
+    test ! -e /usr/bin/systemctl
+    test ! -L /etc/systemd/user/graphical-session.target.wants/scambio.service
+fi
 test ! -e /etc/apt/sources.list.d/scambio.sources.dpkg-new
 test "$(cat /root/.config/scambio/config.toml)" = sentinel
 sed -i "s|https://scambio.app/apt|$SCAMBIO_TEST_APT|" \
     /etc/apt/sources.list.d/scambio.sources
 apt-get update -o APT::Update::Error-Mode=any
 apt-cache policy scambio
-mkdir -m 700 /tmp/scambio-systemd-runtime
-XDG_RUNTIME_DIR=/tmp/scambio-systemd-runtime \
-    systemd-analyze --user verify /usr/lib/systemd/user/scambio.service
+if [ "$SCAMBIO_TEST_SYSTEMD" = yes ]; then
+    mkdir -m 700 /tmp/scambio-systemd-runtime
+    XDG_RUNTIME_DIR=/tmp/scambio-systemd-runtime \
+        systemd-analyze --user verify /usr/lib/systemd/user/scambio.service
+fi
 apt-get remove -y scambio
 test ! -e /etc/apt/sources.list.d/scambio.sources
 test ! -L /etc/systemd/user/graphical-session.target.wants/scambio.service
 test "$(cat /root/.local/share/scambio/state.json)" = sentinel
 apt-get purge -y scambio
-apt-get install -y /artifacts/scambio_*_all.deb
+apt-get install -y --no-install-recommends /artifacts/scambio_*_all.deb
 test "$(scambio --version)" = "$SCAMBIO_EXPECTED_VERSION"
 apt-get purge -y scambio
 test ! -e /usr/bin/scambio
 test "$(cat /root/.config/scambio/config.toml)" = sentinel
+if [ "$SCAMBIO_TEST_SYSTEMD" = no ]; then test ! -e /usr/bin/systemctl; fi
+printf 'PASS package lifecycle (systemd=%s)\n' "$SCAMBIO_TEST_SYSTEMD"
 """
 
 
@@ -130,7 +148,12 @@ def docker():
         worker = threading.Thread(target=server.serve_forever, daemon=True)
         worker.start()
         try:
-            for image in ("ubuntu:24.04", "debian:13"):
+            for image, systemd in (
+                ("ubuntu:24.04", "yes"),
+                ("debian:13", "yes"),
+                ("ubuntu:24.04", "no"),
+                ("debian:13", "no"),
+            ):
                 run(
                     "docker",
                     "run",
@@ -140,6 +163,8 @@ def docker():
                     f"type=bind,src={DIST},dst=/artifacts,readonly",
                     "--env",
                     f"SCAMBIO_EXPECTED_VERSION={version()}",
+                    "--env",
+                    f"SCAMBIO_TEST_SYSTEMD={systemd}",
                     "--env",
                     f"SCAMBIO_TEST_APT=http://127.0.0.1:{server.server_port}/apt",
                     image,
