@@ -1,0 +1,28 @@
+{
+  "method": "Pattern scan of all Git patches, not a proof of absence. Matched values are never printed.",
+  "patterns": {
+    "private_key": "-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY(?: BLOCK)?-----",
+    "github": "\\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,})\\b",
+    "openai_anthropic": "\\bsk-(?:proj-|ant-)?[A-Za-z0-9_-]{30,}\\b",
+    "aws": "\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b",
+    "jwt": "\\beyJ[A-Za-z0-9_-]{20,}\\.[A-Za-z0-9_-]{20,}\\.[A-Za-z0-9_-]{20,}\\b",
+    "bearer": "(?i)\\bBearer\\s+[A-Za-z0-9._~-]{24,}",
+    "credential_assignment": "(?i)(?:password|secret|api_key|api_token|access_token)\\s*[=:]\\s*[\"'][A-Za-z0-9_./+~-]{24,}[\"']"
+  },
+  "results": [
+    {
+      "repository": ".",
+      "head": "58332382edc6e43998534e86ab94e7b0db0d3670",
+      "candidate_matches": []
+    },
+    {
+      "repository": "../scambio-site",
+      "head": "1340c319e897e3c431d51b0d028b4d21f7219096",
+      "candidate_matches": []
+    }
+  ],
+  "staged_evidence_scan": {
+    "command": "git diff --cached",
+    "candidate_matches": []
+  }
+}

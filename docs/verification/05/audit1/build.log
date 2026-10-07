@@ -1,0 +1,249 @@
+make: Entering directory '~/development/scambio-audit1-build-bwxZRT'
+~/development/scambio/.venv/bin/python tools/release.py dist
++ git status --porcelain
++ git tag --list v1.0.0
++ gpg --homedir /tmp/scambio-key-check-70n1ymkg --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-70n1ymkg/pubring.kbx' created
+gpg: /tmp/scambio-key-check-70n1ymkg/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz.asc --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-wb10lln3 --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz
+gpgv: Signature made Thu Oct  8 01:24:02 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-n629p0e5 --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-n629p0e5/pubring.kbx' created
+gpg: /tmp/scambio-key-check-n629p0e5/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS.asc --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-xagypjij --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS
+gpgv: Signature made Thu Oct  8 01:24:02 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
+~/development/scambio/.venv/bin/python tools/release.py deb
++ git status --porcelain
++ git tag --list v1.0.0
++ git status --porcelain
++ git tag --list v1.0.0
++ gpg --homedir /tmp/scambio-key-check-gjzpq0eb --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-gjzpq0eb/pubring.kbx' created
+gpg: /tmp/scambio-key-check-gjzpq0eb/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz.asc --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-0g97_jc3 --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz
+gpgv: Signature made Thu Oct  8 01:24:02 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-s96j7sxo --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-s96j7sxo/pubring.kbx' created
+gpg: /tmp/scambio-key-check-s96j7sxo/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS.asc --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-j3kveyxb --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS
+gpgv: Signature made Thu Oct  8 01:24:02 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ git show -s --format=%ct HEAD
++ make install PREFIX=/usr DESTDIR=/tmp/scambio-deb-bi3i26pz/root SYSTEMD_USER_UNIT=1 PYTHON_LIB=lib/python3/dist-packages PYTHON=~/development/scambio/.venv/bin/python
+make[1]: Entering directory '/tmp/scambio-deb-bi3i26pz/scambio-1.0.0'
+blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
+[33m[1mwarning: Gtk.ShortcutLabel is deprecated[0m
+at design/ui/settings-window.blp line 90 column 13:
+[2m  90 |[0m            ShortcutLabel shortcut_label {
+     [2m|            ^^^^^^^^^^^^^[0m
+
+~/development/scambio/.venv/bin/python tools/install.py install --prefix "/usr" --destdir "/tmp/scambio-deb-bi3i26pz/root" --python-lib "lib/python3/dist-packages" --systemd
+Processing /tmp/scambio-deb-bi3i26pz/scambio-1.0.0
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: scambio
+  Building wheel for scambio (pyproject.toml): started
+  Building wheel for scambio (pyproject.toml): finished with status 'done'
+  Created wheel for scambio: filename=scambio-1.0.0-py3-none-any.whl size=85078 sha256=9b204e43be9a215fca400a5050995e892290618cb5a3c32c850149e7ba9c5db0
+  Stored in directory: ~/.cache/pip/wheels/0b/32/5b/c84257e78e374d069eed9024357d2e1bc4f17197abd3f69a08
+Successfully built scambio
+Installing collected packages: scambio
+Successfully installed scambio-1.0.0
+make[1]: Leaving directory '/tmp/scambio-deb-bi3i26pz/scambio-1.0.0'
++ dpkg-deb --root-owner-group --build /tmp/scambio-deb-bi3i26pz/root ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb
+dpkg-deb: building package 'scambio' in '~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb'.
++ lintian --fail-on error ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb
+W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (in test syntax) [postinst:7]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (in test syntax) [postrm:5]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (plain script) [postinst:8]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (plain script) [postrm:6]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (in test syntax) [postinst:4]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (in test syntax) [prerm:4]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (plain script) [postinst:5]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (plain script) [prerm:5]
+W: scambio: no-manual-page [usr/bin/scambio]
++ gpg --homedir /tmp/scambio-key-check-pg1_06b2 --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-pg1_06b2/pubring.kbx' created
+gpg: /tmp/scambio-key-check-pg1_06b2/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb.asc --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb
++ gpgv --homedir /tmp/scambio-verify-key-058z_gim --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb
+gpgv: Signature made Thu Oct  8 01:24:04 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-uqj7n5b8 --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-uqj7n5b8/pubring.kbx' created
+gpg: /tmp/scambio-key-check-uqj7n5b8/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS.asc --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-bnnfrwbb --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS
+gpgv: Signature made Thu Oct  8 01:24:04 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
+~/development/scambio/.venv/bin/python tools/release.py apt-repo
++ git status --porcelain
++ git tag --list v1.0.0
++ gpg --homedir /tmp/scambio-key-check-yo7jch2d --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-yo7jch2d/pubring.kbx' created
+gpg: /tmp/scambio-key-check-yo7jch2d/trustdb.gpg: trustdb created
++ gpgv --homedir /tmp/scambio-verify-key-xh5pw7uy --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio_1.0.0_all.deb
+gpgv: Signature made Thu Oct  8 01:24:04 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ apt-ftparchive packages pool
++ apt-ftparchive -o APT::FTPArchive::Release::MD5=false -o APT::FTPArchive::Release::SHA1=false -o APT::FTPArchive::Release::SHA512=false -o APT::FTPArchive::Release::Acquire-By-Hash=yes -o APT::FTPArchive::Release::Codename=stable -o APT::FTPArchive::Release::Suite=stable -o APT::FTPArchive::Release::Architectures=all -o APT::FTPArchive::Release::Components=main release dists/stable
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/site/apt/dists/stable/InRelease --clearsign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/site/apt/dists/stable/Release
++ gpgv --homedir /tmp/scambio-verify-key-tdkzo2t3 --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/site/apt/dists/stable/InRelease
+gpgv: Signature made Thu Oct  8 01:24:05 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/site/apt/dists/stable/Release.gpg --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/site/apt/dists/stable/Release
++ gpgv --homedir /tmp/scambio-verify-key-1qn8t0cv --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/site/apt/dists/stable/Release.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/site/apt/dists/stable/Release
+gpgv: Signature made Thu Oct  8 01:24:05 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
+~/development/scambio/.venv/bin/python tools/release.py flatpak
++ git status --porcelain
++ git tag --list v1.0.0
++ git status --porcelain
++ git tag --list v1.0.0
++ gpg --homedir /tmp/scambio-key-check-vtfaomzl --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-vtfaomzl/pubring.kbx' created
+gpg: /tmp/scambio-key-check-vtfaomzl/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz.asc --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-ht7gpe5n --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz
+gpgv: Signature made Thu Oct  8 01:24:05 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-8fm2woff --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-8fm2woff/pubring.kbx' created
+gpg: /tmp/scambio-key-check-8fm2woff/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS.asc --detach-sign ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-rb_vscn5 --keyring ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS.asc ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/SHA256SUMS
+gpgv: Signature made Thu Oct  8 01:24:05 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-nl163bae --batch --with-colons --show-keys ~/development/scambio-audit1-build-bwxZRT/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-nl163bae/pubring.kbx' created
+gpg: /tmp/scambio-key-check-nl163bae/trustdb.gpg: trustdb created
++ git show -s --format=%ct HEAD
++ flatpak-builder --show-manifest ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/app.scambio.Scambio.yml
+{
+  "id" : "app.scambio.Scambio",
+  "branch" : "stable",
+  "runtime" : "org.gnome.Platform",
+  "runtime-version" : "51",
+  "sdk" : "org.gnome.Sdk",
+  "command" : "scambio",
+  "modules" : [
+    {
+      "name" : "scambio",
+      "buildsystem" : "simple",
+      "sources" : [
+        {
+          "path" : "~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/scambio-1.0.0.tar.gz",
+          "sha256" : "a7884954b321a5f2a061dc89f6406a4bb7fef0fba9f55f9fcdfb9b8e53d2d603",
+          "type" : "archive"
+        }
+      ],
+      "build-commands" : [
+        "make install PREFIX=/app"
+      ]
+    }
+  ],
+  "finish-args" : [
+    "--share=ipc",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=dri",
+    "--socket=pulseaudio",
+    "--system-talk-name=org.bluez",
+    "--system-talk-name=org.freedesktop.login1",
+    "--talk-name=org.mpris.MediaPlayer2.*",
+    "--talk-name=org.kde.kglobalaccel",
+    "--talk-name=org.kde.StatusNotifierWatcher",
+    "--talk-name=org.freedesktop.Notifications",
+    "--talk-name=org.freedesktop.ScreenSaver"
+  ]
+}
++ flatpak-builder --user --force-clean --disable-download --override-source-date-epoch=1791415336 --repo=~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/flatpak-repo --gpg-sign=4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --gpg-homedir=~/.local/share/scambio-release/gnupg --default-branch=stable ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/flatpak-build ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/app.scambio.Scambio.yml
+Initializing build dir
+Committing stage init to cache
+Starting build of app.scambio.Scambio
+========================================================================
+Building module scambio in ~/development/scambio-audit1-build-bwxZRT/.flatpak-builder/build/scambio-1
+========================================================================
+Running: make install PREFIX=/app
+blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
+[33m[1mwarning: Gtk.ShortcutLabel is deprecated[2m[0m
+at design/ui/settings-window.blp line 90 column 13:
+[2m  90 |[0m            ShortcutLabel shortcut_label {
+     [2m|            ^^^^^^^^^^^^^[0m
+[2mhint: This widget will be removed in GTK 5[0m
+
+/usr/bin/python3 tools/install.py install --prefix "/app" --destdir "/" --python-lib "" 
+Processing ./.
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: scambio
+  Building wheel for scambio (pyproject.toml): started
+  Building wheel for scambio (pyproject.toml): finished with status 'done'
+  Created wheel for scambio: filename=scambio-1.0.0-py3-none-any.whl size=84710 sha256=c22c910f79fabde11499ff15f5135d220e8d9e1ab7992b31fd3292aaa92ca3f5
+  Stored in directory: /tmp/pip-ephem-wheel-cache-1q9sipnm/wheels/b4/c9/99/ff5f242fac012a039fd172bca1af4ae7a829f24e8fdd4a75d7
+Successfully built scambio
+Installing collected packages: scambio
+Successfully installed scambio-1.0.0
+Recording license file LICENSE
+Committing stage build-scambio to cache
+Cleaning up
+Running appstreamcli compose
+Only accepting components: app.scambio.Scambio, app.scambio.Scambio.desktop
+Processing directory: ~/development/scambio-audit1-build-bwxZRT/.flatpak-builder/rofiles/rofiles-dRmBPX/files
+Composing metadata...
+Success!
+Committing stage cleanup to cache
+Finishing app
+Exporting share/applications/app.scambio.Scambio.desktop
+Exporting share/icons/hicolor/scalable/apps/app.scambio.Scambio.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-on-pc-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-error-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-released-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-priority-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-unavailable-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-connecting-symbolic.svg
+Exporting share/icons/hicolor/symbolic/apps/app.scambio.Scambio-symbolic.svg
+Exporting share/dbus-1/services/app.scambio.Scambio.service
+Exporting share/dbus-1/services/app.scambio.Scambio.Settings.service
+Exporting share/metainfo/app.scambio.Scambio.metainfo.xml
+Please review the exported files and the metadata
+Committing stage finish to cache
+Exporting app.scambio.Scambio to repo
+Commit: d0892360cf570c9492cce0546386aa2bdb3bfc2ede2e81ba5f3b608e460e7fd7
+Metadata Total: 147
+Metadata Written: 56
+Content Total: 115
+Content Written: 86
+Content Bytes Written: 509572 (509.6 kB)
+Pruning cache
++ flatpak build-update-repo --generate-static-deltas --prune --gpg-sign=4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --gpg-homedir=~/.local/share/scambio-release/gnupg ~/development/scambio-audit1-build-bwxZRT/dist/candidates/audit-1/flatpak-repo
+Updating appstream branch
+Generating static deltas
+Generating delta: appstream2/x86_64 (c6afaacf8a)
+Generating delta: app/app.scambio.Scambio/x86_64/stable (d0892360cf)
+Updating summary
+Pruning old commits
+Total objects: 152
+No unreachable objects
+~/development/scambio/.venv/bin/python tools/release.py flatpak-site
++ git status --porcelain
++ git tag --list v1.0.0
+make: Leaving directory '~/development/scambio-audit1-build-bwxZRT'

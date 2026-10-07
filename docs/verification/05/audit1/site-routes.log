@@ -1,0 +1,6 @@
+PASS /apt/dists/stable/InRelease
+PASS /flatpak/scambio.flatpakref
+PASS /flatpak/repo/summary
+PASS /download/latest.json
+PASS /scambio_1.0.0_all.deb
+PASS staged deb and manifest match corrected candidate

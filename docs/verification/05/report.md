@@ -8,7 +8,9 @@ Implementati packaging Debian/Flatpak, avvio e percorsi installati, correzioni d
 §3.1.10, sito con asset locali e doppio opt-in, strumenti di verifica e firma. Nessun push,
 deploy, tag, riscrittura della storia, invio email reale o migrazione D1 remota.
 
-**La chiusura complessiva resta sospesa sui prerequisiti di Claude indicati sotto.**
+**Stato della prima consegna, precedente all’audit 1:** la chiusura restava sospesa sui
+prerequisiti di Claude indicati sotto. La sezione [Correzioni audit 1](#correzioni-audit-1)
+aggiorna questa situazione e distingue il lavoro di Codex dalle attività rimaste a Claude/GM.
 La prova reale di GM è esclusa dal goal e non è stata eseguita né simulata come prova umana.
 Le prove locali del binding email sono positive, ma non dimostrano l'abilitazione nell'account.
 
@@ -214,3 +216,113 @@ artefatto/hash, esito e anomalie; nessuna casella è una prova già effettuata.
   `unavailable`; nessuna misura Bluetooth inventata nella VM.
 - [ ] C facoltativa: Ubuntu 24.04 GNOME, installazione e avvio deb.
 - [ ] Firma GM, data ed evidenze; chiusura tracker solo dopo audit e prove richieste.
+
+## Correzioni audit 1
+
+Riferimento: §7 «Audit 1», commit Claude `575f7e3`; autorizzazioni aggiuntive di GM
+in questa sessione per `scambio-site/migrations/` e il modello config generato dal codice.
+Le sezioni precedenti documentano la prima consegna; questa sezione ne aggiorna l'esito.
+
+| Punto | Correzione | Evidenza |
+|---|---|---|
+| 1 — M35 | Default e template includono `sd_dummy` e `speech-dispatcher-dummy`. Il filtro copre nome e binario, senza distinzione maiuscole/minuscole. Liste esplicite, anche vuote, preservate; il vero `speech-dispatcher` non è escluso. | 63 test mirati config/audio; test dei default anche nel Python installato dai pacchetti. [Log](audit1/audio-tests.log) |
+| 2 — Debian senza systemd | `postinst` e `prerm` eseguono `systemctl --global` solo con `/usr/bin/systemctl` eseguibile. | `verify`: Ubuntu 24.04 e Debian 13, entrambi con e senza il pacchetto systemd; installazione, upgrade fittizio da 0.9.0, remove, purge e reinstallazione. Assenza del binario controllata prima e dopo il ciclo, senza stub. [Log](audit1/verify.log) |
+| 3 — Migrazione autonoma | SQL invariato spostato in `scambio-site/migrations/0003_double_opt_in.sql`; tolto `migrations_dir`, quindi directory predefinita del solo sito. Test aggiornato al percorso e all'intera sequenza delle migrazioni. | Copia temporanea del solo sito, schema iniziale con una riga, `wrangler d1 migrations apply --local` applica 0002/0003; la riga resta `legacy_unconfirmed`; seconda applicazione senza operazioni. [Log](audit1/site-migrations.log) |
+| 4 — Binding email | Tolto `remote = false`; aggiunto `allowed_sender_addresses = ["hello@scambio.app"]`. Worker e testi invariati. | Config verificata dal test; `wrangler dev --local` e doppio opt-in simulato en/it/de: 38 asserzioni HTTP, token scaduti/riusati, riga confermata immutabile e nessun reinvio. [Log](audit1/site-tests.log) |
+
+La configurazione email segue la [documentazione del binding Cloudflare](https://developers.cloudflare.com/email-service/configuration/send-bindings/).
+L'esecuzione locale senza binding remoti [simula le email](https://developers.cloudflare.com/email-service/local-development/sending/);
+è stato usato anche `--local` esplicito. Nessun invio reale, onboarding o migrazione D1 remota.
+L'onboarding dalla dashboard resta a Claude, come stabilito dall'audit.
+
+### Ricostruzione 1.0.0 e S2
+
+Il contenuto dei pacchetti cambia per i punti 1 e 2: sono stati ricostruiti tarball, `.deb`,
+repository apt, Flatpak e staging del sito dal commit pulito **`6685c13`**.
+È stato usato un checkout detached separato, perché nel checkout principale era presente la
+guida non committata di Claude `docs/guide/prova-installazione-1.0.md`, lasciata intatta.
+Nessun commit o spostamento di branch nel checkout di build.
+
+Per non violare l'immutabilità è stata aggiunta l'opzione di tooling
+`SCAMBIO_RELEASE_CANDIDATE=audit-1` (decisione 169n):
+
+- nuovi output: `dist/candidates/audit-1/`;
+- nuovo archivio sigillato: `~/.local/share/scambio-release/candidates/audit-1/1.0.0/`;
+- archivio precedente: `~/.local/share/scambio-release/archive/1.0.0/`, **mai modificato**.
+
+Entrambi gli archivi mantengono manifest firmato, SHA256, file 0444 e directory 0555.
+Verificato l'inventario completo del vecchio archivio prima/dopo: **228 file identici**, comprese
+le firme e il manifest. Il test automatico continua a rifiutare byte diversi per una versione
+già sigillata, anche nelle candidate. Nessuna eccezione “force”, nessun download di vecchi
+binari, nessuna fusione dei due archivi. [Verifica](audit1/archive-check.log).
+
+Il sito locale contiene la candidata corretta. La vecchia copia in `dist/` è evidenza della
+prima consegna, **non** la candidata da provare. I percorsi sopra, gli
+[hash nuovi](audit1/artifacts.json) e il manifest identificano senza ambiguità gli artefatti.
+Non è stata promossa o sovrascritta una release pubblicata: scelta della candidata per il
+rilascio, onboarding, push/deploy e tag restano a Claude/GM.
+
+Comandi eseguiti nel checkout pulito, con la venv di sviluppo già disponibile:
+
+```sh
+SCAMBIO_RELEASE_CANDIDATE=audit-1 make dist deb apt-repo flatpak flatpak-site
+# Verifica e sigillatura con tools/verify_release.py --stage-site
+```
+
+`stage-site` esegue prima `verify`, poi sigilla solo la candidata e copia gli asset nel sito.
+Il primo tentativo senza systemd ha rilevato che apt lo introduceva tramite `dbus-user-session`.
+Il verificatore corretto (`5833238`) sceglie `dbus-x11` e imposta un pin negativo per systemd:
+la matrice completa è poi passata. È stato eseguito con `runpy.run_path` dal main, importando
+`release` dal checkout pulito `6685c13`, così `seal()` registra il vero commit sorgente degli
+artefatti. Questo cambiamento riguarda solo il verificatore: nessuna seconda ricostruzione
+dei pacchetti invariati. Ora gli stessi artefatti sono disponibili nel main e si verificano con
+`SCAMBIO_RELEASE_CANDIDATE=audit-1 make verify`.
+[Build](audit1/build.log), [verify completo](audit1/verify.log). Verificate firme, SHA256,
+apt update locale/by-hash, versione installata, hardening quando systemd è presente,
+conservazione dei dati utente, permessi Flatpak esatti e tre accessi D-Bus negati.
+
+### Controlli, commit e limiti
+
+`make check`: **804 test passati, zero saltati**, 991 avvisi esterni PyGObject già classificati.
+[Output](audit1/make-check.log). I 14 test degli strumenti di release coprono anche separazione
+delle candidate, identificatori invalidi e divieto di sostituire una versione sigillata.
+Lintian senza errori; restano i due override, otto avvisi sui percorsi assoluti e uno
+no-manpage, motivati come nella prima consegna. AppStream valida con il solo avviso pedantico sul maiuscolo dell'ID invariato.
+
+Sono state ripetute le misure di dieci minuti dai **nuovi** pacchetti installati in venv/Flatpak
+temporanei: stesso metodo e stessi limiti della prima consegna (bus privati, pactl simulato,
+nessun dispositivo configurato). [deb](audit1/idle-deb.json), [Flatpak](audit1/idle-flatpak.json).
+| Candidata audit-1 | Intervallo | CPU aggiuntiva | RSS iniziale/finale |
+|---|---:|---:|---:|
+| deb | 600,100 s | 0 tick, 0% | 38.068 / 38.068 KiB |
+| Flatpak | 600,089 s | 1 tick (10 ms), 0,0017% | 43.440 / 43.440 KiB |
+
+I valori riguardano questo scenario; M35 resta una misura di Claude, non ripetuta da Codex sul
+Bluetooth reale.
+
+Commit main: `509f5ba` (punto 1), `63a0959` (test e rimozione della migrazione dal main),
+`6685c13` (punto 2, verifiche e candidate). Commit sito: `54b0ec5` (punti 3–4);
+`1340c31` contiene gli artefatti corretti; `5833238` nel main corregge il solo ambiente Docker. Il commit del presente report
+raccoglie le evidenze senza cambiare il contenuto dei pacchetti.
+
+File di implementazione toccati: `src/scambio/config.py`, `tests/test_config_state.py`,
+`tests/test_adapters.py`, `tests/test_release_tools.py`, `packaging/debian/postinst`,
+`packaging/debian/prerm`, `tools/test_site.py`, `tools/release.py`, `tools/verify_release.py`,
+`docs/decisions.md` (solo 169); SQL rimosso da `packaging/site/` e trasferito nel sito,
+`wrangler.toml`, asset generati in `public/`, report e allegati sotto `docs/verification/05/`.
+Nessun cambiamento Codex a design, spec, contesti, hardware-lab, guide o configurazione di GM.
+[Rotte locali e hash](audit1/site-routes.log); [scan della storia di entrambi i repo](audit1/history-scan.json),
+nessun candidato ai pattern di segreti controllati.
+
+Le configurazioni già esistenti con `ignore_apps = []` continuano a escludere zero app:
+la modifica dei default non sovrascrive una scelta esplicita. Per adottare il nuovo filtro su
+una configurazione esistente, GM può aggiungere i due nomi alla propria lista. Codex non ha
+modificato il file reale né riavviato il servizio.
+
+Le FAQ definitive risultano consegnate da Claude in `67d950e` del sito: la precedente richiesta
+nel report è superata. Restano a Claude/GM onboarding email, screenshot reali dell'app/prova B,
+audit finale, prova §6.1 e operazioni di pubblicazione. Nessun push, deploy, tag o riscrittura
+della storia effettuati da Codex. La guida non committata di Claude resta fuori dai nostri commit.
+
+Ricerca: graphify per simboli e impatto nel main; nel sito il grafo non esiste, quindi lettura
+diretta dei file noti. Brain consultato solo tramite agvm-scambio, senza scritture o cambio brain.

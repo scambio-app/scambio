@@ -1,0 +1,85 @@
+blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
+[33m[1mwarning: Gtk.ShortcutLabel is deprecated[0m
+at design/ui/settings-window.blp line 90 column 13:
+[2m  90 |[0m            ShortcutLabel shortcut_label {
+     [2m|            ^^^^^^^^^^^^^[0m
+
+.venv/bin/ruff format --check src tests tools
+75 files already formatted
+.venv/bin/ruff check src tests tools
+[1;32mAll checks passed![0m
+.venv/bin/mypy
+Success: no issues found in 32 source files
+.venv/bin/pytest
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.1.1, pluggy-1.6.0
+rootdir: ~/development/scambio
+configfile: pyproject.toml
+testpaths: tests
+plugins: typeguard-4.4.4
+collected 804 items
+
+tests/test_adapters.py ........................                          [  2%]
+tests/test_audio_recovery.py ........................                    [  5%]
+tests/test_background.py ..............                                  [  7%]
+tests/test_config_edit.py ..............................                 [ 11%]
+tests/test_config_state.py .......................................       [ 16%]
+tests/test_external_text.py ...                                          [ 16%]
+tests/test_files.py .......                                              [ 17%]
+tests/test_i18n.py ........................                              [ 20%]
+tests/test_install_user.py ............                                  [ 22%]
+tests/test_notifications.py ...............................              [ 25%]
+tests/test_packaging.py ...                                              [ 26%]
+tests/test_paths.py ............                                         [ 27%]
+tests/test_players.py ......................................             [ 32%]
+tests/test_policy.py ................................................... [ 38%]
+........................................................................ [ 47%]
+.......................                                                  [ 50%]
+tests/test_policy_players.py ........................................... [ 55%]
+..........................................................               [ 63%]
+tests/test_presentation.py ............................................. [ 68%]
+........................                                                 [ 71%]
+tests/test_release_tools.py ..............                               [ 73%]
+tests/test_service.py ...................                                [ 75%]
+tests/test_service_players.py ..................................         [ 80%]
+tests/test_service_unblock.py ..                                         [ 80%]
+tests/test_session_recovery.py ..                                        [ 80%]
+tests/test_settings_api.py ......................                        [ 83%]
+tests/test_settings_cli.py .....                                         [ 83%]
+tests/test_settings_model.py ......................................      [ 88%]
+tests/test_shortcuts.py ................................................ [ 94%]
+.                                                                        [ 94%]
+tests/test_tray.py ....................                                  [ 97%]
+tests/test_ui_service.py ...........                                     [ 98%]
+tests/test_window.py ...........                                         [100%]
+
+=============================== warnings summary ===============================
+../../../../usr/lib/python3/dist-packages/gi/overrides/__init__.py:159
+  /usr/lib/python3/dist-packages/gi/overrides/__init__.py:159: PyGIDeprecationWarning: GLib.unix_signal_add_full is deprecated; use GLibUnix.signal_add_full instead
+    value = getattr(proxy, attr)
+
+tests/test_adapters.py::test_audio_snapshot_coalescing_routing_restore
+  /usr/lib/python3/dist-packages/gi/events.py:803: DeprecationWarning: 'asyncio.AbstractEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    AbstractEventLoopPolicy = getattr(asyncio, "AbstractEventLoopPolicy", object)
+
+tests/test_adapters.py: 55 warnings
+tests/test_audio_recovery.py: 84 warnings
+tests/test_install_user.py: 2 warnings
+tests/test_notifications.py: 150 warnings
+tests/test_players.py: 98 warnings
+tests/test_service.py: 61 warnings
+tests/test_service_players.py: 92 warnings
+tests/test_service_unblock.py: 19 warnings
+tests/test_session_recovery.py: 15 warnings
+tests/test_settings_api.py: 58 warnings
+tests/test_shortcuts.py: 170 warnings
+tests/test_tray.py: 125 warnings
+tests/test_ui_service.py: 60 warnings
+  /usr/lib/python3/dist-packages/gi/events.py:890: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    if not isinstance(_get_event_loop_policy(), GLibEventLoopPolicy):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 804 passed, 991 warnings in 92.12s (0:01:32) =================
+[graphify hook] launching background rebuild (log: ~/.cache/graphify-rebuild.log)
+[main 5833238] Keep systemd out of non-systemd verification containers
+ 1 file changed, 5 insertions(+)

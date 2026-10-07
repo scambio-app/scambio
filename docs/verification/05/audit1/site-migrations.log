@@ -1,0 +1,49 @@
+
+ ⛅️ wrangler 4.148.0
+────────────────────
+Resource location: local 
+
+Use --remote if you want to access the remote instance.
+
+Migrations to be applied:
+┌─────────────────────────┐
+│ name                    │
+├─────────────────────────┤
+│ 0002_multi_platform.sql │
+├─────────────────────────┤
+│ 0003_double_opt_in.sql  │
+└─────────────────────────┘
+? About to apply 2 migration(s)
+Your database may not be available to serve requests during the migration, continue?
+🤖 Using fallback value in non-interactive context: yes
+🌀 Executing on local database scambio-waitlist (48495369-16a1-4beb-9c29-fb773e393e22) from .wrangler/state/v3/d1:
+🌀 To execute on your remote database, add a --remote flag to your wrangler command.
+🚣 5 commands executed successfully.
+┌─────────────────────────┬────────┐
+│ name                    │ status │
+├─────────────────────────┼────────┤
+│ 0002_multi_platform.sql │ ✅     │
+├─────────────────────────┼────────┤
+│ 0003_double_opt_in.sql  │ 🕒️    │
+└─────────────────────────┴────────┘
+🌀 Executing on local database scambio-waitlist (48495369-16a1-4beb-9c29-fb773e393e22) from .wrangler/state/v3/d1:
+🌀 To execute on your remote database, add a --remote flag to your wrangler command.
+🚣 7 commands executed successfully.
+┌─────────────────────────┬────────┐
+│ name                    │ status │
+├─────────────────────────┼────────┤
+│ 0002_multi_platform.sql │ ✅     │
+├─────────────────────────┼────────┤
+│ 0003_double_opt_in.sql  │ ✅     │
+└─────────────────────────┴────────┘
+
+
+ ⛅️ wrangler 4.148.0
+────────────────────
+Resource location: local 
+
+Use --remote if you want to access the remote instance.
+
+✅ No migrations to apply!
+
+PASS standalone site checkout; both migrations applied once; legacy row retained; sender restricted; remote unset

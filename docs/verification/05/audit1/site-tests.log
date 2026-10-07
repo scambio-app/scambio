@@ -1,0 +1,8 @@
+PASS migration preserves legacy records
+PASS origin, content type, streaming body limit and headers
+PASS Cloudflare rate limit
+PASS double opt-in, replacement, reuse and immutable rows in en/it/de
+PASS expired token
+PASS global daily quota
+PASS relative redirect, manifest tampering and explicit local origin
+PASS 38 HTTP assertions; only local D1 and simulated emails

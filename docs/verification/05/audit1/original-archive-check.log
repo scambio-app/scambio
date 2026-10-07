@@ -1,0 +1,5 @@
++ gpgv --homedir /tmp/scambio-verify-key-ldk_vlpc --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/archive/1.0.0/manifest.json.asc ~/.local/share/scambio-release/archive/1.0.0/manifest.json
+gpgv: Signature made Thu Oct  8 00:51:59 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
+PASS original signed archive; preserved inventory: 228
