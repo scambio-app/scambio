@@ -1,15 +1,15 @@
 """Asynchronous client, preserving the daemon's signal order and own-call window."""
 
-import logging
 from collections.abc import Callable
 from typing import Any
 
 from gi.repository import Gio, GLib
 
 from scambio.api import INTERFACE, introspection_xml
+from scambio.text import logger
 from scambio.ui.guard import guarded
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 Listener = Callable[[str, Any], None]
 
 

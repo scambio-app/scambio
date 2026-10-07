@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: 2026 Fermich srl
 """One Background portal request per Flatpak process, without retries."""
 
-import logging
 import uuid
 from pathlib import Path
 from typing import Any
@@ -10,8 +9,9 @@ from typing import Any
 from gi.repository import Gio, GLib
 
 from scambio.i18n import Translator
+from scambio.text import logger
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 PORTAL = "org.freedesktop.portal.Desktop"
 PATH = "/org/freedesktop/portal/desktop"
 REQUEST = "org.freedesktop.portal.Request"

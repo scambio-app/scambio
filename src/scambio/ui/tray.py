@@ -1,6 +1,5 @@
 """SNI and dbusmenu exports on a dedicated session bus connection."""
 
-import logging
 from collections.abc import Callable
 from importlib.resources import files
 from typing import Any
@@ -8,10 +7,11 @@ from typing import Any
 from gi.repository import Gio, GLib
 
 from scambio.paths import design_dir, host_path
+from scambio.text import logger
 from scambio.ui.guard import guarded
 from scambio.ui.presentation import Design, Model
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 SNI = "org.kde.StatusNotifierItem"
 MENU = "com.canonical.dbusmenu"
 SNI_PATH = "/StatusNotifierItem"
@@ -310,6 +310,18 @@ class Tray:
         invocation: Gio.DBusMethodInvocation,
     ) -> None:
         try:
+            if params.get_size() > 65536 or any(
+                child.get_type_string().startswith("a") and child.n_children() > 32
+                for child in (
+                    params.get_child_value(index)
+                    for index in range(params.n_children())
+                )
+            ):
+                invocation.return_dbus_error(
+                    "org.freedesktop.DBus.Error.InvalidArgs",
+                    "Tray request exceeds size limit",
+                )
+                return
             if interface == SNI and method == "Activate":
                 # Plasma 5.27 opens the menu only when Activate fails (decision 85).
                 invocation.return_dbus_error(

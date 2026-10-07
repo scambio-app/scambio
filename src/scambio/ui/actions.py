@@ -1,14 +1,13 @@
 """Shared GActions dispatch only through the public daemon client."""
 
-import logging
-
 from gi.repository import Gio, GLib
 
 from scambio.api import SETTINGS_BUS_NAME, SETTINGS_PATH
+from scambio.text import logger
 from scambio.ui.client import ScambioClient
 from scambio.ui.guard import guarded
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 
 
 def open_settings(client: ScambioClient) -> None:

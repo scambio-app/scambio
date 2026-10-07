@@ -152,10 +152,10 @@ def test_routing_exception_always_finishes_and_drains_queue(
     if fault == "spawn":
         original = audio._run
 
-        def fail(args, callback):
+        def fail(args, callback, *extra):
             if args[0] == "set-default-sink":
                 raise RuntimeError("Injected spawn failure")
-            original(args, callback)
+            original(args, callback, *extra)
 
         monkeypatch.setattr(audio, "_run", fail)
     if fault == "save":
@@ -223,3 +223,100 @@ def test_command_deadline_configuration():
     for value in [0, -1, True, "10"]:
         with pytest.raises(ValueError):
             parse({"backend": {"command_timeout_seconds": value}})
+
+
+def test_subscription_size_limit_rejects_complete_and_partial_records():
+    for payload in (b'{"text":"' + b"x" * 129, b'{"text":"' + b"x" * 129 + b'"}'):
+        parser = JSONStream(128)
+        with pytest.raises(ValueError, match="size limit"):
+            parser.feed(payload)
+        assert parser.buffer == ""
+    parser = JSONStream(32)
+    assert parser.feed(b'{"on":"sink"}' * 20) == [{"on": "sink"}] * 20
+
+
+def test_oversized_snapshot_reaps_child_and_backs_off(audio, fake_pactl, caplog):
+    audio.reload(
+        replace(
+            audio.config, backend=replace(audio.config.backend, snapshot_max_bytes=1024)
+        )
+    )
+    fake_pactl.update({"streams": [{"properties": {"long": "x" * 2048}}]})
+    audio.refresh()
+    spin_until(lambda: audio.backend_down and not audio.refresh_running)
+    spin_until(lambda: not audio.commands)
+    assert audio.retry and "output exceeds size limit" in caplog.text
+
+
+def test_subscription_oversize_reaps_subscriber(audio, fake_pactl):
+    audio.reload(
+        replace(
+            audio.config, backend=replace(audio.config.backend, subscribe_max_bytes=128)
+        )
+    )
+    pid = int(audio.subscriber.get_identifier())
+    fake_pactl.event(b'{"on":"sink","text":"' + b"x" * 256)
+    spin_until(lambda: audio.backend_down)
+    spin_until(lambda: not Path(f"/proc/{pid}").exists())
+    assert audio.retry
+
+
+def test_command_concurrency_is_bounded(audio, fake_pactl):
+    audio.reload(
+        replace(
+            audio.config,
+            backend=replace(
+                audio.config.backend, command_max_processes=2, command_timeout_seconds=1
+            ),
+        )
+    )
+    spin_until(lambda: not audio.commands)
+    fake_pactl.update({"hang_commands": ["get-default-sink"]})
+    responses = []
+    for _ in range(3):
+        audio._run(["get-default-sink"], lambda output, ok: responses.append(ok))
+        assert len(audio.commands) <= 2
+    assert responses == [False]
+    spin_until(lambda: len(responses) == 3, seconds=3)
+    assert responses == [False, False, False]
+    assert not audio.commands
+
+
+def test_debounce_has_a_maximum_latency(audio, monkeypatch):
+    scheduled = []
+    clock = [1_000_000]
+    real_timeout = GLib.timeout_add
+
+    def schedule(ms, callback):
+        scheduled.append(ms)
+        return real_timeout(60000, callback)
+
+    monkeypatch.setattr(GLib, "get_monotonic_time", lambda: clock[0])
+    monkeypatch.setattr(GLib, "timeout_add", schedule)
+    audio._schedule()
+    clock[0] += 1_999_000
+    audio._schedule()
+    assert scheduled == [50, 1]
+    clock[0] += 100_000
+    audio._schedule()
+    assert scheduled[-1] == 1
+
+
+def test_routing_fanout_limit_does_not_spawn_moves(audio, fake_pactl):
+    audio.reload(
+        replace(
+            audio.config, backend=replace(audio.config.backend, route_max_streams=2)
+        )
+    )
+    fake_pactl.add_sink()
+    fake_pactl.update(
+        {"streams": [{"index": n, "sink": 1, "corked": False} for n in range(3)]}
+    )
+    finished = []
+    audio.route(lambda: finished.append(True))
+    spin_until(lambda: finished)
+    assert audio.backend_down
+    assert not any(
+        c["args"][0] in {"move-sink-input", "set-default-sink"}
+        for c in fake_pactl.calls()
+    )

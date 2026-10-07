@@ -2,20 +2,18 @@
 
 import copy
 import json
-import logging
-import os
 import re
-import stat
-import tempfile
 import tomllib
 from collections.abc import Iterator
 from dataclasses import dataclass, field, fields
 from pathlib import Path
 
+from scambio.files import CONFIG_LIMIT, parent_fd, read_text, write_text
 from scambio.i18n import Translator
 from scambio.paths import user_config_dir
+from scambio.text import logger
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 RESUME_DEFAULTS = {"generic": 0, "meta_glasses": 2000}
 WINDOW_KEYS = {
     "device.address": str,
@@ -67,6 +65,12 @@ class Backend:
     dbus_timeout_seconds: int = 10
     command_timeout_seconds: int = 10
     player_timeout_ms: int = 1000
+    player_max_count: int = 16
+    snapshot_max_bytes: int = 4 * 1024 * 1024
+    subscribe_max_bytes: int = 64 * 1024
+    route_max_streams: int = 256
+    command_max_processes: int = 4
+    refresh_max_ms: int = 2000
 
 
 @dataclass(frozen=True)
@@ -115,6 +119,12 @@ dbus_margin_seconds = 5
 dbus_timeout_seconds = 10
 command_timeout_seconds = 10
 player_timeout_ms = 1000
+player_max_count = 16
+snapshot_max_bytes = 4194304
+subscribe_max_bytes = 65536
+route_max_streams = 256
+command_max_processes = 4
+refresh_max_ms = 2000
 """
 
 CONFIG_COMMENTS = {
@@ -162,15 +172,13 @@ def config_path() -> Path:
 
 def load(path: Path | None = None) -> Config:
     path = path or config_path()
-    if not path.exists():
-        path.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            with path.open("x") as out:
-                out.write(template())
-        except FileExistsError:
-            pass
     try:
-        data = tomllib.loads(path.read_text())
+        if not path.exists():
+            try:
+                write_text(path, template(), exclusive=True)
+            except FileExistsError:
+                pass
+        data = tomllib.loads(read_text(path, CONFIG_LIMIT, symlink=True))
         return parse(data)
     except (OSError, ValueError, TypeError) as exc:
         raise ConfigInvalid(str(exc)) from exc
@@ -234,14 +242,21 @@ def parse(data: dict[str, object]) -> Config:
         strings("ignore_players", Audio().ignore_players),
     )
     b = section("backend", {f.name for f in fields(Backend)})
+    bounds = {
+        "player_timeout_ms": (100, 5000),
+        "player_max_count": (1, 16),
+        "snapshot_max_bytes": (1024, 64 * 1024 * 1024),
+        "subscribe_max_bytes": (128, 4 * 1024 * 1024),
+        "route_max_streams": (1, 4096),
+        "command_max_processes": (1, 32),
+    }
     backend = Backend(
         **{
             f.name: integer(
                 b,
                 f.name,
                 getattr(Backend(), f.name),
-                100 if f.name == "player_timeout_ms" else 1,
-                5000 if f.name == "player_timeout_ms" else 60000,
+                *bounds.get(f.name, (1, 60000)),
             )
             for f in fields(Backend)
         }
@@ -359,23 +374,14 @@ class ConfigEdit:
     path: Path
     text: str
     config: Config
-    mode: int
 
     def write(self) -> None:
         """Commit only after the service's DeviceBusy check."""
-        path = self.path.resolve()
-        path.parent.mkdir(parents=True, exist_ok=True)
-        fd, name = tempfile.mkstemp(prefix=".config-", dir=path.parent)
-        try:
-            with os.fdopen(fd, "wb") as out:
-                os.fchmod(out.fileno(), self.mode)
-                out.write(self.text.encode("utf-8"))
-                out.flush()
-                os.fsync(out.fileno())
-            os.replace(name, path)
-        finally:
-            if os.path.exists(name):
-                os.unlink(name)
+        with parent_fd(self.path, create=True):
+            path = self.path.resolve()
+        if len(self.text.encode("utf-8")) > CONFIG_LIMIT:
+            raise OSError("Configuration exceeds size limit")
+        write_text(path, self.text)
 
 
 def prepare_update(
@@ -385,11 +391,10 @@ def prepare_update(
         if key not in WINDOW_KEYS or type(value) is not WINDOW_KEYS[key]:
             raise ConfigInvalid("Unsupported configuration key or type: " + key)
     try:
-        text = path.read_bytes().decode("utf-8")
-        mode = stat.S_IMODE(path.stat().st_mode)
+        text = read_text(path, CONFIG_LIMIT, symlink=True)
     except FileNotFoundError:
-        text, mode = template(language), 0o600
-    except (OSError, UnicodeError) as exc:
+        text = template(language)
+    except (OSError, ValueError) as exc:
         raise ConfigInvalid(str(exc)) from exc
     try:
         data = tomllib.loads(text)
@@ -408,4 +413,4 @@ def prepare_update(
             raise ConfigInvalid("TOML edit changed unrelated values")
     except (ValueError, TypeError) as exc:
         raise ConfigInvalid(str(exc)) from exc
-    return ConfigEdit(path, text, config, mode)
+    return ConfigEdit(path, text, config)

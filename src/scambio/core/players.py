@@ -1,6 +1,5 @@
 """On-demand MPRIS control. No subscriptions, subprocesses or periodic work."""
 
-import logging
 from collections.abc import Callable
 from functools import partial
 from typing import Literal
@@ -11,8 +10,9 @@ from scambio.config import Config
 from scambio.core.ports import Done
 from scambio.core.transport import BusClient
 from scambio.state import PlayerRef, ResumePlayers, Store
+from scambio.text import logger
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 PREFIX = "org.mpris.MediaPlayer2."
 PATH = "/org/mpris/MediaPlayer2"
 PLAYER = "org.mpris.MediaPlayer2.Player"
@@ -220,13 +220,19 @@ class Players:
         if self.closed:
             done()
             return
-        done = self._completion(done)
+        completed = self._completion(done)
+
+        def finish_operation() -> None:
+            self._save()
+            completed()
+
+        done = finish_operation
         deadline = self._read_deadline()
         self.held = dict.fromkeys(self.held, kind)
-        self._save()
         # Discovery shares the read budget; no additional watchdog or idle work.
         candidates: tuple[str, ...] | None = None
         identity_ready = False
+        reserved: set[PlayerRef] = set()
 
         def ready() -> None:
             if self.closed:
@@ -241,6 +247,11 @@ class Players:
                 and name[len(PREFIX) :].split(".", 1)[0].casefold()
                 not in self.config.audio.ignore_players
             ]
+            held_names = {ref.name for ref in self.held}
+            room = max(0, self.config.backend.player_max_count - len(self.held))
+            names = [name for name in names if name in held_names] + [
+                name for name in names if name not in held_names
+            ][:room]
             pending = len(names)
             if not pending:
                 done()
@@ -260,14 +271,22 @@ class Players:
                     finished()
                     return
                 ref = PlayerRef(name, owner)
+                if ref not in self.held:
+                    if (
+                        len(self.held) + len(reserved)
+                        >= self.config.backend.player_max_count
+                    ):
+                        finished()
+                        return
+                    reserved.add(ref)
 
                 def paused(reply: Reply, error: str) -> None:
+                    reserved.discard(ref)
                     if self.closed:
                         done()
                         return
                     if not error:
                         self.held[ref] = kind
-                        self._save()
                         LOG.info("Paused player %s", name)
                     finished()
 

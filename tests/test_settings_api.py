@@ -320,3 +320,27 @@ def test_unexpected_set_config_exception_returns_failed(
     assert any(
         record.exc_info and "SetConfig" in record.message for record in caplog.records
     )
+
+
+def test_priority_noop_does_not_write_state(running_executor, monkeypatch):
+    service, _ = running_executor
+    saved = []
+    monkeypatch.setattr(
+        service.store, "save", lambda: saved.append(service.store.value.iphone_priority)
+    )
+    for value in (False, True, True, True, False, False):
+        rpc(service.bus, BUS_NAME, INTERFACE, "SetPriority", "(b)", (value,), PATH)
+    assert saved == [True, False]
+
+
+def test_oversized_config_request_does_not_write(running_executor):
+    service, _ = running_executor
+    original = service.config_file.read_bytes()
+    for values in (
+        {str(i): GLib.Variant("b", True) for i in range(33)},
+        {"ui.language": GLib.Variant("s", "x" * 65536)},
+    ):
+        with pytest.raises(GLib.Error) as error:
+            set_config(service.bus, values)
+        assert Gio.DBusError.get_remote_error(error.value).endswith(".ConfigInvalid")
+        assert service.config_file.read_bytes() == original

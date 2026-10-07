@@ -2,7 +2,6 @@
 
 import codecs
 import json
-import logging
 import re
 from collections import deque
 from collections.abc import Callable, Sequence
@@ -14,12 +13,14 @@ from scambio.config import Config
 from scambio.core.policy import Event
 from scambio.core.ports import Done, Emit
 from scambio.state import Store
+from scambio.text import logger
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 
 
 class JSONStream:
-    def __init__(self) -> None:
+    def __init__(self, max_bytes: int = 64 * 1024) -> None:
+        self.max_bytes = max_bytes
         self.buffer = ""
         self.decoder = json.JSONDecoder()
         self.utf8 = codecs.getincrementaldecoder("utf-8")(errors="replace")
@@ -48,11 +49,20 @@ class JSONStream:
                 elif char == "}":
                     depth -= 1
                     if depth == 0:
+                        if (
+                            len(self.buffer[: index + 1].encode("utf-8"))
+                            > self.max_bytes
+                        ):
+                            self.buffer = ""
+                            raise ValueError("Subscription record exceeds size limit")
                         values.append(self.decoder.decode(self.buffer[: index + 1]))
                         self.buffer = self.buffer[index + 1 :]
                         break
             else:
                 break
+        if len(self.buffer.encode("utf-8")) > self.max_bytes:
+            self.buffer = ""
+            raise ValueError("Subscription record exceeds size limit")
         return values
 
 
@@ -87,6 +97,7 @@ class Audio:
         )
         self.launcher.setenv("LC_ALL", "C", True)
         self.children: set[Gio.Subprocess] = set()
+        self.commands: set[Gio.Subprocess] = set()
         self.command_timers: dict[Gio.Subprocess, int] = {}
         self.backend_down = False
         self.subscriber: Gio.Subprocess | None = None
@@ -94,8 +105,9 @@ class Audio:
         self.ready = False
         self.enabled = False
         self.generation = 0
-        self.parser = JSONStream()
+        self.parser = JSONStream(config.backend.subscribe_max_bytes)
         self.coalesce = 0
+        self.coalesce_started = 0
         self.retry = 0
         self.retry_delay = config.backend.retry_initial_seconds
         self.refresh_running = False
@@ -113,6 +125,7 @@ class Audio:
 
     def reload(self, config: Config) -> None:
         self.config = config
+        self.parser.max_bytes = config.backend.subscribe_max_bytes
         self._publish()  # Re-evaluate filters immediately without a subprocess.
 
     def _spawn(self, args: list[str]) -> Gio.Subprocess:
@@ -120,8 +133,18 @@ class Audio:
         self.children.add(child)
         return child
 
-    def _run(self, args: list[str], callback: Callable[[str, bool], None]) -> None:
+    def _run(
+        self,
+        args: list[str],
+        callback: Callable[[str, bool], None],
+        max_bytes: int | None = None,
+    ) -> None:
         if self.closed:
+            return
+        if len(self.commands) >= self.config.backend.command_max_processes:
+            LOG.warning("Audio command concurrency limit exceeded")
+            self._down(self.generation)
+            callback("", False)
             return
         try:
             child = self._spawn(args)
@@ -129,7 +152,31 @@ class Audio:
             callback("", False)
             return
 
+        self.commands.add(child)
+        generation = self.generation
         expired = False
+        failed = False
+        eof = False
+        exited = False
+        completed = False
+        output = bytearray()
+        limit = (
+            self.config.backend.snapshot_max_bytes if max_bytes is None else max_bytes
+        )
+
+        def complete() -> None:
+            nonlocal completed
+            if completed or not (eof and exited):
+                return
+            completed = True
+            timer = self.command_timers.pop(child, 0)
+            if timer:
+                GLib.source_remove(timer)
+            if not self.closed:
+                callback(
+                    output.decode("utf-8", errors="replace"),
+                    not failed and not expired and child.get_successful(),
+                )
 
         def timeout() -> bool:
             nonlocal expired
@@ -143,19 +190,45 @@ class Audio:
         )
 
         def finished(process: Gio.Subprocess, result: Gio.AsyncResult) -> None:
-            timer = self.command_timers.pop(process, 0)
-            if timer:
-                GLib.source_remove(timer)
+            nonlocal exited, failed
             self.children.discard(process)
+            self.commands.discard(process)
             try:
-                _, output, _ = process.communicate_utf8_finish(result)
-                ok = process.get_successful() and not expired
+                process.wait_finish(result)
             except GLib.Error:
-                output, ok = "", False
-            if not self.closed:
-                callback(output or "", ok)
+                failed = True
+            exited = True
+            complete()
 
-        child.communicate_utf8_async(None, None, finished)
+        def read(source: Gio.InputStream, result: Gio.AsyncResult) -> None:
+            nonlocal eof, failed
+            try:
+                data = source.read_bytes_finish(result).get_data()
+                if not data:
+                    eof = True
+                elif not failed:
+                    if len(output) + len(data) > limit:
+                        failed = True
+                        output.clear()
+                        child.force_exit()
+                        LOG.warning("Audio command output exceeds size limit")
+                        self._down(generation)
+                    else:
+                        output.extend(data)
+            except GLib.Error:
+                eof = failed = True
+                child.force_exit()
+            if not eof and not self.closed:
+                size = 65536 if failed else min(65536, limit - len(output) + 1)
+                source.read_bytes_async(size, GLib.PRIORITY_DEFAULT, None, read)
+            complete()
+
+        child.wait_async(None, finished)
+        stream = child.get_stdout_pipe()
+        assert stream is not None
+        stream.read_bytes_async(
+            min(65536, limit + 1), GLib.PRIORITY_DEFAULT, None, read
+        )
 
     def start(self) -> None:
         def version(output: str, ok: bool) -> None:
@@ -179,7 +252,7 @@ class Audio:
         self.backend_down = False
         self.generation += 1
         generation = self.generation
-        self.parser = JSONStream()
+        self.parser = JSONStream(self.config.backend.subscribe_max_bytes)
         self.force = True
         try:
             child = self._spawn(["-f", "json", "subscribe"])
@@ -230,6 +303,7 @@ class Audio:
         if self.coalesce:
             GLib.source_remove(self.coalesce)
             self.coalesce = 0
+        self.coalesce_started = 0
         self.ready = True
         self.emit(Event("AudioBackend", False))
         delay = self.retry_delay
@@ -243,14 +317,21 @@ class Audio:
         return False
 
     def _schedule(self) -> None:
+        now = GLib.get_monotonic_time()
+        if not self.coalesce_started:
+            self.coalesce_started = now
         if self.coalesce:
             GLib.source_remove(self.coalesce)
+        remaining = (
+            self.config.backend.refresh_max_ms - (now - self.coalesce_started) // 1000
+        )
         self.coalesce = GLib.timeout_add(
-            self.config.backend.coalesce_ms, self._coalesced
+            max(1, min(self.config.backend.coalesce_ms, remaining)), self._coalesced
         )
 
     def _coalesced(self) -> bool:
         self.coalesce = 0
+        self.coalesce_started = 0
         self.refresh()
         return False
 
@@ -312,7 +393,10 @@ class Audio:
             if len(results) == len(commands):
                 finish(True)
             else:
-                self._run(commands[len(results)], part)
+                remaining = self.config.backend.snapshot_max_bytes - sum(
+                    len(value.encode("utf-8")) for value in results
+                )
+                self._run(commands[len(results)], part, max(0, remaining))
 
         self._run(commands[0], part)
 
@@ -420,10 +504,13 @@ class Audio:
                     if not self._save():
                         return False  # Do not route without a durable restore target.
                 old_indices = {s["index"] for s in self.sinks if s.get("name") == old}
+                moving = [s for s in self.streams if s.get("sink") in old_indices]
+                if len(moving) > self.config.backend.route_max_streams:
+                    LOG.warning("Audio stream routing limit exceeded")
+                    self._down(self.generation)
+                    return False
                 commands = [["set-default-sink", target]] + [
-                    ["move-sink-input", str(s["index"]), target]
-                    for s in self.streams
-                    if s.get("sink") in old_indices
+                    ["move-sink-input", str(s["index"]), target] for s in moving
                 ]
                 successful = True
 
@@ -475,3 +562,4 @@ class Audio:
             process.force_exit()
             process.wait_async(None, lambda p, r: p.wait_finish(r))
         self.children.clear()
+        self.commands.clear()

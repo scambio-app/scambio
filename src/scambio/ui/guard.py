@@ -1,11 +1,12 @@
 """Exception boundaries for callbacks invoked by Gio/GLib."""
 
-import logging
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
-LOG = logging.getLogger("scambio.ui")
+from scambio.text import logger
+
+LOG = logger("scambio.ui")
 
 
 def guarded(callback: Callable[..., Any]) -> Callable[..., Any]:

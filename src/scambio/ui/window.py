@@ -11,6 +11,7 @@ from gi.repository import Gio, GLib
 
 from scambio.api import BUS_NAME, PATH, SETTINGS_ACTIVE, SETTINGS_BUS_NAME
 from scambio.config import Config, config_path, parse
+from scambio.files import CONFIG_LIMIT, read_text
 from scambio.i18n import Translator, cli_translator
 from scambio.paths import design_dir, ui_file
 from scambio.ui.client import ScambioClient
@@ -348,7 +349,9 @@ class Application(Adw.Application):
         self.config_file = config_file or config_path()
         self.bus_name, self.path = bus_name, path
         try:
-            config = parse(tomllib.loads(self.config_file.read_text()))
+            config = parse(
+                tomllib.loads(read_text(self.config_file, CONFIG_LIMIT, symlink=True))
+            )
         except (OSError, ValueError):
             config = Config()
         self.timeout_ms = config.backend.dbus_timeout_seconds * 1000

@@ -40,9 +40,10 @@ from scambio.core.session import Session
 from scambio.core.shortcuts import Shortcuts
 from scambio.i18n import Translator
 from scambio.state import Store
+from scambio.text import logger
 from scambio.ui import DisabledUi, Ui, start_ui
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 ERROR_DETAILS = {
     "connect_failed": "BlueZ failed to connect the configured device.",
     "connect_timeout": "The configured device did not connect before the deadline.",
@@ -375,6 +376,8 @@ class Service:
         elif kind == "CancelTimer":
             self._cancel_timer(value)
         elif kind == "SavePriority":
+            if self.store.value.iphone_priority == bool(action.value):
+                return
             self.store.value.iphone_priority = bool(action.value)
             try:
                 self.store.save()
@@ -498,6 +501,8 @@ class Service:
                 )
             elif method == "SetConfig":
                 values = params.get_child_value(0)
+                if values.n_children() > 32 or values.get_size() > 65536:
+                    raise ConfigInvalid("Configuration request exceeds size limit")
                 changes: dict[str, object] = {}
                 types = {
                     "device.address": "s",

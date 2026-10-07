@@ -421,3 +421,21 @@ def test_bad_assets_disable_ui(ui_client, tmp_path, monkeypatch, caplog, bad):
     ui.stop()
     client.call("SetPriority", GLib.Variant("(b)", (True,)))
     spin_until(lambda: client.props["IphonePriority"])
+
+
+def test_event_group_limit_rejects_before_any_action(tray):
+    item, client, _, opened = tray
+    event = (0, "opened", GLib.Variant("i", 0), 0)
+    with pytest.raises(GLib.Error) as error:
+        rpc(
+            client.connection,
+            item.name,
+            MENU,
+            "EventGroup",
+            "(a(isvu))",
+            ([event] * 33,),
+        )
+    assert Gio.DBusError.get_remote_error(error.value).endswith(".InvalidArgs")
+    assert not opened
+    rpc(client.connection, item.name, MENU, "EventGroup", "(a(isvu))", ([event] * 32,))
+    assert len(opened) == 32

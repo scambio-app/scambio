@@ -1,6 +1,5 @@
 """Deduplicated lock sources and logind delay inhibitor on the Gio main loop."""
 
-import logging
 import os
 from typing import Any
 
@@ -11,8 +10,9 @@ from scambio.core.policy import Event
 from scambio.core.ports import Emit
 from scambio.core.transport import BusClient
 from scambio.i18n import Translator
+from scambio.text import logger
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 PROPERTIES = "org.freedesktop.DBus.Properties"
 LOGIN = "org.freedesktop.login1"
 MANAGER = LOGIN + ".Manager"

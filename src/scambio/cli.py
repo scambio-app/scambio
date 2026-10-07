@@ -11,6 +11,7 @@ from gi.repository import Gio, GLib
 from scambio.api import BUS_NAME, INTERFACE, PATH, introspection_xml
 from scambio.config import config_path
 from scambio.i18n import cli_translator
+from scambio.text import display_text
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -85,13 +86,20 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.command == "status":
             values = properties()
+            values = {
+                key: display_text(value) if isinstance(value, str) else value
+                for key, value in values.items()
+            }
             print(
                 json.dumps(values, sort_keys=True)
                 if args.json
                 else "\n".join(
                     f"{key}: "
                     + (
-                        ", ".join(f"{k}={v}" for k, v in value.items())
+                        ", ".join(
+                            f"{k}={display_text(v) if isinstance(v, str) else v}"
+                            for k, v in value.items()
+                        )
                         if isinstance(value, dict)
                         else str(value)
                     )
@@ -102,7 +110,7 @@ def main(argv: list[str] | None = None) -> int:
             reply = proxy.call_sync(
                 "Switch", None, Gio.DBusCallFlags.NO_AUTO_START, -1, None
             )
-            print(reply.unpack()[0])
+            print(display_text(reply.unpack()[0]))
         else:
             enabled = properties()["IphonePriority"]
             if args.value is None:

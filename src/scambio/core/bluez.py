@@ -9,6 +9,7 @@ from scambio.config import Config
 from scambio.core.policy import Event
 from scambio.core.ports import Emit
 from scambio.core.transport import BusClient
+from scambio.text import display_text
 
 DEVICE = "org.bluez.Device1"
 ADAPTER = "org.bluez.Adapter1"
@@ -116,7 +117,7 @@ class BlueZ:
                 path, props = candidate, p
                 break
         self.path = path
-        name = str(props.get("Alias", ""))
+        name = display_text(props.get("Alias", ""))
         if self.name != name or force:
             self.name = name
             self.emit(Event("DeviceName", name))
@@ -175,7 +176,7 @@ class BlueZ:
                 uuids = {str(v).lower() for v in props.get("UUIDs", [])}
                 address = str(props.get("Address", "")).upper()
                 if powered and props.get("Paired") and uuids & AUDIO_UUIDS and address:
-                    devices.setdefault(address, str(props.get("Alias", "")))
+                    devices.setdefault(address, display_text(props.get("Alias", "")))
             done(sorted(devices.items(), key=lambda item: item[1].casefold()))
 
         self.client.call("/", MANAGER, "GetManagedObjects", None, received)

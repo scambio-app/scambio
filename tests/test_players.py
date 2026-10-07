@@ -101,6 +101,28 @@ def complete(method, *args):
     assert done == [True]
 
 
+def test_player_limit_and_single_save_per_operation(
+    adapter, player_factory, monkeypatch
+):
+    players = [player_factory(f"bounded{i}") for i in range(3)]
+    adapter.config = replace(
+        adapter.config, backend=replace(adapter.config.backend, player_max_count=2)
+    )
+    saves = []
+    original = adapter.store.save
+
+    def save():
+        saves.append(True)
+        original()
+
+    monkeypatch.setattr(adapter.store, "save", save)
+    complete(adapter.pause, "grab")
+    assert sum(player.calls() == ["Pause"] for player in players) == 2
+    assert len(adapter.held) == 2 and len(saves) == 1
+    complete(adapter.resume)
+    assert not adapter.held and len(saves) == 2
+
+
 def test_empty_startup_without_bus_identity_is_silent(adapter, caplog):
     complete(adapter.recover)
     complete(adapter.forget)

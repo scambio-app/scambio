@@ -40,7 +40,7 @@ array = [
     edit.write()
     expected = original.replace("= 120  #", "= 180  #").replace("'en' #", '"de" #')
     assert path.read_bytes() == expected.encode()
-    assert stat.S_IMODE(path.stat().st_mode) == 0o640
+    assert stat.S_IMODE(path.stat().st_mode) == 0o600
     assert load(path).policy.release_idle_seconds == 180
     assert list(tmp_path.iterdir()) == [path]
 
@@ -136,7 +136,7 @@ def test_merge_reads_file_and_preserves_unknowns(tmp_path):
     assert path.read_text().startswith(source)
 
 
-def test_write_preserves_relative_symlink_and_target_permissions(tmp_path):
+def test_write_preserves_relative_symlink_and_makes_target_private(tmp_path):
     target = tmp_path / "actual" / "settings.toml"
     target.parent.mkdir()
     target.write_text("[ui]\ntray = true # preserved\n")
@@ -147,5 +147,5 @@ def test_write_preserves_relative_symlink_and_target_permissions(tmp_path):
     assert link.is_symlink()
     assert os.readlink(link) == "actual/settings.toml"
     assert target.read_text() == "[ui]\ntray = false # preserved\n"
-    assert stat.S_IMODE(target.stat().st_mode) == 0o640
+    assert stat.S_IMODE(target.stat().st_mode) == 0o600
     assert list(target.parent.iterdir()) == [target]

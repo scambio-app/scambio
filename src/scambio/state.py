@@ -1,16 +1,15 @@
 """Small crash-safe persistent state, independent of user configuration."""
 
 import json
-import logging
-import os
 import re
-import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from scambio.files import STATE_LIMIT, read_text, write_text
 from scambio.paths import user_data_dir
+from scambio.text import logger
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 
 
 @dataclass(frozen=True)
@@ -33,6 +32,8 @@ def parse_resume(raw: object) -> ResumePlayers | None:
     bus_id, players = raw.get("bus_id"), raw.get("players")
     if not isinstance(bus_id, str) or not bus_id or not isinstance(players, list):
         raise ValueError("invalid resume_players bus or players")
+    if len(players) > 16:
+        raise ValueError("too many saved players")
     refs = []
     for entry in players:
         if not isinstance(entry, dict):
@@ -72,7 +73,7 @@ class Store:
 
     def load(self) -> State:
         try:
-            data = json.loads(self.path.read_text())
+            data = json.loads(read_text(self.path, STATE_LIMIT))
             if not isinstance(data, dict) or type(data.get("version")) is not int:
                 raise ValueError("invalid state")
             if data["version"] != 1 or type(data.get("iphone_priority")) is not bool:
@@ -99,15 +100,7 @@ class Store:
         return self.value
 
     def save(self) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        fd, name = tempfile.mkstemp(prefix=".state-", dir=self.path.parent)
-        try:
-            with os.fdopen(fd, "w") as out:
-                json.dump(asdict(self.value), out)
-                out.write("\n")
-                out.flush()
-                os.fsync(out.fileno())
-            os.replace(name, self.path)
-        finally:
-            if os.path.exists(name):
-                os.unlink(name)
+        text = json.dumps(asdict(self.value)) + "\n"
+        if len(text.encode("utf-8")) > STATE_LIMIT:
+            raise OSError("State exceeds size limit")
+        write_text(self.path, text)

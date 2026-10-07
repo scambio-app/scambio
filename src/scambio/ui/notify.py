@@ -1,7 +1,6 @@
 """Notification families, ordered event correlation and guarded desktop actions."""
 
 import html
-import logging
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
@@ -12,11 +11,12 @@ from gi.repository import Gio, GLib
 from scambio.api import SETTINGS_ACTIVE
 from scambio.i18n import Translator
 from scambio.paths import design_dir
+from scambio.text import logger
 from scambio.ui.client import ScambioClient
 from scambio.ui.guard import guarded
 from scambio.ui.presentation import Design, matches
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 NAME = "org.freedesktop.Notifications"
 PATH = "/org/freedesktop/Notifications"
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -19,7 +18,9 @@ if TYPE_CHECKING:
     from scambio.ui.notify import Notifications
     from scambio.ui.tray import Tray
 
-LOG = logging.getLogger(__name__)
+from scambio.text import logger
+
+LOG = logger(__name__)
 
 
 class Ui:

@@ -1,6 +1,5 @@
 """Event-driven global shortcuts; every activation uses the public daemon API."""
 
-import logging
 import os
 import uuid
 from collections.abc import Callable
@@ -13,10 +12,11 @@ from scambio.config import Config
 from scambio.core.shortcut_keys import Key, from_qt, parse_key
 from scambio.i18n import Translator
 from scambio.state import Shortcut, Store
+from scambio.text import display_text, logger
 from scambio.ui.client import ScambioClient
 from scambio.ui.guard import guarded
 
-LOG = logging.getLogger(__name__)
+LOG = logger(__name__)
 KGA = "org.kde.kglobalaccel"
 KPATH = "/kglobalaccel"
 KIFACE = "org.kde.KGlobalAccel"
@@ -70,7 +70,10 @@ class Shortcuts:
         self, state: str, key: str = "", label: str = "", owner: str = ""
     ) -> None:
         self.values.update(
-            ShortcutState=state, Shortcut=key, ShortcutLabel=label, ShortcutOwner=owner
+            ShortcutState=state,
+            Shortcut=key,
+            ShortcutLabel=display_text(label),
+            ShortcutOwner=display_text(owner),
         )
         self.changed()
 

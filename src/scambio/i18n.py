@@ -7,7 +7,9 @@ import tomllib
 from collections.abc import Mapping
 from pathlib import Path
 
+from scambio.files import CONFIG_LIMIT, read_text
 from scambio.paths import locale_dir
+from scambio.text import display_text
 
 LANGUAGES = ("it", "en", "de")
 
@@ -42,6 +44,10 @@ class Translator:
                     ) from exc
 
     def tr(self, key: str, **values: object) -> str:
+        values = {
+            name: display_text(value) if isinstance(value, str) else value
+            for name, value in values.items()
+        }
         template = self.catalog.gettext(key)
         fallback = "device" in values and not values["device"]
         if fallback:
@@ -54,7 +60,7 @@ class Translator:
 
 def cli_translator(path: Path) -> Translator:
     try:
-        data = tomllib.loads(path.read_text())
+        data = tomllib.loads(read_text(path, CONFIG_LIMIT, symlink=True))
         language = data.get("ui", {}).get("language", "auto")
         if not isinstance(language, str):
             language = "auto"
