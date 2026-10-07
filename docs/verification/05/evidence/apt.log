@@ -1,0 +1,22 @@
+.venv/bin/python tools/release.py apt-repo
++ git status --porcelain
++ git tag --list v1.0.0
++ gpg --homedir /tmp/scambio-key-check-4qsenhr4 --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-4qsenhr4/pubring.kbx' created
+gpg: /tmp/scambio-key-check-4qsenhr4/trustdb.gpg: trustdb created
++ gpgv --homedir /tmp/scambio-verify-key-mqi_d_qv --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/scambio_1.0.0_all.deb.asc ~/development/scambio/dist/scambio_1.0.0_all.deb
+gpgv: Signature made Thu Oct  8 00:49:43 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ apt-ftparchive packages pool
++ apt-ftparchive -o APT::FTPArchive::Release::MD5=false -o APT::FTPArchive::Release::SHA1=false -o APT::FTPArchive::Release::SHA512=false -o APT::FTPArchive::Release::Acquire-By-Hash=yes -o APT::FTPArchive::Release::Codename=stable -o APT::FTPArchive::Release::Suite=stable -o APT::FTPArchive::Release::Architectures=all -o APT::FTPArchive::Release::Components=main release dists/stable
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/site/apt/dists/stable/InRelease --clearsign ~/development/scambio/dist/site/apt/dists/stable/Release
++ gpgv --homedir /tmp/scambio-verify-key-6kkvkt6w --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/site/apt/dists/stable/InRelease
+gpgv: Signature made Thu Oct  8 00:49:43 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --output ~/development/scambio/dist/site/apt/dists/stable/Release.gpg --detach-sign ~/development/scambio/dist/site/apt/dists/stable/Release
++ gpgv --homedir /tmp/scambio-verify-key-thc07zmx --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/site/apt/dists/stable/Release.gpg ~/development/scambio/dist/site/apt/dists/stable/Release
+gpgv: Signature made Thu Oct  8 00:49:43 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"

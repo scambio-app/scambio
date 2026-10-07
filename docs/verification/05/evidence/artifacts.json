@@ -1,0 +1,18 @@
+{
+  "source_commit": "f02a9a5",
+  "version": "1.0.0",
+  "artifacts": {
+    "scambio_1.0.0_all.deb": {
+      "bytes": 94496,
+      "sha256": "3029b0f9b7e7a1830ed3d8f543060f33554a2fc687aee28da0b1b0629ad6b40b"
+    },
+    "scambio-1.0.0.tar.gz": {
+      "bytes": 379672,
+      "sha256": "0c5773f92767b8bf0402c1b164db99c7c41e0950029024e33694d26403223fa8"
+    },
+    "SHA256SUMS": {
+      "bytes": 175,
+      "sha256": "9cc69d5452f13fe907645a4db8bf3d1985353adff8db37f2e1ddf63ff706dea8"
+    }
+  }
+}

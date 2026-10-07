@@ -1,0 +1,69 @@
+.venv/bin/python tools/release.py deb
++ git status --porcelain
++ git tag --list v1.0.0
++ git status --porcelain
++ git tag --list v1.0.0
++ gpg --homedir /tmp/scambio-key-check-ptfwk67e --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-ptfwk67e/pubring.kbx' created
+gpg: /tmp/scambio-key-check-ptfwk67e/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/scambio-1.0.0.tar.gz.asc --detach-sign ~/development/scambio/dist/scambio-1.0.0.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-lr18fjd2 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/scambio-1.0.0.tar.gz.asc ~/development/scambio/dist/scambio-1.0.0.tar.gz
+gpgv: Signature made Thu Oct  8 00:49:41 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-bxupg5e3 --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-bxupg5e3/pubring.kbx' created
+gpg: /tmp/scambio-key-check-bxupg5e3/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/SHA256SUMS.asc --detach-sign ~/development/scambio/dist/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-bkt0b3h0 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/SHA256SUMS.asc ~/development/scambio/dist/SHA256SUMS
+gpgv: Signature made Thu Oct  8 00:49:41 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ git show -s --format=%ct HEAD
++ make install PREFIX=/usr DESTDIR=/tmp/scambio-deb-kiwhe_jm/root SYSTEMD_USER_UNIT=1 PYTHON_LIB=lib/python3/dist-packages PYTHON=~/development/scambio/.venv/bin/python
+make[1]: Entering directory '/tmp/scambio-deb-kiwhe_jm/scambio-1.0.0'
+blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
+[33m[1mwarning: Gtk.ShortcutLabel is deprecated[0m
+at design/ui/settings-window.blp line 90 column 13:
+[2m  90 |[0m            ShortcutLabel shortcut_label {
+     [2m|            ^^^^^^^^^^^^^[0m
+
+~/development/scambio/.venv/bin/python tools/install.py install --prefix "/usr" --destdir "/tmp/scambio-deb-kiwhe_jm/root" --python-lib "lib/python3/dist-packages" --systemd
+Processing /tmp/scambio-deb-kiwhe_jm/scambio-1.0.0
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: scambio
+  Building wheel for scambio (pyproject.toml): started
+  Building wheel for scambio (pyproject.toml): finished with status 'done'
+  Created wheel for scambio: filename=scambio-1.0.0-py3-none-any.whl size=85049 sha256=335c541dedd52f3c25878e062f7537564c9ce45a56e62d087feeee3d2286fdb5
+  Stored in directory: ~/.cache/pip/wheels/54/2f/8c/136f318f713964e112b5204c9d07405d0b47a7ca41383849f3
+Successfully built scambio
+Installing collected packages: scambio
+Successfully installed scambio-1.0.0
+make[1]: Leaving directory '/tmp/scambio-deb-kiwhe_jm/scambio-1.0.0'
++ dpkg-deb --root-owner-group --build /tmp/scambio-deb-kiwhe_jm/root ~/development/scambio/dist/scambio_1.0.0_all.deb
+dpkg-deb: building package 'scambio' in '~/development/scambio/dist/scambio_1.0.0_all.deb'.
++ lintian --fail-on error ~/development/scambio/dist/scambio_1.0.0_all.deb
+W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (in test syntax) [postinst:5]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (in test syntax) [postrm:5]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (plain script) [postinst:6]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (plain script) [postrm:6]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (plain script) [postinst:4]
+W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (plain script) [prerm:4]
+W: scambio: no-manual-page [usr/bin/scambio]
++ gpg --homedir /tmp/scambio-key-check-iwh8g217 --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-iwh8g217/pubring.kbx' created
+gpg: /tmp/scambio-key-check-iwh8g217/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/scambio_1.0.0_all.deb.asc --detach-sign ~/development/scambio/dist/scambio_1.0.0_all.deb
++ gpgv --homedir /tmp/scambio-verify-key-ncu_e83b --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/scambio_1.0.0_all.deb.asc ~/development/scambio/dist/scambio_1.0.0_all.deb
+gpgv: Signature made Thu Oct  8 00:49:43 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-pq33jg5s --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-pq33jg5s/pubring.kbx' created
+gpg: /tmp/scambio-key-check-pq33jg5s/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/SHA256SUMS.asc --detach-sign ~/development/scambio/dist/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-irel93z4 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/SHA256SUMS.asc ~/development/scambio/dist/SHA256SUMS
+gpgv: Signature made Thu Oct  8 00:49:43 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"

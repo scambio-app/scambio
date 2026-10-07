@@ -1,0 +1,3 @@
+P: app.scambio.Scambio:4: cid-contains-uppercase-letter app.scambio.Scambio
+
+✔ Validation was successful: pedantic: 1

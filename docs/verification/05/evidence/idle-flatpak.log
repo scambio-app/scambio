@@ -1,0 +1,10 @@
++ flatpak --user remote-add --gpg-import=~/development/scambio/packaging/keys/scambio-archive-keyring.gpg scambio-test ~/development/scambio/dist/flatpak-repo
++ flatpak --user install --noninteractive --no-deps --no-related scambio-test app.scambio.Scambio//stable
+Installing app/app.scambio.Scambio/x86_64/stable
+dbus-daemon[747083]: [session uid=1000 pid=747083 pidfd=4] Reloaded configuration
++ flatpak --user info --show-commit app.scambio.Scambio
+Cannot load state; using defaults: [Errno 2] No such file or directory: 'state.json'
+Cannot acquire sleep inhibitor: g-dbus-error-quark: GDBus.Error:org.freedesktop.DBus.Error.Name…
+No screen lock source available
+MEASUREMENT_STARTED
+{"version": "1.0.0", "module": "/app/lib/python3.14/site-packages/scambio/__init__.py", "elapsed_seconds": 600.1000040380022, "before": {"cpu_seconds": 0.16, "rss_kib": 43752}, "after": {"cpu_seconds": 0.16, "rss_kib": 43752}, "cpu_percent": 0.0, "environment": "Private system/session buses; no device configured; healthy injected pactl; UI enabled", "method": "Two /proc/self/stat endpoint samples, 600 seconds apart; no sampling loop"}

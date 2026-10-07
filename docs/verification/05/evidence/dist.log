@@ -1,0 +1,19 @@
+.venv/bin/python tools/release.py dist
++ git status --porcelain
++ git tag --list v1.0.0
++ gpg --homedir /tmp/scambio-key-check-wm_wi811 --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-wm_wi811/pubring.kbx' created
+gpg: /tmp/scambio-key-check-wm_wi811/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/scambio-1.0.0.tar.gz.asc --detach-sign ~/development/scambio/dist/scambio-1.0.0.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-sfrfkf5a --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/scambio-1.0.0.tar.gz.asc ~/development/scambio/dist/scambio-1.0.0.tar.gz
+gpgv: Signature made Thu Oct  8 00:49:41 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-6fe01u1h --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-6fe01u1h/pubring.kbx' created
+gpg: /tmp/scambio-key-check-6fe01u1h/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/SHA256SUMS.asc --detach-sign ~/development/scambio/dist/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-_r9jvbm7 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/SHA256SUMS.asc ~/development/scambio/dist/SHA256SUMS
+gpgv: Signature made Thu Oct  8 00:49:41 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"

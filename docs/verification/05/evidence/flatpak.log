@@ -1,0 +1,134 @@
+.venv/bin/python tools/release.py flatpak
++ git status --porcelain
++ git tag --list v1.0.0
++ git status --porcelain
++ git tag --list v1.0.0
++ gpg --homedir /tmp/scambio-key-check-_0t05f11 --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-_0t05f11/pubring.kbx' created
+gpg: /tmp/scambio-key-check-_0t05f11/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/scambio-1.0.0.tar.gz.asc --detach-sign ~/development/scambio/dist/scambio-1.0.0.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-mn1kvy0u --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/scambio-1.0.0.tar.gz.asc ~/development/scambio/dist/scambio-1.0.0.tar.gz
+gpgv: Signature made Thu Oct  8 00:49:43 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-6dszu_e5 --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-6dszu_e5/pubring.kbx' created
+gpg: /tmp/scambio-key-check-6dszu_e5/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/SHA256SUMS.asc --detach-sign ~/development/scambio/dist/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-en2c8gr8 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/SHA256SUMS.asc ~/development/scambio/dist/SHA256SUMS
+gpgv: Signature made Thu Oct  8 00:49:44 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpg --homedir /tmp/scambio-key-check-ijmsw4gw --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-ijmsw4gw/pubring.kbx' created
+gpg: /tmp/scambio-key-check-ijmsw4gw/trustdb.gpg: trustdb created
++ git show -s --format=%ct HEAD
++ flatpak-builder --show-manifest ~/development/scambio/dist/app.scambio.Scambio.yml
+{
+  "id" : "app.scambio.Scambio",
+  "branch" : "stable",
+  "runtime" : "org.gnome.Platform",
+  "runtime-version" : "51",
+  "sdk" : "org.gnome.Sdk",
+  "command" : "scambio",
+  "modules" : [
+    {
+      "name" : "scambio",
+      "buildsystem" : "simple",
+      "sources" : [
+        {
+          "path" : "~/development/scambio/dist/scambio-1.0.0.tar.gz",
+          "sha256" : "0c5773f92767b8bf0402c1b164db99c7c41e0950029024e33694d26403223fa8",
+          "type" : "archive"
+        }
+      ],
+      "build-commands" : [
+        "make install PREFIX=/app"
+      ]
+    }
+  ],
+  "finish-args" : [
+    "--share=ipc",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=dri",
+    "--socket=pulseaudio",
+    "--system-talk-name=org.bluez",
+    "--system-talk-name=org.freedesktop.login1",
+    "--talk-name=org.mpris.MediaPlayer2.*",
+    "--talk-name=org.kde.kglobalaccel",
+    "--talk-name=org.kde.StatusNotifierWatcher",
+    "--talk-name=org.freedesktop.Notifications",
+    "--talk-name=org.freedesktop.ScreenSaver"
+  ]
+}
++ flatpak-builder --user --force-clean --disable-download --override-source-date-epoch=1791413258 --repo=~/development/scambio/dist/flatpak-repo --gpg-sign=4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --gpg-homedir=~/.local/share/scambio-release/gnupg --default-branch=stable ~/development/scambio/dist/flatpak-build ~/development/scambio/dist/app.scambio.Scambio.yml
+Emptying app dir '~/development/scambio/dist/flatpak-build'
+Starting build of app.scambio.Scambio
+Cache miss, checking out last cache hit
+========================================================================
+Building module scambio in ~/development/scambio/.flatpak-builder/build/scambio-1
+========================================================================
+Running: make install PREFIX=/app
+blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
+[33m[1mwarning: Gtk.ShortcutLabel is deprecated[2m[0m
+at design/ui/settings-window.blp line 90 column 13:
+[2m  90 |[0m            ShortcutLabel shortcut_label {
+     [2m|            ^^^^^^^^^^^^^[0m
+[2mhint: This widget will be removed in GTK 5[0m
+
+/usr/bin/python3 tools/install.py install --prefix "/app" --destdir "/" --python-lib "" 
+Processing ./.
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: scambio
+  Building wheel for scambio (pyproject.toml): started
+  Building wheel for scambio (pyproject.toml): finished with status 'done'
+  Created wheel for scambio: filename=scambio-1.0.0-py3-none-any.whl size=84682 sha256=b1edd086c7ffe0c0a2adee61faf604631457c8501adcd29d81d2e35404dc26ea
+  Stored in directory: /tmp/pip-ephem-wheel-cache-dclu3jgh/wheels/b4/c9/99/ff5f242fac012a039fd172bca1af4ae7a829f24e8fdd4a75d7
+Successfully built scambio
+Installing collected packages: scambio
+Successfully installed scambio-1.0.0
+Recording license file LICENSE
+Committing stage build-scambio to cache
+Cleaning up
+Running appstreamcli compose
+Only accepting components: app.scambio.Scambio, app.scambio.Scambio.desktop
+Processing directory: ~/development/scambio/.flatpak-builder/rofiles/rofiles-xz4w8Q/files
+Composing metadata...
+Success!
+Committing stage cleanup to cache
+Finishing app
+Exporting share/applications/app.scambio.Scambio.desktop
+Exporting share/icons/hicolor/scalable/apps/app.scambio.Scambio.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-on-pc-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-error-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-released-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-priority-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-unavailable-symbolic.svg
+Exporting share/icons/hicolor/scalable/status/app.scambio.Scambio-connecting-symbolic.svg
+Exporting share/icons/hicolor/symbolic/apps/app.scambio.Scambio-symbolic.svg
+Exporting share/dbus-1/services/app.scambio.Scambio.service
+Exporting share/dbus-1/services/app.scambio.Scambio.Settings.service
+Exporting share/metainfo/app.scambio.Scambio.metainfo.xml
+Please review the exported files and the metadata
+Committing stage finish to cache
+Exporting app.scambio.Scambio to repo
+Commit: 750f8782028a946d00617d8d7f7b9ecae43a017bb21a67a2ad94ffbd0cf37592
+Metadata Total: 147
+Metadata Written: 3
+Content Total: 115
+Content Written: 1
+Content Bytes Written: 1246 (1.2 kB)
+Pruning cache
++ flatpak build-update-repo --generate-static-deltas --prune --gpg-sign=4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --gpg-homedir=~/.local/share/scambio-release/gnupg ~/development/scambio/dist/flatpak-repo
+Updating appstream branch
+Generating static deltas
+Generating delta: app/app.scambio.Scambio/x86_64/stable (750f878202)
+Generating delta: app/app.scambio.Scambio/x86_64/stable (6abbe7f9be-750f878202)
+Deleting unwanted delta: f741ae578d0b2e04036d90d94a57f036b545d15ef6eb9f4e45329b825a0405f3-b35e42db31d4bf06ed07c3432435bb742f9a786e9dc6e73b9496336f0acfe2bb
+Deleting unwanted delta: b35e42db31d4bf06ed07c3432435bb742f9a786e9dc6e73b9496336f0acfe2bb
+Updating summary
+Pruning old commits
+Total objects: 176
+No unreachable objects

@@ -1,0 +1,11 @@
+bbf86db Switch UI wording from iPhone to phone (decision 165)
+978ec76 Resolve packaged assets and XDG application paths
+b07df78 Activate the daemon through D-Bus and isolate the tray connection
+5e9679a Support Flatpak background startup and orderly process restart
+66d4032 Bound external inputs and persist private state safely
+516474a Build isolated Linux packages and signed local repositories
+6efb561 Verify release boundaries and normalize package metadata
+058b05d Preserve the system icon theme during package installation
+de6d85a Regenerate staging packages while preserving archived versions
+4f179be Verify local site flows before sealing release artifacts
+f02a9a5 Exclude untrusted staging files from signed apt indexes

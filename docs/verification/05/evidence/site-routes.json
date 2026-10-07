@@ -1,0 +1,65 @@
+[
+  {
+    "path": "/apt/dists/stable/InRelease",
+    "status": 200,
+    "content_type": null,
+    "cache_control": "no-cache",
+    "sha256": "876ad8d8dfca8f76b3aa00c823f644127f4eb18793b4a4cbb3f0b7ded2208b9c"
+  },
+  {
+    "path": "/apt/dists/stable/Release",
+    "status": 200,
+    "content_type": null,
+    "cache_control": "no-cache",
+    "sha256": "c8a2337be390a315f8becb17c5ea9b5aa51fded3faae98feed1f9ab65a34711b"
+  },
+  {
+    "path": "/apt/dists/stable/main/binary-all/Packages",
+    "status": 200,
+    "content_type": null,
+    "cache_control": "no-cache",
+    "sha256": "5b2c086945d0a24625bf3fcadc8ed397029fd7bbc291a2531188e0831775e331"
+  },
+  {
+    "path": "/flatpak/scambio.flatpakref",
+    "status": 200,
+    "content_type": "application/vnd.flatpak.ref",
+    "cache_control": "no-cache",
+    "sha256": "94c2139fcd9bb188677714bff2061aceffd9ac998d10b75a991f7dcfa1c2958e"
+  },
+  {
+    "path": "/flatpak/scambio.flatpakrepo",
+    "status": 200,
+    "content_type": "application/vnd.flatpak.repo",
+    "cache_control": "no-cache",
+    "sha256": "ee2192e307be516ee2f1d94ff3daa9fca677e20f35e0962d044e273fd41230cf"
+  },
+  {
+    "path": "/flatpak/repo/summary",
+    "status": 200,
+    "content_type": null,
+    "cache_control": "no-cache",
+    "sha256": "d1224873e26e1aee4cd8d207e029f84c9d42c0981e959e5e5d7f39dea80efd89"
+  },
+  {
+    "path": "/download/latest.json",
+    "status": 200,
+    "content_type": "application/json",
+    "cache_control": "no-cache",
+    "sha256": "55c269806ba5c2b78ea3eeaaf33ed338261cead53aa93fb3e5e73f119068247b"
+  },
+  {
+    "path": "/scambio_1.0.0_all.deb",
+    "status": 200,
+    "content_type": "application/vnd.debian.binary-package",
+    "cache_control": "public, max-age=0, must-revalidate",
+    "sha256": "3029b0f9b7e7a1830ed3d8f543060f33554a2fc687aee28da0b1b0629ad6b40b"
+  },
+  {
+    "path": "/download/scambio.deb",
+    "status": 302,
+    "content_type": null,
+    "cache_control": "no-cache",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

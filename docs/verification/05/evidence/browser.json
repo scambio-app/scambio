@@ -1,0 +1,31 @@
+{
+  "captures": [
+    {
+      "lang": "en",
+      "download": "Download for Linux\nUbuntu & Debian\n\nUbuntu 24.04+, Debian 13+\n\nDownload .deb\n\nUpdates arrive with your system updates.\n\nFlatpak\nInstall with Flatpak\nflatpak install https://scambio.app/flatpak/scambio.flatpakref\nGitHub"
+    },
+    {
+      "lang": "it",
+      "download": "Scarica per Linux\nUbuntu & Debian\n\nUbuntu 24.04+, Debian 13+\n\nScarica il .deb\n\nGli aggiornamenti arrivano con quelli di sistema.\n\nFlatpak\nInstalla con Flatpak\nflatpak install https://scambio.app/flatpak/scambio.flatpakref\nGitHub"
+    },
+    {
+      "lang": "de",
+      "download": "Für Linux herunterladen\nUbuntu & Debian\n\nUbuntu 24.04+, Debian 13+\n\n.deb herunterladen\n\nUpdates kommen mit deinen System-Updates.\n\nFlatpak\nMit Flatpak installieren\nflatpak install https://scambio.app/flatpak/scambio.flatpakref\nGitHub"
+    }
+  ],
+  "requests": [
+    "http://127.0.0.1:8787/",
+    "http://127.0.0.1:8787/vendor/fonts.css",
+    "http://127.0.0.1:8787/app.css",
+    "http://127.0.0.1:8787/boot.js",
+    "http://127.0.0.1:8787/app.js",
+    "http://127.0.0.1:8787/copy.json",
+    "http://127.0.0.1:8787/vendor/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_KUnNSg.ttf",
+    "http://127.0.0.1:8787/vendor/_Xmz-HUzqDCFdgfMsYiV_F7wfS-Bs_ehR15e.ttf",
+    "http://127.0.0.1:8787/vendor/_Xmz-HUzqDCFdgfMsYiV_F7wfS-Bs_d_QF5e.ttf",
+    "http://127.0.0.1:8787/vendor/_Xmz-HUzqDCFdgfMsYiV_F7wfS-Bs_dNQF5e.ttf",
+    "http://127.0.0.1:8787/vendor/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_TknNSg.ttf"
+  ],
+  "external": [],
+  "errors": []
+}

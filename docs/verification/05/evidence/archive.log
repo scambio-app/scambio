@@ -1,0 +1,11 @@
++ git status --porcelain
++ git tag --list v1.0.0
++ gpgv --homedir /tmp/scambio-verify-key-9x2dgmrx --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/archive/1.0.0/manifest.json.asc ~/.local/share/scambio-release/archive/1.0.0/manifest.json
+gpgv: Signature made Thu Oct  8 00:51:59 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpgv --homedir /tmp/scambio-verify-key-3sqpxz8m --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/archive/1.0.0/manifest.json.asc ~/.local/share/scambio-release/archive/1.0.0/manifest.json
+gpgv: Signature made Thu Oct  8 00:51:59 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
+{"version": "1.0.0", "files": 226, "immutable_modes": true, "repeat_seal_unchanged": true}

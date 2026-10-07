@@ -1,0 +1,24 @@
+docs/context/01-project-overview.md:59:e tester: GM (Kubuntu, KDE Plasma, iPhone, Oakley Meta 002Z).
+docs/decisions.md:612:     `privacy@scambio.app` inoltrato a [indirizzo di GM] (Cloudflare Email Routing).
+docs/decisions.md:696:     ora a [indirizzo di GM] (regola catch-all di Cloudflare Email Routing).
+docs/decisions.md:707:     164: MAC degli occhiali → `80:AA:1C:XX:XX:XX`, `~` → `~`, l'indirizzo di inoltro Fermich →
+docs/hardware-lab.md:9:PipeWire con pipewire-pulse, Python 3.12.3, PyGObject presente. Dispositivo: Oakley Meta 002Z,
+docs/hardware-lab.md:102:| Uscita predefinita | in WirePlumber non è configurato un sink predefinito (`default-nodes` ha solo la sorgente): con gli occhiali collegati il predefinito diventa da solo `bluez_output.80_AA_1C_XX_XX_XX.1` |
+docs/hardware-lab.md:131:| Cambio profilo | il sink viene rimosso e ricreato con **lo stesso nome** `bluez_output.80_AA_1C_XX_XX_XX.1` (nuovo indice) in < 10 ms, nello stesso blocco di eventi |
+docs/hardware-lab.md:512:| Configurazione | dentro il sandbox `HOME=~` ma `XDG_CONFIG_HOME=~/.var/app/app.scambio.Scambio/config`: il codice che usa `Path.home()/.config` non vede la configurazione senza `--filesystem` |
+docs/specs/01-demone-headless.md:496:`device.address = "80:AA:1C:XX:XX:XX"`; `systemctl --user start scambio`; in un terminale
+docs/specs/03-tray-notifiche.md:14:monitor» senza alcuna notifica; aprendo il menu legge «Oakley Meta 002Z — sul PC» e, messo in
+docs/specs/03-tray-notifiche.md:17:`scambio switch`: gli occhiali tornano al PC e arriva «Oakley Meta 002Z sul PC — Priorità iPhone
+docs/specs/03-tray-notifiche.md:18:disattivata.». Con gli occhiali chiusi nella custodia e un video avviato arriva «Oakley Meta 002Z
+docs/specs/04-scorciatoia-e-impostazioni.md:14:occhiali tornano all'iPhone e arriva «Oakley Meta 002Z lasciato all'iPhone» con «Annulla»; di
+docs/specs/05-packaging-e-release.md:269:   percorsi `~` e simili restano solo dove sono **misure** (`docs/hardware-lab.md`,
+docs/verification/01/report.md:435:`device.address = "80:AA:1C:XX:XX:XX"`; `systemctl --user start scambio`; in un terminale
+docs/verification/02/audit-1-checks.txt:10:rootdir: ~/development/scambio
+docs/verification/02/checks.txt:10:rootdir: ~/development/scambio
+docs/verification/02/decision-68-checks.txt:10:rootdir: ~/development/scambio
+docs/verification/03/make-check-activate.txt:10:rootdir: ~/development/scambio
+docs/verification/03/make-check.txt:10:rootdir: ~/development/scambio
+docs/verification/03/report.md:144:cd ~/development/scambio
+docs/verification/04/audit1-make-check.txt:11:rootdir: ~/development/scambio
+docs/verification/04/make-check.txt:11:rootdir: ~/development/scambio
+docs/verification/04/report.md:196:  (`ListDevices` → Oakley Meta 002Z); `RestartUnit` misurato in M18.

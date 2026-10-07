@@ -1,0 +1,88 @@
+blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
+[33m[1mwarning: Gtk.ShortcutLabel is deprecated[0m
+at design/ui/settings-window.blp line 90 column 13:
+[2m  90 |[0m            ShortcutLabel shortcut_label {
+     [2m|            ^^^^^^^^^^^^^[0m
+
+.venv/bin/ruff format --check src tests tools
+59 files already formatted
+.venv/bin/ruff check src tests tools
+[1;32mAll checks passed![0m
+.venv/bin/mypy
+Success: no issues found in 28 source files
+.venv/bin/pytest
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.1.1, pluggy-1.6.0
+rootdir: ~/development/scambio
+configfile: pyproject.toml
+testpaths: tests
+plugins: typeguard-4.4.4
+collected 731 items
+
+tests/test_adapters.py ....................                              [  2%]
+tests/test_audio_recovery.py ..................                          [  5%]
+tests/test_config_edit.py ..............................                 [  9%]
+tests/test_config_state.py ......................................        [ 14%]
+tests/test_i18n.py ........................                              [ 17%]
+tests/test_install_user.py .......                                       [ 18%]
+tests/test_notifications.py ...............................              [ 22%]
+tests/test_players.py .....................................              [ 28%]
+tests/test_policy.py ................................................... [ 35%]
+........................................................................ [ 44%]
+.......................                                                  [ 48%]
+tests/test_policy_players.py ........................................... [ 53%]
+..........................................................               [ 61%]
+tests/test_presentation.py ............................................. [ 67%]
+........................                                                 [ 71%]
+tests/test_service.py ...................                                [ 73%]
+tests/test_service_players.py ..................................         [ 78%]
+tests/test_service_unblock.py ..                                         [ 78%]
+tests/test_session_recovery.py ..                                        [ 79%]
+tests/test_settings_api.py ....................                          [ 81%]
+tests/test_settings_cli.py .....                                         [ 82%]
+tests/test_settings_model.py ......................................      [ 87%]
+tests/test_shortcuts.py ................................................ [ 94%]
+.                                                                        [ 94%]
+tests/test_tray.py ...................                                   [ 96%]
+tests/test_ui_service.py ...........                                     [ 98%]
+tests/test_window.py ...........                                         [100%]
+
+=============================== warnings summary ===============================
+../../../../usr/lib/python3/dist-packages/gi/overrides/__init__.py:159
+  /usr/lib/python3/dist-packages/gi/overrides/__init__.py:159: PyGIDeprecationWarning: GLib.unix_signal_add_full is deprecated; use GLibUnix.signal_add_full instead
+    value = getattr(proxy, attr)
+
+tests/test_adapters.py::test_audio_snapshot_coalescing_routing_restore
+  /usr/lib/python3/dist-packages/gi/events.py:803: DeprecationWarning: 'asyncio.AbstractEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    AbstractEventLoopPolicy = getattr(asyncio, "AbstractEventLoopPolicy", object)
+
+tests/test_adapters.py: 55 warnings
+tests/test_audio_recovery.py: 67 warnings
+tests/test_install_user.py: 2 warnings
+tests/test_notifications.py: 150 warnings
+tests/test_players.py: 95 warnings
+tests/test_service.py: 61 warnings
+tests/test_service_players.py: 92 warnings
+tests/test_service_unblock.py: 19 warnings
+tests/test_session_recovery.py: 15 warnings
+tests/test_settings_api.py: 47 warnings
+tests/test_shortcuts.py: 170 warnings
+tests/test_tray.py: 120 warnings
+tests/test_ui_service.py: 38 warnings
+  /usr/lib/python3/dist-packages/gi/events.py:890: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    if not isinstance(_get_event_loop_policy(), GLibEventLoopPolicy):
+
+tests/test_install_user.py::test_install_launcher_and_activation_service[repo with space]
+tests/test_install_user.py::test_install_launcher_and_activation_service[repo \\ quote" dollar$ tick`]
+  ~/development/scambio/tests/test_install_user.py:96: PyGIDeprecationWarning: Gio.DesktopAppInfo is deprecated; use GioUnix.DesktopAppInfo instead
+    launcher = Gio.DesktopAppInfo.new_from_filename(str(desktop))
+
+tests/test_service.py::test_full_cycle_accelerated
+  ~/development/scambio/src/scambio/core/service.py:132: DeprecationWarning: Gio.DBusConnection.register_object is deprecated
+    self.registration = self.bus.register_object(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 731 passed, 936 warnings in 87.23s (0:01:27) =================
+[graphify hook] launching background rebuild (log: ~/.cache/graphify-rebuild.log)
+[main bbf86db] Switch UI wording from iPhone to phone (decision 165)
+ 7 files changed, 150 insertions(+), 95 deletions(-)

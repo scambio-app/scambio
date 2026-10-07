@@ -1,0 +1,15 @@
+
+ ⛅️ wrangler 4.148.0
+────────────────────
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m🚧 `wrangler email sending settings` is an open beta command. Please report any issues to https://github.com/cloudflare/workers-sdk/issues/new/choose[0m
+
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mA request to the Cloudflare API (/zones/35ac0550d106c3282d4f612502d0cb34/email/sending/subdomains) failed.[0m
+
+  Unauthorized [code: 2036]
+  
+  If you think this is a bug, please open an issue at: [4mhttps://github.com/cloudflare/workers-sdk/issues/new/choose[0m
+
+
+🪵  Logs were written to "~/.config/.wrangler/logs/wrangler-2026-10-07_22-48-35_243.log"
