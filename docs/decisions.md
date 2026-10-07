@@ -605,3 +605,11 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      con inglese come predefinita. Anteprima: https://claude.ai/artifact/44UmbRNbQZMbayNU8HYmov.
      Prima della messa online servono: backend del modulo, informativa privacy completata (sede,
      P. IVA, fornitore email) e doppio opt-in. Account social più avanti.
+140. Claude — **scambio.app online dal 2026-10-07** (approvato da GM): Worker Cloudflare
+     `scambio-site` sull'account personale di GM (stesso account di kuchl.app, che non è stato
+     toccato), con asset statici e `POST /api/waitlist` su D1 `scambio-waitlist` (regione weur).
+     Codice in `~/development/scambio-site` (git locale, nessun remote). `www` → 301 su apex.
+     `privacy@scambio.app` inoltrato a [indirizzo di GM] (Cloudflare Email Routing).
+     Informativa completata con i dati di Fermich e Cloudflare come responsabile. Il campo
+     «Quali occhiali» suggerisce i modelli Meta in vendita al 2026-10-07 (lista da aggiornare:
+     `<datalist id="device-models">`). Doppio opt-in e invio email: non ancora.
