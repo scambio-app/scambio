@@ -421,7 +421,7 @@ def flatpak_site():
 
 def seal():
     """Preserve a verified release once, including its reachable OSTree objects."""
-    value = version()
+    value = check()
     existing = {path.name: path for path in archived()}
     names = [f"scambio_{value}_all.deb", f"scambio-{value}.tar.gz", "SHA256SUMS"]
     if value in existing:

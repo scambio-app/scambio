@@ -753,3 +753,14 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      (h) Le misure dei pacchetti usano il codice installato, bus privati e pactl simulato stabile,
      senza dispositivo configurato: due campioni `/proc/self/stat` a distanza di dieci minuti,
      senza ciclo di campionamento. Non sostituiscono la prova Bluetooth/desktop di GM.
+     (i) Il Worker usa il binding nativo Email Sending; `remote = false` mantiene simulato
+     l'invio durante `wrangler dev`. La disponibilità nell'account richiede verifica separata:
+     il comando di sola lettura ha restituito Unauthorized (2036), non una prova di disponibilità.
+     La migrazione D1 risiede in `packaging/site/`, richiamata da `migrations_dir`, per rispettare
+     le proprietà dei file autorizzate. Il contatore giornaliero è atomico in D1; il rate limiter
+     Cloudflare per IP resta il primo filtro. Nessuna migrazione remota o email reale nella prova.
+     (j) CSS, JavaScript, font e Three.js sono asset locali; CSP senza `unsafe-inline`.
+     Le copie tradotte entrano nel DOM come testo; solo geometrie SVG costanti usano `innerHTML`.
+     `make verify` verifica senza congelare; `make stage-site` ripete le verifiche, controlla
+     l'albero pulito, sigilla l'archivio firmato e copia gli asset nel checkout del sito.
+     Non pubblica, non crea tag e non modifica servizi o installazioni reali dell'utente.

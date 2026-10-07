@@ -51,3 +51,7 @@ release-check:
 .PHONY: verify
 verify:
 	$(VENV)/python tools/verify_release.py
+
+.PHONY: stage-site
+stage-site:
+	$(VENV)/python tools/verify_release.py --stage-site

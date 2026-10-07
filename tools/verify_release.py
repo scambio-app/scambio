@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Fermich srl
 """Install local artifacts in disposable Docker and Flatpak installations."""
 
+import argparse
 import configparser
 import functools
 import http.server
@@ -40,7 +41,9 @@ sed -i "s|https://scambio.app/apt|$SCAMBIO_TEST_APT|" \
     /etc/apt/sources.list.d/scambio.sources
 apt-get update -o APT::Update::Error-Mode=any
 apt-cache policy scambio
-systemd-analyze --user verify /usr/lib/systemd/user/scambio.service
+mkdir -m 700 /tmp/scambio-systemd-runtime
+XDG_RUNTIME_DIR=/tmp/scambio-systemd-runtime \
+    systemd-analyze --user verify /usr/lib/systemd/user/scambio.service
 apt-get remove -y scambio
 test ! -e /etc/apt/sources.list.d/scambio.sources
 test ! -L /etc/systemd/user/graphical-session.target.wants/scambio.service
@@ -259,9 +262,14 @@ def negative_bus_access(environment):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stage-site", action="store_true")
+    args = parser.parse_args()
     verify_files()
     docker()
     flatpak()
+    if not args.stage_site:
+        return
     seal()
     destination = ROOT.parent / "scambio-site/public"
     for directory in ("apt", "flatpak", "download"):
