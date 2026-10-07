@@ -486,6 +486,7 @@ Prove e log in `~/Scrivania/Claude/scambio-misure/fase5/`.
 | GTK / libadwaita / GLib | 4.24 / 1.10 / 2.90 | idem |
 | `pactl` | **presente** (17.0), `libpulse.so.0` | presente |
 | `blueprint-compiler`, `msgfmt`, `appstreamcli` | — | **presenti** |
+| `pip` / `setuptools` | — | 26.2.1 / 83.0.0 (build offline di `pyproject.toml` possibile) |
 
 Conclusione: nessun modulo aggiuntivo serve per eseguire Scambio; per costruirlo basta l'SDK.
 

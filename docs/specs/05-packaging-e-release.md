@@ -1,6 +1,6 @@
 # Spec 05 — Packaging e prima release pubblica (Linux 1.0.0)
 
-Stato: bozza · Autore: Claude (chat di rilascio) · Data: 2026-10-07
+Stato: approvata (GM, 2026-10-07, dopo l'audit di sicurezza e le decisioni 166–168) · Autore: Claude (chat di rilascio) · Data: 2026-10-07
 
 ## 1. Obiettivo
 
@@ -22,7 +22,7 @@ scambio.app dice «Linux: available» e porta ai download.
 - Prodotto: 2–3 e 122 (Linux gratuito), 17 (nome D-Bus e app-id `app.scambio.Scambio`), 48 (avvio
   al login), 106 (cosa installa `make install-user`), 131 (titolare Fermich), 134 (Flathub, Meta
   solo «Works with», disclaimer), 137 (GPL-3.0 + CLA), 138 (niente ® né ™), 139–140 (scambio.app).
-- Di questa spec: **150–165** (150–152 e 160–165 di GM, 153–159 di Claude) e quelle di Codex (**166–169**).
+- Di questa spec: **150–168** (150–152, 160–167 di GM; 153–159 e 168 di Claude) e la **169** di Codex (una sola voce con sottopunti per le sue scelte tecniche).
 - Misure: **M30–M34** (Flatpak), M17 (tray nascosto), M20 (portal su Plasma 6), M21 (tray Plasma 6).
 
 ## 3. Dettagli
@@ -80,6 +80,17 @@ scambio.app dice «Linux: available» e porta ai download.
 3. `IconThemePath`: la cartella delle icone dei dati (§3.1.1); nel Flatpak tradotta nel percorso
    dell'host sostituendo il prefisso `/app` con `app-path` letto da `/.flatpak-info`.
 4. Il contratto di `05-ui-context.md` §5.3 cambia solo nel nome del servizio: Claude lo aggiorna.
+
+#### 3.1.3b Installazione generica `make install`
+
+`make install PREFIX=/usr DESTDIR=…` (e `make uninstall`) installa **tutto** ciò che serve a un
+pacchetto sotto `$(DESTDIR)$(PREFIX)`: modulo Python (`pip install --no-deps --no-build-isolation
+--prefix`, senza rete), `bin/scambio`, `share/scambio/` con `.mo` e `.ui` compilati, desktop, metainfo,
+icone, servizi D-Bus (Exec con `$(PREFIX)/bin/scambio`), licenza in `share/licenses/scambio/`;
+`SYSTEMD_USER_UNIT=1` aggiunge `lib/systemd/user/scambio.service`. Il `.deb` e il manifest Flatpak
+del repository proprio usano **solo** questo target, così anche il manifest Flathub di GM resta un
+modulo di poche righe (`make install PREFIX=/app`). Richiede solo Python, gettext e
+blueprint-compiler; niente rete durante la build.
 
 #### 3.1.4 Pacchetto `.deb` e repository apt (decisioni 151, 157, 158)
 
@@ -153,13 +164,93 @@ scambio.app dice «Linux: available» e porta ai download.
    `debian:13` con `apt install ./scambio_*.deb` e `scambio --version`; `flatpak install` dal repo
    locale in `--user` di un'installazione Flatpak temporanea, `flatpak run --command=scambio
    app.scambio.Scambio --version`). Nessun passo pubblica nulla, fa push o tocca la rete in scrittura.
-2. Chiave: keyring GnuPG in `~/.local/share/scambio-release/gnupg` (permessi 700), creata da
-   `tools/release.py init-key` se manca, Ed25519, uid `Scambio Release Signing Key <release@scambio.app>`,
-   senza scadenza, senza passphrase (casa è l'unica macchina di build); esporta la pubblica in
-   `packaging/keys/scambio-archive-keyring.gpg` (binaria) e `.asc`. La privata **mai** nel repo né in
-   `dist/`. La creazione la lancia Claude (non Codex) prima del goal; Codex la usa tramite
-   `SCAMBIO_GNUPGHOME`.
+2. Chiave (decisioni 158 e 168a, creata da Claude): keyring GnuPG in
+   `~/.local/share/scambio-release/gnupg` (700); primaria `24A30DBED8973273A486CC7386C8855E1251E7E2`
+   tenuta offline, sottochiave di firma `4C23A6729A5750DDFC8745E305499CD6ECB01DE7` (scade
+   2028-10-06). Pubblica in `packaging/keys/scambio-archive-keyring.gpg` e `.asc` (file di Claude). Gli
+   strumenti usano `SCAMBIO_GNUPGHOME`, firmano **sempre** con `--local-user` sulla sottochiave e
+   verificano prima l'impronta attesa (costante nel codice, confrontata con il keyring del pacchetto);
+   se non corrisponde o la sottochiave scade entro 90 giorni, si fermano con un messaggio chiaro.
 3. Il tag `v1.0.0` (annotato, non firmato) lo crea Claude dopo la prova di GM.
+
+#### 3.1.10 Correzioni dell'audit di sicurezza (decisione 168)
+
+Riferimenti: `docs/verification/05/security-audit.md`. Ogni punto ha test o evidenza nel report.
+
+1. **S2 — archivio immutabile**: gli artefatti pubblicati (`.deb`, tarball, firme, commit del repo
+   OSTree) si conservano in `~/.local/share/scambio-release/archive/<versione>/` (mai sovrascritti,
+   SHA256 in un manifest locale firmato). `make apt-repo` e `make flatpak-site` costruiscono **solo**
+   da quell'archivio + la versione nuova; non scaricano mai binari dal sito. Il punto 5 di §3.1.4 è
+   sostituito da questo.
+2. **S3 — repository**: `Release` con `Date`, `Acquire-By-Hash: yes`, soli SHA256 (niente MD5/SHA1),
+   **senza** `Valid-Until` (168b); `dists/stable/main/binary-all/by-hash/SHA256/…`. `SHA256SUMS` della
+   release firmato (`SHA256SUMS.asc`) e firme distaccate `.asc` per `.deb` e tarball. Il README spiega
+   come verificare il `.deb` scaricato a mano (Claude). `latest.json`: schema
+   `{"version":"X.Y.Z","deb":"scambio_X.Y.Z_all.deb","sha256":"…"}` con regex stretta; il Worker fa
+   redirect **relativo** solo verso un nome che rispetta la regex, solo GET/HEAD.
+   Pubblicazione: `dist/site/` si prepara completa, si verifica (firme, hash, `apt update` in
+   contenitore che punta a un server HTTP locale su quella cartella) e solo dopo si copia in
+   `public/`.
+3. **S4/S5/S6/167 — sito** (`~/development/scambio-site`):
+   - `POST /api/waitlist`: solo `Content-Type: application/json`, corpo ≤ 4 KiB, `Origin` obbligatorio e
+     uguale **esattamente** a `https://scambio.app` (o `http://localhost:8787` solo con la variabile di
+     sviluppo), `Sec-Fetch-Site` `same-origin` se presente; rate limit con il binding Cloudflare
+     `ratelimit` (per IP: 5/minuto; globale: quota giornaliera configurabile) e risposte non
+     enumerabili.
+   - **Doppio opt-in**: nuova tabella o colonne `status` (`pending`/`confirmed`), `token_hash`
+     (SHA-256 di un token casuale da 32 byte), `token_expires` (48 h), `confirmed_at`, `ip_hash` facoltativo.
+     L'iscrizione crea/aggiorna solo una voce `pending` e invia l'email di conferma
+     (`GET /api/confirm?t=…` → pagina di conferma statica nelle tre lingue); una voce `confirmed` **non**
+     si modifica da un nuovo POST (risposta identica, nessuna email). Email inviata dal binding Cloudflare
+     Email Sending (`send_email`) da `hello@scambio.app`, testo semplice in en/it/de (testi di §3.3.4).
+     Se il binding non è disponibile sull'account, fermati e scrivilo nel report: lo configura Claude.
+     Migrazione D1 nuova; le voci esistenti diventano `legacy_unconfirmed` (non si cancellano).
+   - Header su tutte le risposte: CSP senza `unsafe-inline` per gli script (`script-src 'self'`,
+     `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'`, `form-action 'self'`),
+     `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`,
+     `Permissions-Policy` restrittiva, `Strict-Transport-Security: max-age=31536000`. Gli script e lo
+     stile inline della pagina passano in file statici (`/app.js`, `/app.css`); Three.js e i font
+     **vendorizzati** in `public/vendor/` con versione fissata e licenze; nessuna richiesta a CDN
+     esterni. Il JSON dei testi diventa `public/copy.json` (fetch) e nessun testo va in `innerHTML`
+     (link del consenso costruito via DOM). Aspetto della pagina invariato (screenshot prima/dopo nel
+     report).
+   - Test Worker con `vitest` + `@cloudflare/vitest-pool-workers` (o `wrangler dev` + script) per:
+     origin, content type, dimensione, rate limit, doppio opt-in, token scaduto/riusato, voce
+     confermata non modificabile, header.
+4. **S7 — API D-Bus**: limiti su dimensioni di array/dizionari in ingresso (`SetConfig`,
+   `EventGroup` del menu ≤ 32 voci), `SetPriority` uguale allo stato attuale non scrive
+   `state.json`; documentare in `05-ui-context.md` (Claude) che il bus di sessione è il confine di fiducia.
+5. **S8 — pactl**: limiti configurabili in `[backend]` con default prudenti (output di uno snapshot
+   ≤ 4 MiB, riga di subscribe ≤ 64 KiB, ≤ 256 stream spostati per evento, ≤ 4 sottoprocessi `pactl`
+   contemporanei oltre al subscribe); oltre soglia il figlio si termina, si registra una riga di log e si
+   riprova con backoff; debounce con **latenza massima** (un refresh entro 2 s anche con eventi
+   continui), senza polling.
+6. **S9 — file**: cartelle `~/.config/scambio` e `~/.local/share/scambio` create 0700, file 0600;
+   `state.json`: niente symlink (né file né cartella genitore, `O_NOFOLLOW`), ≤ 64 KiB, temp nella
+   stessa cartella, `fsync` del file e della cartella; `config.toml`: resta permesso il symlink (168d),
+   letto con limite di 256 KiB.
+7. **S10 — testi esterni**: alias BlueZ, nomi dei player e ogni stringa esterna mostrata in tray,
+   notifiche, finestra, CLI e log: rimozione dei caratteri di controllo C0/C1 e dei controlli
+   bidirezionali, lunghezza ≤ 64 caratteri con «…»; MPRIS: al massimo 16 player gestiti per volta,
+   salvataggio dello stato una volta per operazione.
+8. **S11 — installazione**: `tools/install_user.py` rifiuta percorsi con CR/LF/NUL, scrive in modo
+   atomico senza seguire symlink e chiama `systemctl` con percorso assoluto. Script del `.deb` in
+   `sh` con `set -eu`, idempotenti, senza rete né `HOME` né servizi utente avviati; provati in
+   contenitore per install, upgrade da una versione fittizia 0.9.0, remove e purge. Unità systemd
+   utente con `NoNewPrivileges=yes` e `LockPersonality=yes` (verificate su casa con il `.deb` nella prova A e
+   nei contenitori); niente altre direttive di sandbox che richiedono namespace (misura in contenitore).
+9. **S12 — Flatpak**: test «golden» che confronta `flatpak info --show-permissions` dell'app
+   costruita con l'elenco esatto della decisione 153; test negativi (UPower, systemd1,
+   `org.freedesktop.Flatpak` non raggiungibili). Il portal Background si chiede una volta per avvio,
+   senza argomenti variabili.
+10. **S13 — esecuzione**: `/usr/bin/scambio` del `.deb` e `/app/bin/scambio` sono wrapper che
+    eseguono `python3 -I -m scambio` (niente `PYTHONPATH`/user site); `pactl` cercato una volta
+    all'avvio in `/usr/bin:/bin` (nel Flatpak `/usr/bin`) e usato col percorso assoluto; la
+    ri-esecuzione (§3.1.2.5) usa lo stesso eseguibile assoluto e argv fisso. Nessun caricamento di
+    estensioni nella 1.0.0 (il punto di estensione resta non attivo).
+11. **S14 — repository**: via il percorso personale dagli hook in `.githooks/` (usa la radice del
+    repo); dati personali in `src/`, `tests/`, `tools/`, `packaging/` sostituiti come §3.1.9. La
+    pulizia della storia la fa Claude (dec. 164, 166).
 
 #### 3.1.8 File pubblici del repository (scritti da Claude prima del goal, §8)
 
@@ -236,6 +327,35 @@ it «Scarica il .deb», «Installa con Flatpak»; de «.deb herunterladen», «M
 FAQ «Is it free?» e «When does it launch?»: Claude fornisce i testi definitivi nel commit dei testi
 (§8) prima del goal.
 
+#### 3.3.4 Email di conferma della lista d'attesa (testo semplice)
+
+Oggetto en «Confirm your Scambio waitlist sign-up» · it «Conferma l'iscrizione alla lista d'attesa di
+Scambio» · de «Bestätige deine Anmeldung zur Scambio-Warteliste».
+
+Corpo en: «Hi! Someone (hopefully you) asked to join the Scambio waitlist with this address.
+Confirm here: {link}
+The link works for 48 hours. If it wasn't you, just ignore this email and we won't write again.
+— Scambio, by Fermich srl · scambio.app»
+
+Corpo it: «Ciao! Qualcuno (speriamo tu) ha chiesto di entrare nella lista d'attesa di Scambio con
+questo indirizzo. Conferma qui: {link}
+Il link vale 48 ore. Se non sei stato tu, ignora questa email e non ti scriveremo più.
+— Scambio, di Fermich srl · scambio.app»
+
+Corpo de: «Hallo! Jemand (hoffentlich du) möchte sich mit dieser Adresse auf die Scambio-Warteliste
+setzen. Hier bestätigen: {link}
+Der Link gilt 48 Stunden. Warst du das nicht, ignoriere diese E-Mail einfach – wir schreiben dir
+dann nicht mehr.
+— Scambio, von Fermich srl · scambio.app»
+
+Pagina di conferma (testi nel `copy.json`): en «You're on the list. We'll write when Scambio is ready
+for your platform.» / «This link has expired or was already used.»; it «Sei nella lista. Ti
+scriviamo quando Scambio è pronto per la tua piattaforma.» / «Questo link è scaduto o è già stato
+usato.»; de «Du stehst auf der Liste. Wir melden uns, wenn Scambio für deine Plattform bereit ist.» /
+«Dieser Link ist abgelaufen oder wurde schon benutzt.» Dopo l'invio del modulo il messaggio di
+successo diventa: en «Almost there: check your inbox and confirm.» · it «Ci siamo quasi: controlla la
+posta e conferma.» · de «Fast geschafft: Schau in dein Postfach und bestätige.»
+
 ### 3.4 Errori e casi limite
 
 - Distro con libadwaita < 1.4 o PulseAudio < 16: apt rifiuta l'installazione per dipendenze.
@@ -282,7 +402,7 @@ deprecato (resta debito di design).
 - [ ] Nessun polling; CPU/RSS a riposo misurati dal `.deb` installato in venv di prova e dal Flatpak.
 - [ ] `design/`, `docs/context/`, `docs/specs/`, `docs/hardware-lab.md`, `README.md`, `CLA.md`,
       `CHANGELOG.md`, `LICENSE`, `NOTICE.md`, `CONTRIBUTING.md` non modificati da Codex.
-- [ ] `docs/verification/05/report.md` scritto; decisioni tecniche in `docs/decisions.md` (166–169).
+- [ ] `docs/verification/05/report.md` scritto; decisioni tecniche in `docs/decisions.md` (voce 169, con sottopunti).
 - [ ] Nessun push, nessun deploy, nessun tag.
 - [ ] Prova di installazione pulita di GM (§6.1) eseguita · Firma: GM, data.
 
@@ -325,7 +445,7 @@ Riletta il 2026-10-07 prima della consegna. Cosa correggerei o terrei d'occhio:
    con «iPhone» vanno aggiornati da Codex.
 8. Già corretti in questa bozza: ordine di ricerca dei dati nel Flatpak (§3.1.1, Python ha
    `sys.prefix=/usr`), indirizzo stabile del `.deb` fatto dal Worker (§3.1.6.2), numerazione delle
-   decisioni di Codex (166–169), testi `background-reason`, `daemon-already-running`,
+   decisioni di Codex (169), testi `background-reason`, `daemon-already-running`,
    `cli-version-help`, `tray-detail-not-configured` e `config-header` senza `systemctl`.
 
 ## 9. Domande aperte

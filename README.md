@@ -55,6 +55,15 @@ wget https://scambio.app/download/scambio.deb -O scambio.deb
 sudo apt install ./scambio.deb
 ```
 
+To check a `.deb` downloaded by hand, compare it with the signed checksums of the
+[release](https://github.com/scambio-app/scambio/releases): the signing key fingerprint is
+`24A3 0DBE D897 3273 A486  CC73 86C8 855E 1251 E7E2`.
+
+```sh
+gpg --keyserver keys.openpgp.org --recv-keys 24A30DBED8973273A486CC7386C8855E1251E7E2
+gpg --verify SHA256SUMS.asc SHA256SUMS && sha256sum --check --ignore-missing SHA256SUMS
+```
+
 ### Other distributions (Flatpak)
 
 If your distribution has Flatpak (Fedora, openSUSE, Arch, …):

@@ -121,6 +121,11 @@ Dalla spec 05 (decisione 154): esportato su una connessione di sessione dedicata
 presso il watcher col solo percorso `/StatusNotifierItem` (nessun nome ben noto); nascondere l'icona
 chiude la connessione.
 
+**Confine di fiducia (decisione 168c).** L'API `app.scambio.Scambio1`, il menu del tray e le azioni
+delle notifiche non distinguono i chiamanti: chiunque sia sul bus di sessione dell'utente può usarli.
+Il bus di sessione è il confine di fiducia (stesso utente); gli ingressi hanno limiti di dimensione
+(spec 05 §3.1.10).
+
 | Proprietà | Valore |
 |---|---|
 | `Id`, `Category`, `Title` | da `tray.json` → `sni` |

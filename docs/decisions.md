@@ -679,8 +679,12 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      2026-10-07: dichiarare il materiale generato con IA con parti ed estensione; i manifest Flathub
      non possono contenere contenuto generato o assistito da IA; l'IA non può aprire né scrivere PR,
      descrizioni, messaggi di commit o risposte ai revisori; i revisori possono rifiutare in base
-     all'estensione del codice generato. Scambio è scritto quasi tutto da Codex: rischio concreto di
-     rifiuto. Il repository Flatpak proprio resta il canale per le altre distro; per Flathub Claude
+     all'estensione del codice generato. Storia (git di flathub-infra/documentation): divieto totale
+     del codice IA da fine maggio 2026, **sostituito il 2026-09-04 dalla politica a dichiarazione**
+     (#641), divieto per i soli manifest ripristinato il 2026-09-21; nessuna soglia numerica, la
+     valutazione è dei revisori (maturità, manutenzione, cura del progetto). Scambio è scritto quasi
+     tutto da Codex, ma con spec, misure, audit e prove reali documentati: domanda possibile, esito
+     incerto. Il repository Flatpak proprio resta il canale per le altre distro; per Flathub Claude
      prepara a GM solo una guida passo passo.
 160. GM — **Repository su una nuova organizzazione GitHub** (proposta: `scambio-app`, libera al
      2026-10-07), creata da GM con l'account `VAX90` come proprietario. Chiude Q7.
@@ -699,3 +703,23 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      «Handy»): «Priorità telefono», «Lascia al telefono», «Switch intelligente (PC ↔ telefono)».
      Cambiano solo i testi di `design/i18n/` (fatto da Claude il 2026-10-07); chiavi, nomi dell'API
      D-Bus (`IphonePriority`, `SetPriority`) e configurazione restano. Chiude Q12.
+166. GM — **Dalla storia pubblicata si tolgono anche i dati personali**, nella stessa riscrittura della
+     164: MAC degli occhiali → `80:AA:1C:XX:XX:XX`, `~` → `~`, l'indirizzo di inoltro Fermich →
+     «l'indirizzo di GM». Dopo la riscrittura Claude ripete la scansione di segreti e dati personali
+     su tutta la storia di entrambi i repository (audit S14).
+167. GM — **Doppio opt-in della lista d'attesa con la release** (completa la 139–140): conta solo chi
+     conferma dal link ricevuto da `hello@scambio.app`; invio con Cloudflare Email Sending dal Worker.
+168. Claude — **Esito dell'audit di sicurezza** (`docs/verification/05/security-audit.md`, Codex con
+     Daybreak Blue, 14 punti, nessuno critico). Si correggono prima della 1.0.0: S2–S6, S8, S10–S14 e
+     in parte S7 e S9 (spec 05 §3.1.10). Rischi accettati:
+     (a) S1 — chiave: primaria **offline** (backup di GM, poi tolta da casa), sulla macchina di build
+     solo una sottochiave di firma Ed25519 senza passphrase che **scade il 2028-10-06**, unica per apt e
+     Flatpak; revoca pronta nel backup. Chiavi separate per apt e Flatpak non danno protezione reale
+     con un solo build host;
+     (b) S3 — niente `Valid-Until` nel `Release`: obbligherebbe a rifirmare il repository a scadenza fissa,
+     e un ritardo bloccherebbe `apt update` a tutti; il rischio «freeze» richiede comunque il sito
+     compromesso;
+     (c) S7 — l'API D-Bus non distingue i chiamanti: il bus di sessione è il confine di fiducia
+     (stesso utente); si mettono solo limiti di dimensione e si evitano scritture ripetute;
+     (d) S9 — `config.toml` può restare un collegamento simbolico (dotfile gestiti dall'utente);
+     `state.json` e le cartelle invece no.
