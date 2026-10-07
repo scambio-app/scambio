@@ -18,7 +18,7 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 | 2 | Spec 02 — pausa MPRIS durante presa e rilascio (decisioni 50–56; niente muto, M10); l'instradamento e il rilascio a tempo sono già nella spec 01 | ✅ verificata 2026-10-05 (418 test, prova reale GM ok dopo la correzione 68; annuncio misurato M11b; Q4 chiusa senza misura, decisione 67) |
 | 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | ✅ verificata 2026-10-07 (569 test; audit 1 di Claude: codice conforme, clic sinistro su Plasma corretto con la decisione 85, d33afa1; prova reale GM passi 0–10 ok; misure M14, M15) |
 | 4 | Spec 04 — scorciatoia globale (KGlobalAccel su Plasma, portal altrove; M16) + finestra impostazioni | ✅ verificata 2026-10-07 (731 test; audit 1 corretto; prova reale GM ok su Ubuntu 26.04 / Plasma 6.6.6 Wayland; misure M16–M22) |
-| 5 | Avvio automatico, packaging (Flatpak), prima release | da fare |
+| 5 | Spec 05 — packaging (`.deb` + repo apt «come Chrome», Flatpak da repo proprio), GitHub `scambio-app`, release 1.0.0 | in corso: misure M30–M34, decisioni 150–165, spec in approvazione |
 | 6 | **macOS** (dec. 120–122): vettori di test condivisi, app Swift da barra dei menu, firma e vendita diretta | dopo la fase 5 |
 | 7+ | Premium: widget Plasma/GNOME, ponte fotocamera iPhone, agenti | futuro |
 
@@ -48,3 +48,4 @@ Vedi `docs/decisions.md`, voci 1–29.
 6. **Fase 3 chiusa il 2026-10-07** (spec 03 verificata). Prossima unità: spec 04 (scorciatoia globale + finestra impostazioni).
 7. Spec 04 (2026-10-07): misure M16–M18, mock della finestra approvato, decisioni 100–109; spec approvata da GM, Codex al lavoro.
 8. **Fase 4 chiusa il 2026-10-07** (spec 04 verificata su Plasma 6.6.6 Wayland). Debiti: `Gtk.ShortcutLabel` deprecato da GTK 4.22 (design, Claude); verifica GNOME in VM (Q6) prima della fase 5.
+8. Fase 5 (2026-10-07, chat di rilascio): Flatpak misurato su casa (M30–M34), scelte di GM 150–152 e 160–165, spec 05 scritta; Flathub solo come tentativo (dec. 159).

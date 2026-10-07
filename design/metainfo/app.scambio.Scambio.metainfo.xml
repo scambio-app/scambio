@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2026 Fermich srl -->
+<component type="desktop-application">
+  <id>app.scambio.Scambio</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>Scambio</name>
+  <summary>Your audio follows you between computer and phone</summary>
+  <summary xml:lang="it">L’audio ti segue fra computer e telefono</summary>
+  <summary xml:lang="de">Dein Audio folgt dir zwischen Computer und Handy</summary>
+
+  <developer id="app.scambio">
+    <name>Fermich srl</name>
+  </developer>
+
+  <description>
+    <p>
+      Many Bluetooth headphones and smart glasses connect to one device at a time. Scambio is a
+      software multipoint for Linux: it hands them to your computer when the computer plays audio,
+      and gives them back to your phone after a couple of minutes of silence or when you lock the
+      screen.
+    </p>
+    <p xml:lang="it">
+      Molte cuffie Bluetooth e molti occhiali smart si collegano a un solo dispositivo alla volta.
+      Scambio è un multipoint software per Linux: li passa al computer quando il computer riproduce
+      audio e li restituisce al telefono dopo un paio di minuti di silenzio o quando blocchi lo
+      schermo.
+    </p>
+    <p xml:lang="de">
+      Viele Bluetooth-Kopfhörer und smarte Brillen verbinden sich nur mit einem Gerät gleichzeitig.
+      Scambio ist ein Software-Multipoint für Linux: Es holt sie an den Computer, sobald dort Audio
+      läuft, und gibt sie nach ein paar Minuten Stille oder beim Sperren des Bildschirms an dein
+      Handy zurück.
+    </p>
+    <ul>
+      <li>Takes the device automatically when audio starts and pauses the video while it switches</li>
+      <li xml:lang="it">Prende il dispositivo da solo quando parte l’audio e mette in pausa il video durante il passaggio</li>
+      <li xml:lang="de">Holt das Gerät automatisch, sobald Audio startet, und pausiert das Video während des Wechsels</li>
+      <li>Gives it back after silence, on screen lock and before suspend</li>
+      <li xml:lang="it">Lo restituisce dopo il silenzio, al blocco dello schermo e prima della sospensione</li>
+      <li xml:lang="de">Gibt es nach Stille, beim Sperren und vor dem Ruhezustand zurück</li>
+      <li>One global shortcut (Super+G) switches by hand; Phone priority keeps the computer’s hands off</li>
+      <li xml:lang="it">Una scorciatoia globale (Super+G) lo sposta a mano; la priorità al telefono tiene fuori il computer</li>
+      <li xml:lang="de">Ein globales Tastenkürzel (Super+G) wechselt von Hand; der Handy-Vorrang hält den Computer fern</li>
+      <li>Lives in the system tray, with a small settings window</li>
+      <li xml:lang="it">Vive nella barra di sistema, con una piccola finestra di impostazioni</li>
+      <li xml:lang="de">Lebt im Systemabschnitt der Leiste, mit einem kleinen Einstellungsfenster</li>
+      <li>No network access, no telemetry</li>
+      <li xml:lang="it">Nessun accesso alla rete, nessuna telemetria</li>
+      <li xml:lang="de">Kein Netzwerkzugriff, keine Telemetrie</li>
+    </ul>
+    <p>
+      Works with Ray-Ban Meta and Oakley Meta glasses and with any Bluetooth headphones without
+      multipoint. Scambio is an independent app by Fermich srl and is not affiliated with, endorsed
+      or sponsored by Meta Platforms, EssilorLuxottica, Ray-Ban or Oakley. All trademarks belong to
+      their respective owners.
+    </p>
+    <p xml:lang="it">
+      Funziona con gli occhiali Ray-Ban Meta e Oakley Meta e con qualsiasi cuffia Bluetooth senza
+      multipoint. Scambio è un’app indipendente di Fermich srl, non affiliata né approvata da Meta
+      Platforms, EssilorLuxottica, Ray-Ban o Oakley. Tutti i marchi appartengono ai rispettivi
+      titolari.
+    </p>
+    <p xml:lang="de">
+      Funktioniert mit Ray-Ban Meta und Oakley Meta Brillen und mit allen Bluetooth-Kopfhörern ohne
+      Multipoint. Scambio ist eine unabhängige App der Fermich srl und steht in keiner Verbindung zu
+      Meta Platforms, EssilorLuxottica, Ray-Ban oder Oakley. Alle Marken gehören ihren jeweiligen
+      Inhabern.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">app.scambio.Scambio.desktop</launchable>
+
+  <provides>
+    <binary>scambio</binary>
+    <dbus type="user">app.scambio.Scambio</dbus>
+  </provides>
+
+  <categories>
+    <category>Settings</category>
+    <category>HardwareSettings</category>
+  </categories>
+
+  <keywords>
+    <keyword>Bluetooth</keyword>
+    <keyword>audio</keyword>
+    <keyword>headphones</keyword>
+    <keyword>glasses</keyword>
+    <keyword>multipoint</keyword>
+  </keywords>
+
+  <url type="homepage">https://scambio.app</url>
+  <url type="bugtracker">https://github.com/scambio-app/scambio/issues</url>
+  <url type="vcs-browser">https://github.com/scambio-app/scambio</url>
+  <url type="contribute">https://github.com/scambio-app/scambio/blob/main/CONTRIBUTING.md</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Settings window</caption>
+      <image>https://scambio.app/screenshots/settings.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Tray menu</caption>
+      <image>https://scambio.app/screenshots/tray.png</image>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1"/>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+
+  <releases>
+    <release version="1.0.0" date="2026-10-08">
+      <description>
+        <p>First public release for Linux.</p>
+      </description>
+    </release>
+  </releases>
+</component>

@@ -117,13 +117,17 @@ l'unità systemd, il lanciatore `.desktop` e il file di servizio D-Bus della fin
 
 ### 5.3 StatusNotifierItem (`/StatusNotifierItem`)
 
+Dalla spec 05 (decisione 154): esportato su una connessione di sessione dedicata al tray e registrato
+presso il watcher col solo percorso `/StatusNotifierItem` (nessun nome ben noto); nascondere l'icona
+chiude la connessione.
+
 | Proprietà | Valore |
 |---|---|
 | `Id`, `Category`, `Title` | da `tray.json` → `sni` |
 | `Status` | `Active`; `NeedsAttention` con l'errore attivo |
 | `IconName` | icona della regola (o `error`) |
 | `AttentionIconName` | icona `error` |
-| `IconThemePath` | percorso assoluto di `design/icons` |
+| `IconThemePath` | percorso assoluto di `design/icons` (dati installati, §3.1.1 spec 05); nel Flatpak tradotto nel percorso dell'host (decisione 154) |
 | `ToolTip` (`(sa(iiay)ss)`) | (`IconName`, [], `Title`, `header` + `\n` + testo): testo = errore se attivo, altrimenti `tooltip_detail` se c'è, altrimenti `detail` |
 | `ItemIsMenu` | `true` |
 | `Menu` | `/MenuBar` |

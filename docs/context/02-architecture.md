@@ -128,3 +128,5 @@ stato aggiornato.
   metodo `Quit()` (decisioni 74–81).
 - 2026-10-07 — spec 04: scorciatoia con KGlobalAccel/portal, finestra in processo separato,
   `SetConfig`/`ListDevices`/`RetryShortcut`, riavvio per cambio dispositivo (decisioni 100–108).
+- 2026-10-07 — spec 05: percorsi da pacchetto e XDG, attivazione D-Bus al posto di systemd, portal
+  Background nel Flatpak, tray senza nome ben noto, pacchetti `.deb` e Flatpak (decisioni 153–158).

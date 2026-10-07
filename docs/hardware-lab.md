@@ -473,3 +473,76 @@ i segnali di BlueZ.
 Conclusione: la correzione 68 regge su BlueZ 5.85: la presa riparte solo a scollegamento avvenuto,
 nessuna presa letta come fallita. L'ordine `DisconnectResult`/`Connected=false` al millisecondo non
 è osservabile senza root (la transizione e il segnale distano 7 ms su due processi diversi).
+
+## 2026-10-07 — M30: contenuto del runtime Flatpak `org.gnome.Platform//51` (Claude, senza GM)
+
+Metodo: Flatpak 1.16.6 e flatpak-builder 1.4.8 installati da GM con apt; runtime e SDK GNOME 51
+da Flathub (remote `--user`); `flatpak run --command=sh org.gnome.Platform//51` e `…Sdk//51`.
+Prove e log in `~/Scrivania/Claude/scambio-misure/fase5/`.
+
+| Componente | Platform 51 | Sdk 51 |
+|---|---|---|
+| Python / PyGObject | 3.14.7 / 3.58.0 | idem |
+| GTK / libadwaita / GLib | 4.24 / 1.10 / 2.90 | idem |
+| `pactl` | **presente** (17.0), `libpulse.so.0` | presente |
+| `blueprint-compiler`, `msgfmt`, `appstreamcli` | — | **presenti** |
+
+Conclusione: nessun modulo aggiuntivo serve per eseguire Scambio; per costruirlo basta l'SDK.
+
+## 2026-10-07 — M31: demone Scambio dentro un Flatpak di prova (Claude, senza GM)
+
+Metodo: Flatpak **di laboratorio** fuori dal repo (`fase5/app.scambio.Scambio.yml`, copia di
+`src/ design/ build/` a `cc5fdd9`, avvio con `PYTHONPATH`), permessi: `--socket=pulseaudio`,
+`--system-talk-name=org.bluez`, `--system-talk-name=org.freedesktop.login1`,
+`--talk-name=org.mpris.MediaPlayer2.*`, `org.kde.kglobalaccel`, `org.kde.StatusNotifierWatcher`,
+`org.freedesktop.Notifications`, `org.freedesktop.ScreenSaver`, `--share=ipc`, `--socket=wayland`,
+`--socket=fallback-x11`. Servizio utente di casa fermato durante la prova (21:59–22:05) e poi riavviato;
+per la prova il demone vedeva `~/.config/scambio` e `~/.local/share/scambio` con `--filesystem`
+(solo laboratorio). Occhiali collegati al PC con audio in corso.
+
+| Prova | Esito |
+|---|---|
+| BlueZ (sistema): `GetManagedObjects`, proprietà del dispositivo | ok (dispositivo trovato, `Connected=True`) |
+| BlueZ: `scambio switch` ×2 dalla CLI dell'host | `on_pc → releasing → released` e `released → connecting → on_pc`, nessun errore: **Connect/Disconnect funzionano** dal sandbox |
+| logind `ListSessions`, ScreenSaver `GetActive` | ok; `Lock source logind: False` |
+| `pactl -f json info` / `subscribe` | ok via `unix:/run/flatpak/pulse/native` (PulseAudio su PipeWire 1.6.2) |
+| KGlobalAccel | `ShortcutState: active`, `ShortcutBackend: kglobalaccel` (pressione di Meta+G **non** provata) |
+| Nomi non concessi (`org.freedesktop.UPower`, `org.freedesktop.systemd1`) | `ServiceUnknown`: **systemd utente non raggiungibile** dal sandbox |
+| Configurazione | dentro il sandbox `HOME=~` ma `XDG_CONFIG_HOME=~/.var/app/app.scambio.Scambio/config`: il codice che usa `Path.home()/.config` non vede la configurazione senza `--filesystem` |
+| CPU a riposo | 0 tick in 30 s |
+| Memoria | RSS 38–41 MB (contro ≈ 24,5 MB della venv di casa) + `xdg-dbus-proxy` 2,3 MB |
+
+## 2026-10-07 — M32: avvio automatico tramite portal Background su Plasma 6.6.6 (Claude, senza GM)
+
+Metodo: `bgprobe` (fase5/bgprobe.py) nel Flatpak di prova chiama
+`org.freedesktop.portal.Background.RequestBackground` con `autostart=true`,
+`commandline=["scambio","daemon"]`; xdg-desktop-portal 1.21.1, xdg-desktop-portal-kde 6.6.6.
+
+| Prova | Esito |
+|---|---|
+| `autostart=true` | risposta `0 {'background': True, 'autostart': True}`, **nessun dialogo**; creato `~/.config/autostart/app.scambio.Scambio.desktop` con `Exec=flatpak run --command=scambio app.scambio.Scambio daemon` e `X-XDP-Autostart` |
+| `autostart=false` | risposta `0 {…'autostart': False}`, file rimosso |
+| Avvio reale al login | **non provato** (serve un nuovo accesso): va nella prova di installazione pulita |
+
+## 2026-10-07 — M33: icona del tray da Flatpak su Plasma 6.6.6 Wayland (Claude, senza GM)
+
+Metodo: demone nel Flatpak di prova; `RegisteredStatusNotifierItems` del watcher; screenshot del
+pannello con `spectacle -b -n -f` (fase5/bottom*.png). Le varianti 2 e 3 sono **patch di laboratorio**
+alla copia in `fase5/`, non al repo.
+
+| Variante | Esito |
+|---|---|
+| Codice attuale (nome `org.kde.StatusNotifierItem-<pid>-1`, `IconThemePath=/app/…`) | nome non concesso dal sandbox: **item non registrato**, nessuna icona |
+| `--own-name=org.kde.StatusNotifierItem-2-1` (nel sandbox il demone ha PID 2) | registrato, ma **posto vuoto**: `IconThemePath` è un percorso del sandbox che Plasma non vede |
+| + `IconThemePath` tradotto nel percorso dell'host (`app-path` di `/.flatpak-info` + resto del percorso) | **icona visibile** (occhiali + monitor) |
+| Registrazione col solo percorso (`RegisterStatusNotifierItem("/StatusNotifierItem")`, nome unico del mittente), senza `--own-name` | **registrato e icona visibile** (`:1.2698/StatusNotifierItem`) |
+
+## 2026-10-07 — M34: portal e attivazione D-Bus da Flatpak (Claude, senza GM)
+
+| Prova | Esito |
+|---|---|
+| `Gio.AppInfo.launch_default_for_uri("systemsettings://kcm_keys/app.scambio.Scambio")` dal sandbox | passa dal portal OpenURI e apre `systemsettings kcm_keys --args app.scambio.Scambio` |
+| `Notify` con `--talk-name=org.freedesktop.Notifications` | ok (id 80) |
+| `flatpak run … settings` | la finestra GTK4 si apre su Wayland ed è identica a quella della venv; senza `--device=dri` Mesa avvisa e ripiega sul rendering software |
+| File di servizio D-Bus in `/app/share/dbus-1/services/` | Flatpak esporta **sia** `app.scambio.Scambio.service` **sia** `app.scambio.Scambio.Settings.service` (Exec riscritto in `flatpak run --command=/app/bin/scambio …`) |
+| Attivazione di `app.scambio.Scambio.Settings` subito dopo l'installazione | `ServiceUnknown`: le cartelle `exports` di Flatpak entrano in `XDG_DATA_DIRS` solo dopo un nuovo accesso. Con l'installazione di sviluppo presente vince il file in `~/.local/share/dbus-1/services/` (si è aperta la finestra della venv): **le due installazioni non vanno tenute insieme** |

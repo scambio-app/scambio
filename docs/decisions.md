@@ -628,3 +628,74 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      (casa dopo l'aggiornamento a Ubuntu 26.04), tray, notifiche, scorciatoia e finestra ok. Resta
      aperta solo la parte **GNOME** (portal con `app_id` dell'unità systemd, tray assente), da
      provare in una VM prima della fase 5.
+
+## 2026-10-07 — Fase 5: packaging e prima release (chat di rilascio; numeri 150–169)
+
+150. GM — **Codice pubblico su GitHub, senza Actions** né altra CI remota: build, test, pacchetti e
+     firma restano su `casa`. Account o organizzazione proprietaria: domanda Q7.
+151. GM — **Formati della v1: Flatpak + apt «come Chrome».** Flatpak da un repository proprio su
+     scambio.app, poi Flathub con il manifest scritto a mano da GM (dec. 134a). Per Ubuntu/Debian un
+     repository apt firmato su scambio.app e un `.deb` scaricabile che installa Scambio **e** aggiunge
+     sorgente e chiave, così gli aggiornamenti arrivano con apt. PPA, AUR e AppImage non nella v1.
+152. GM — **Prima release pubblica: 1.0.0**, a condizione che passi la prova di installazione pulita
+     (casa + VM con un'altra distro e GNOME). Da 1.0.0 l'API D-Bus `app.scambio.Scambio1` e il
+     formato di `config.toml` seguono SemVer.
+153. Claude — **Flatpak fattibile** (M30–M34): runtime `org.gnome.Platform` 51 senza moduli aggiuntivi
+     (`pactl` incluso), permessi statici minimi: `--share=ipc`, `--socket=wayland`,
+     `--socket=fallback-x11`, `--device=dri`, `--socket=pulseaudio`, `--system-talk-name=org.bluez`,
+     `--system-talk-name=org.freedesktop.login1`, `--talk-name=org.mpris.MediaPlayer2.*`,
+     `--talk-name=org.kde.kglobalaccel`, `--talk-name=org.kde.StatusNotifierWatcher`,
+     `--talk-name=org.freedesktop.Notifications`, `--talk-name=org.freedesktop.ScreenSaver`.
+     Niente `--own-name`, niente `--filesystem`, niente systemd: le parti che li richiedevano cambiano
+     (dec. 154–156).
+154. Claude — **Tray senza nome ben noto** (M33): l'icona si registra col solo percorso
+     `/StatusNotifierItem` su una **connessione di sessione dedicata** al tray; nasconderla
+     (`ui.tray = false`) chiude quella connessione, mostrarla ne apre una nuova (stesso effetto
+     visibile della 108 senza `--own-name`). Vale per tutti i formati. Nel Flatpak `IconThemePath`
+     è tradotto nel percorso dell'host con `app-path` di `/.flatpak-info`.
+155. Claude — **Avvio e riavvio senza dipendere da systemd.** Il demone è attivabile via D-Bus in
+     tutti i formati (file `app.scambio.Scambio.service`; nel `.deb` con `SystemdService=scambio.service`).
+     «Avvia» della finestra e l'apertura dal menu usano l'attivazione D-Bus al posto di `StartUnit`.
+     Avvio al login (dec. 48): nel `.deb` il servizio utente abilitato per tutti gli utenti; nel Flatpak
+     il demone chiede al portal Background `autostart=true` a ogni avvio (idempotente, M32). Riavvio
+     dopo il cambio di dispositivo: `RestartUnit` se il demone gira sotto systemd, altrimenti
+     ri-esecuzione del processo dopo l'arresto ordinato.
+156. Claude — **Percorsi da pacchetto.** `design/`, cataloghi compilati e `.ui` si leggono dal checkout
+     quando si sviluppa e da `<prefix>/share/scambio/` quando Scambio è installato; configurazione e
+     stato in `GLib.get_user_config_dir()/scambio` e `GLib.get_user_data_dir()/scambio` (sull'host
+     sono gli stessi `~/.config/scambio` e `~/.local/share/scambio` di oggi; nel Flatpak finiscono in
+     `~/.var/app/app.scambio.Scambio/`). Versione unica in `pyproject.toml`.
+157. Claude — **Pacchetto `.deb`**: `Architecture: all`, per **Ubuntu 24.04+ e Debian 13+** (libadwaita ≥ 1.4,
+     `pactl -f json` ≥ 16); Debian 12 e Ubuntu 22.04 esclusi dalle dipendenze. Sorgente apt in formato
+     deb822 (`/etc/apt/sources.list.d/scambio.sources`) e chiave in
+     `/usr/share/keyrings/scambio-archive-keyring.gpg` come **file del pacchetto** (nessuna modifica
+     in `postinst` alle sorgenti). Repository apt (`stable main`, `all`) e repository Flatpak (OSTree)
+     generati su casa e pubblicati come asset statici del Worker `scambio-site` in
+     `https://scambio.app/apt/` e `https://scambio.app/flatpak/`.
+158. Claude — **Chiave di firma** dedicata «Scambio Release Signing Key» (Ed25519, per apt e Flatpak),
+     generata su casa in un keyring separato `~/.local/share/scambio-release/gnupg`; GM ne conserva
+     una copia offline (perderla significa non poter più aggiornare chi ha già installato).
+159. Claude — **Flathub è un tentativo, non il canale principale.** Requisiti Flathub letti il
+     2026-10-07: dichiarare il materiale generato con IA con parti ed estensione; i manifest Flathub
+     non possono contenere contenuto generato o assistito da IA; l'IA non può aprire né scrivere PR,
+     descrizioni, messaggi di commit o risposte ai revisori; i revisori possono rifiutare in base
+     all'estensione del codice generato. Scambio è scritto quasi tutto da Codex: rischio concreto di
+     rifiuto. Il repository Flatpak proprio resta il canale per le altre distro; per Flathub Claude
+     prepara a GM solo una guida passo passo.
+160. GM — **Repository su una nuova organizzazione GitHub** (proposta: `scambio-app`, libera al
+     2026-10-07), creata da GM con l'account `VAX90` come proprietario. Chiude Q7.
+161. GM — **Licenza `GPL-3.0-or-later`** (precisa la 137). Chiude Q8.
+162. GM — **CLA pubblicato con la 1.0.0, parere legale dopo**: prima di accettare la prima PR esterna
+     il testo va rivisto da un legale. Chiude Q9.
+163. GM — **Indirizzo pubblico dedicato `hello@scambio.app`** (pacchetto, metainfo, README) e
+     `release@scambio.app` nella chiave di firma; **tutti** gli indirizzi `@scambio.app` inoltrati per
+     ora a [indirizzo di GM] (regola catch-all di Cloudflare Email Routing).
+164. GM — **Storia git pubblicata intera, con l'autore riscritto** prima del primo push: autore e
+     committente `Fermich srl <hello@scambio.app>` al posto dell'email personale; i trailer
+     (`Co-Authored-By`, `Claude-Session`) restano. Lo fa Claude con `git filter-repo --mailmap` subito
+     prima del push, salvando la tabella hash vecchio → nuovo in `docs/verification/05/commit-map.txt`;
+     da lì in poi il repository usa quell'identità (`git config user.*` locale). Chiude Q11.
+165. GM — **«Telefono» al posto di «iPhone» in tutta l'interfaccia** (it «telefono», en «phone», de
+     «Handy»): «Priorità telefono», «Lascia al telefono», «Switch intelligente (PC ↔ telefono)».
+     Cambiano solo i testi di `design/i18n/` (fatto da Claude il 2026-10-07); chiavi, nomi dell'API
+     D-Bus (`IphonePriority`, `SetPriority`) e configurazione restano. Chiude Q12.
