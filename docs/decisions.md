@@ -613,3 +613,18 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      Informativa completata con i dati di Fermich e Cloudflare come responsabile. Il campo
      «Quali occhiali» suggerisce i modelli Meta in vendita al 2026-10-07 (lista da aggiornare:
      `<datalist id="device-models">`). Doppio opt-in e invio email: non ancora.
+
+## 2026-10-07 — Spec 04 su Ubuntu 26.04 / Plasma 6 (chat di sviluppo; numeri 141–144)
+
+141. Claude — La decisione 85 (`Activate` del tray risponde con un errore) **resta**: su Plasma 6 il
+     clic sinistro non chiama più `Activate` e apre il menu da sé (M21), quindi la regola è innocua
+     qui e serve ancora su Plasma 5.27 (Kubuntu 24.04 LTS, ancora diffusa).
+142. Claude — Conferma la 102 su Plasma 6: anche se ora il portal GlobalShortcuts lega le scorciatoie
+     (M20), con KDE Scambio continua a usare KGlobalAccel (funziona su 5.27 e 6, nessun dialogo, il
+     tasto preferito si impone, nome del componente `app.scambio.Scambio` e non dipendente
+     dall'`app_id` dell'unità). Il portal resta per i desktop senza KGlobalAccel.
+143. Claude — La correzione 68 è confermata su BlueZ 5.85 (M22): nessuna modifica.
+144. Claude — Q6 chiusa per la parte **Plasma 6**: spec 04 provata da GM su Plasma 6.6.6 Wayland
+     (casa dopo l'aggiornamento a Ubuntu 26.04), tray, notifiche, scorciatoia e finestra ok. Resta
+     aperta solo la parte **GNOME** (portal con `app_id` dell'unità systemd, tray assente), da
+     provare in una VM prima della fase 5.

@@ -156,7 +156,7 @@ la sparizione visibile nel pannello resta nel punto 6 della prova GM.
 - [x] Due debiti §3.1.8 corretti con test.
 - [x] Report, GNOME/Plasma 6 non verificati, decisioni 110–119.
 - [x] Checklist GM preparata qui sotto.
-- [ ] Prova reale GM eseguita e firmata.
+- [x] Prova reale GM eseguita e firmata (2026-10-07, Plasma 6.6.6 Wayland).
 
 ## Checklist di prova reale GM — da eseguire
 
@@ -166,42 +166,48 @@ Un punto non applicabile (assenza di seconda cuffia) va motivato, non segnato
 come prova riuscita. Conservare il config prima della prova e ripristinare
 minuti/lingua alla fine.
 
-- [ ] **0. Preparazione Claude:** verificare backup/rimozione khotkeys di M19,
-  `make install-user`, riavviare Scambio; `scambio status` deve riportare
-  `ShortcutState: active`, `ShortcutBackend: kglobalaccel`, `Shortcut: <Super>g`.
-  Annotare commit provato e versioni desktop.
-- [ ] **1. Tastiera:** occhiali sul PC con video; Meta+G li lascia all'iPhone,
-  notifica con Annulla e lucchetto. Secondo Meta+G li riprende sul PC con
-  notifica di priorità disattivata. Verificare anche Annulla con finestra chiusa.
-- [ ] **2. KCM:** gruppo Scambio e azione «Switch intelligente (PC ↔ iPhone)»
-  su Meta+G. Cambio tasto dal KCM conservato dopo riavvio del demone; poi
-  ripristinare Meta+G. Rimozione del tasto rispettata al riavvio, poi ripristinare.
-- [ ] **3. Apertura dal tray:** Impostazioni apre la finestra; annotare se viene
-  in primo piano su X11. Stato/pulsante coerenti col tray. Lascia all'iPhone
-  dalla finestra funziona senza notifica priority. Seconda apertura presenta
-  la stessa finestra.
-- [ ] **4. Priorità:** modifica nella finestra aggiorna la spunta nel tray senza
-  notifica; finestra dietro/inattiva e Meta+G ripristinano le notifiche normali.
-- [ ] **5. Minuti:** impostare 3, confrontare config (solo valore 180, commenti
-  intatti); alla pausa successiva compare «tra 3 min». Ripristinare 2.
-- [ ] **6. Tray:** disattivare l'icona, verificarne la sparizione immediata;
-  riattivare, verificare una sola icona e menu funzionante.
-- [ ] **7. Lingua:** Deutsch mostra avviso, tray tedesco subito; chiudere e
-  riaprire la finestra, ora tedesca. Ripristinare Automatica e riaprire.
-- [ ] **8. Dispositivo:** con occhiali sul PC, elenco bloccato e spiegazione.
-  Se disponibile una seconda cuffia accoppiata: prima lasciare gli occhiali,
-  scegliere la cuffia, avviso di riavvio **senza banner**, poi dati del nuovo
-  dispositivo; ritornare agli occhiali. Annotare eventuale RestartUnit fallito.
-- [ ] **9. Cambia:** apre il KCM sulle scorciatoie di Scambio.
-- [ ] **10. Apri:** il file di configurazione si apre nell'editor previsto.
-- [ ] **11. Arresto/ripartenza:** Esci da Scambio colla finestra aperta mostra
-  il banner e disabilita i gruppi; Avvia recupera stato e controlli.
-- [ ] **12. Lanciatore:** menu applicazioni → Scambio apre la finestra anche
-  senza icona tray; verificare icona e identificazione della finestra.
-- [ ] **13. Audit Claude:** screenshot reali chiaro/scuro, confronto col mock,
-  testi e focus; registrare esito nella spec.
+- [x] **0. Preparazione Claude (2026-10-07 21:19, su Ubuntu 26.04):** commit provato `032ab86`
+  (codice della spec 04 a `0ef473b`, poi solo documenti). Ambiente: Ubuntu 26.04.1 LTS, KDE Plasma
+  6.6.6 su **Wayland**, kglobalacceld 6.6.5 (KF6 GlobalAccel 6.24), xdg-desktop-portal 1.21.1 +
+  xdg-desktop-portal-kde 6.6.6, BlueZ 5.85, pactl 17.0, Python 3.14.4, GTK 4.22, libadwaita 1.9.
+  `.venv` ricreata con Python 3.14 (la vecchia 3.12 non partiva più dopo l'aggiornamento);
+  `make install-user` rieseguito; `systemctl --user restart scambio` → `active`.
+  `scambio status`: `ShortcutState: active`, `ShortcutBackend: kglobalaccel`, `Shortcut: <Super>g`.
+  `kglobalshortcutsrc`: `[app.scambio.Scambio]` → `switch=Meta+G,none,Switch intelligente (PC ↔ iPhone)`;
+  `action(Meta+G)` = `app.scambio.Scambio/switch`. khotkeys non esiste più su Plasma 6 (decisione 123):
+  nessun conflitto. Lanciatore e servizio D-Bus della finestra installati con i percorsi della nuova
+  venv. Monitor `dbus-monitor` attivi su BlueZ (bus di sistema) e sul nome del demone (bus di
+  sessione) per la prova.
+- [x] **1. Tastiera:** Meta+G → occhiali all'iPhone con notifica «Annulla» e lucchetto; di nuovo →
+  sul PC con «Priorità iPhone disattivata». Doppia pressione rapida: occhiali di nuovo sul PC e
+  video ripreso negli occhiali (M22). GM, 21:21–21:22.
+- [x] **2. KCM:** gruppo «Scambio», «Switch intelligente (PC ↔ iPhone)» su Meta+G (GM). Cambio e
+  rimozione del tasto dal KCM non provati dal vivo (coperti dai test di `yourShortcutsChanged`).
+- [x] **3. Apertura dal tray:** clic sinistro apre il menu (M21); «Impostazioni…» apre la finestra
+  **in primo piano** su Wayland; stato e pulsante coerenti; «Lascia all'iPhone» senza notifica (GM).
+- [x] **4. Priorità:** dalla finestra la spunta del tray si aggiorna, senza notifica (GM).
+- [x] **5. Minuti:** 3 → «tra 3 min» nel menu; file con il solo valore cambiato (anche verificato da
+  Claude via `SetConfig` prima della prova: commenti intatti, ripristinato); rimesso 2 (GM).
+- [x] **6. Tray:** icona tolta subito e rimessa, una sola (GM; watcher verificato da Claude).
+- [x] **7. Lingua:** Deutsch → avviso, tray tedesco subito, finestra tedesca alla riapertura;
+  rimesso Automatica (GM).
+- [x] **8. Dispositivo:** con gli occhiali sul PC elenco bloccato con «Per cambiarlo, prima lascialo
+  all'iPhone» (GM, screenshot). Cambio vero **non applicabile**: un solo dispositivo audio accoppiato
+  (`ListDevices` → Oakley Meta 002Z); `RestartUnit` misurato in M18.
+- [x] **9. Cambia:** apre Impostazioni di sistema → Scorciatoie su «Scambio» (GM).
+- [x] **10. Apri:** apre `config.toml` nell'editor (GM).
+- [x] **11. Arresto/ripartenza:** «Esci da Scambio» con la finestra aperta → banner e gruppi grigi;
+  «Avvia» → demone ripartito alle 21:34:39 e finestra riallineata (GM, journal).
+- [x] **12. Lanciatore:** menu applicazioni → Scambio apre la finestra (GM).
+- [x] **13. Audit Claude:** screenshot reali su Plasma 6.6 Wayland con `spectacle`, Breeze scuro e
+  chiaro (tema cambiato per 5 s e rimesso): finestra conforme al mock (stato «sul PC», pulsante,
+  dispositivo bloccato, Super + G, gruppi e testi italiani); icona del tray ricolorata in entrambi i
+  temi. Nota di design: `Gtk.ShortcutLabel` è deprecato da GTK 4.22 (avviso di Blueprint), da
+  sostituire in una prossima unità.
 
-**Commit provato:** … · **Esiti/allegati:** … · **Firma GM e data:** …
+**Commit provato:** `0ef473b` (codice), ambiente Ubuntu 26.04.1 / Plasma 6.6.6 Wayland ·
+**Esiti/allegati:** M20–M22 in `docs/hardware-lab.md`, screenshot in `~/development/_claude_tmp/p6/`
+· **Firma GM e data:** GM, 2026-10-07 («tutto passato», «tutto funziona bene», «sì a tutto»).
 
 ## File e handoff
 

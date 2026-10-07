@@ -1,6 +1,6 @@
 # Spec 04 — Scorciatoia globale e finestra impostazioni
 
-Stato: approvata (GM, 2026-10-07) · Autore: Claude · Data: 2026-10-07
+Stato: verificata (GM, 2026-10-07) · approvata il 2026-10-07 · Autore: Claude · Data: 2026-10-07
 
 ## 1. Obiettivo
 
@@ -396,20 +396,20 @@ c'è, si chiede nel report: mai inventare una chiave.
 
 - [x] Decisioni 100–109, `AGENTS.md` (invariante sui file installati), 05 §5.1–§5.11, 02, design
       (`.blp`, CSS, cataloghi, `.desktop.in`, `tray.json`) aggiornati da Claude prima del `/goal`.
-- [ ] Ogni regola di §3.1 e di 05 §5.10–§5.11 ha un test (§3.2.5).
-- [ ] `make check` verde (con `make i18n` e `make ui`); nessun test saltato; test GTK solo sotto
+- [x] Ogni regola di §3.1 e di 05 §5.10–§5.11 ha un test (§3.2.5).
+- [x] `make check` verde (con `make i18n` e `make ui`); nessun test saltato; test GTK solo sotto
       `xvfb-run`.
-- [ ] Nessun polling né timer nuovi; misura CPU/RSS a riposo prima e dopo (RSS ≤ 40 MB) e RSS della
+- [x] Nessun polling né timer nuovi; misura CPU/RSS a riposo prima e dopo (RSS ≤ 40 MB) e RSS della
       finestra aperta, nel report.
-- [ ] Nessun valore personale hardcodato; nessun testo visibile o valore di stile nel codice.
-- [ ] `design/` non modificato; richieste di design elencate nel report.
-- [ ] Il demone non scrive fuori da `~/.config/scambio/` e `~/.local/share/scambio/`; `make
+- [x] Nessun valore personale hardcodato; nessun testo visibile o valore di stile nel codice.
+- [x] `design/` non modificato; richieste di design elencate nel report.
+- [x] Il demone non scrive fuori da `~/.config/scambio/` e `~/.local/share/scambio/`; `make
       install-user` scrive solo l'unità systemd e i file di §3.1.6.
-- [ ] I due debiti di §3.1.8 chiusi, con test.
-- [ ] `docs/verification/04/report.md` (GNOME dichiarato non verificato); decisioni tecniche da
+- [x] I due debiti di §3.1.8 chiusi, con test.
+- [x] `docs/verification/04/report.md` (GNOME dichiarato non verificato); decisioni tecniche da
       110 in `docs/decisions.md`.
-- [ ] Checklist di prova reale per GM completata nel report (§6.1).
-- [ ] Prova reale eseguita da GM: … · Firma: GM, data.
+- [x] Checklist di prova reale per GM completata nel report (§6.1).
+- [x] Prova reale eseguita da GM su Ubuntu 26.04 / Plasma 6.6.6 Wayland: passi 1–12 superati (8 parziale: un solo dispositivo) · Firma: GM, 2026-10-07.
 
 ### 6.1 Checklist di prova reale per GM (traccia; Codex la completa nel report)
 
@@ -476,6 +476,17 @@ il carattere è quello di GM. Con un solo dispositivo accoppiato `Adw.ComboRow` 
 diff tutte e 13. Decisione mia sul punto 3: la prima scomparsa del nome dopo un cambio di
 dispositivo riuscito resta senza banner, anche nel caso raro di `RestartUnit` fallito seguito da
 «Esci» (la riapertura della finestra lo risolve); nessun timer o segnale nuovo.
+
+### Prova reale (GM, 2026-10-07 sera, su Ubuntu 26.04 / Plasma 6.6.6 Wayland)
+
+`casa` è stata aggiornata a Ubuntu 26.04 durante la giornata; la venv è stata ricreata con Python
+3.14 e la prova è diventata anche la prima verifica su Plasma 6 (decisione 144). Esito: **superata**,
+passi 1–12 (dettaglio nel report, §«Checklist di prova reale GM»). Meta+G e doppio switch ok (M22);
+clic sinistro sul tray apre il menu senza `Activate` (M21, decisione 141); finestra aperta dal tray in
+primo piano su Wayland; banner e «Avvia» ok; lanciatore ok. Cambio vero di dispositivo non provato
+(un solo dispositivo audio accoppiato). Visivo 13: conforme al mock in chiaro e scuro. Portal
+GlobalShortcuts ora funzionante su Plasma 6 (M20), KGlobalAccel confermato per KDE (decisione 142).
+Debito di design: `Gtk.ShortcutLabel` deprecato da GTK 4.22.
 
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 

@@ -19,6 +19,11 @@ Telefono: iPhone di GM.
 > Disconnect/Connected della decisione 68) vanno **rivalidate** su questo ambiente. La `.venv` è stata
 > ricreata con Python 3.14 alle 11:48 senza i console script di sviluppo: l'orchestratore ha
 > reinstallato `pytest` nella venv; `make check` di nuovo verde (731 test).
+>
+> **Rivalidazioni su questo ambiente (Claude, 2026-10-07 sera):** M13/M16 per il portal → **M20**;
+> M14 (clic sul tray) e M11 (icone) → **M21**; decisione 68 → **M22**. Sessione **Wayland**; GTK 4.22,
+> libadwaita 1.9, kglobalacceld 6.6.5 (i metodi a interi di KGlobalAccel misurati in M16/M18
+> funzionano anche qui: Scambio registra Meta+G).
 
 Aggiornamento 2026-10-05 (orchestratore): installato `gettext` 0.21 (`msgfmt`, `xgettext`) via
 `apt-get`, prerequisito della spec 03.
@@ -410,3 +415,61 @@ lancia `reread_configuration` del modulo khotkeys di `kded5` e, con copia di
 
 Conseguenza: togliere un'azione khotkeys non libera il tasto in KGlobalAccel; serve `unregister`
 della voce. Fino all'installazione della spec 04 Meta+G non fa nulla su `casa`.
+
+## 2026-10-07 — M20: portal GlobalShortcuts su Plasma 6 (rifà M13/M16 per il portal; Claude + GM)
+
+Ambiente: Ubuntu 26.04.1, Plasma 6.6.6 **Wayland**, xdg-desktop-portal 1.21.1, xdg-desktop-portal-kde
+6.6.6, kglobalacceld 6.6.5. Metodo: lo stesso script usa e getta di M16
+(`~/Scrivania/Claude/scambio-misure/portal_probe.py LOGO+F9 240`), log in
+`~/Scrivania/Claude/scambio-misure/p6/portal-M20.log`; GM preme Meta+F9 due volte.
+
+| Passo | Esito |
+|---|---|
+| Interfaccia | `org.freedesktop.portal.GlobalShortcuts` **versione 2** |
+| `CreateSession` | `Response` 0 subito; `app_id` = `com.anthropic.Claude` (scope systemd del chiamante, come in M16) |
+| `BindShortcuts` con `preferred_trigger = LOGO+F9` | `Response` 0 dopo **12,2 s**, `shortcuts = [("switch", {description, trigger_description: "Meta+F9"})]`; GM non ha visto nessun dialogo (accettazione automatica di KDE) |
+| Tasto premuto | `Activated(session, "switch", 0, {})` e `Deactivated` ≈ 80 ms dopo, due volte su due |
+| `kglobalshortcutsrc` | la voce va nel componente dell'`app_id` (`[com.anthropic.Claude]`, `switch=Meta+F9,Meta+F9,…`) |
+
+Conclusione: su Plasma 6 il portal **lega davvero** la scorciatoia (su 5.27 no, M16). Scambio resta su
+KGlobalAccel quando c'è KDE (decisione 102, confermata dalla 142); il portal è verificato funzionante
+su un backend reale, utile per GNOME.
+
+**Effetto collaterale da non ripetere:** il componente KGlobalAccel del portal è quello dell'`app_id`.
+Lo script girava nello scope dell'app Claude, quindi ha condiviso il componente `com.anthropic.Claude`
+con la scorciatoia dell'app Claude (Ctrl+Alt+Space). Alla chiusura della sessione di prova e
+all'`unregister` della voce `switch`, KGlobalAccel ha tolto **tutto il componente**, anche
+Ctrl+Alt+Space. Ripristinata la voce con `doRegister` + `setShortcut` (flag 4) alle 21:38
+(`kglobalshortcutsrc` di nuovo con `Ctrl+Alt+Space`; predefinito `none` invece di `Ctrl+Alt+Space`);
+il collegamento vivo con l'app Claude torna al suo prossimo riavvio. Le prove future del portal vanno
+lanciate in uno scope proprio (`systemd-run --user --scope --unit=app-<id-di-prova>-<n>.scope`).
+
+## 2026-10-07 — M21: tray su Plasma 6 Wayland (rifà M14 e M11; Claude + GM)
+
+Metodo: Scambio a `0ef473b` (venv Python 3.14), `dbus-monitor` sul nome del demone
+(`~/Scrivania/Claude/scambio-misure/p6/session-mon.log`) mentre GM clicca l'icona e usa il menu; tema
+cambiato da Claude per 5 s (BreezeLight → BreezeDark) per gli screenshot con `spectacle -b -n`.
+
+| Osservazione | Esito |
+|---|---|
+| Clic sinistro | `plasmashell` chiama `ProvideXdgActivationToken` (risposta `UnknownMethod`), poi direttamente `AboutToShow(0)` ed `Event(0, "opened")`: **nessuna chiamata ad `Activate`**, il menu si apre (GM). Plasma 6 rispetta `ItemIsMenu`; la decisione 85 resta per Plasma 5.27 e qui è innocua |
+| «Impostazioni…» | `Event(7, "clicked")` → il demone chiama `org.freedesktop.Application.Activate` su `app.scambio.Scambio.Settings`, attivazione D-Bus in ≈ 0,32 s; finestra in primo piano su Wayland (GM) |
+| `ui.tray` falso / vero | l'icona sparisce subito e ritorna una sola (GM; conferma M17 su Plasma 6) |
+| Icona `on-pc` con Breeze chiaro e scuro | ricolorata dal tema in entrambi (screenshot) |
+
+## 2026-10-07 — M22: doppio switch su BlueZ 5.85 (rifà la verifica della decisione 68; Claude + GM)
+
+Metodo: (a) GM preme Meta+G due volte in meno di un secondo con un video negli occhiali (21:22:04);
+(b) Claude lancia `scambio switch; scambio switch` (21:24:59,974 e 21:25:00,141); journal di Scambio
+e `gdbus monitor --system --dest org.bluez` sul dispositivo (`p6/bluez-signals.log`).
+`dbus-monitor --system` non vede più le chiamate degli altri senza root su 26.04: si osservano solo
+i segnali di BlueZ.
+
+| Prova | Esito |
+|---|---|
+| (a) Meta+G ×2 | `on_pc → releasing` 21:22:04,17 · `releasing → connecting` 06,40 · `on_pc` 08,19 · ripresa negli occhiali 10,25; nessun `connect_failed`; GM: «torna immediatamente agli occhiali» |
+| (b) CLI ×2 | `releasing` 00,04 · `ServicesResolved=false` 02,396 e `Connected=false` 02,405 (orologio del monitor) · `releasing → connecting` 02,398 · `Connected=true` 03,101 · `on_pc` 03,72 · ripresa 06,25 |
+
+Conclusione: la correzione 68 regge su BlueZ 5.85: la presa riparte solo a scollegamento avvenuto,
+nessuna presa letta come fallita. L'ordine `DisconnectResult`/`Connected=false` al millisecondo non
+è osservabile senza root (la transizione e il segnale distano 7 ms su due processi diversi).

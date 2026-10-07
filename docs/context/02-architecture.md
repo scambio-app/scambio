@@ -107,8 +107,9 @@ di PipeWire riagganciandosi ai servizi.
 - ~~`Trusted=yes` e riconnessione spontanea~~ — misurato (M3, 2026-10-04): nessuna presa
   spontanea del PC; il demone non tocca `Trusted`.
 - ~~Supporto reale del portal GlobalShortcuts su Plasma 5.27~~ — misurato (M16, 2026-10-07): non
-  lega scorciatoie; su Plasma si usa KGlobalAccel. Resta da provare GNOME (portal, `app_id` dell'unità
-  systemd) prima della fase 5.
+  lega scorciatoie; su Plasma si usa KGlobalAccel. Su Plasma 6 il portal funziona (M20) ma con KDE si resta su
+  KGlobalAccel (decisione 142). Resta da provare GNOME (portal, `app_id` dell'unità systemd) prima della
+  fase 5.
 - Su GNOME senza estensione AppIndicator il tray non è visibile: la finestra e le notifiche devono
   bastare da sole.
 

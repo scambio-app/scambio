@@ -130,7 +130,8 @@ l'unità systemd, il lanciatore `.desktop` e il file di servizio D-Bus della fin
 
 Metodo `Activate`: risponde **sempre** con l'errore D-Bus `org.freedesktop.DBus.Error.NotSupported`
 e nient'altro (decisione 85): Plasma 5.27 ignora `ItemIsMenu`, al clic sinistro chiama `Activate` e apre
-il menu solo se la chiamata fallisce (M14). Metodi `SecondaryActivate`, `ContextMenu`, `Scroll`:
+il menu solo se la chiamata fallisce (M14). Su Plasma 6 il clic sinistro apre il menu senza chiamare `Activate` (M21): la regola
+resta per Plasma 5.27 (decisione 141). Metodi `SecondaryActivate`, `ContextMenu`, `Scroll`:
 nessun effetto. `ProvideXdgActivationToken` (chiamato da Plasma) non si implementa. Segnali
 `NewIcon`, `NewAttentionIcon`, `NewToolTip`, `NewTitle`, `NewStatus(s)` solo quando il valore
 cambia. Testi del tooltip con `&`, `<`, `>` sostituiti dalle entità (Plasma interpreta il
