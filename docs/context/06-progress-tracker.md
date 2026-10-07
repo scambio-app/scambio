@@ -30,7 +30,7 @@ Vedi `docs/decisions.md`, voci 1–29.
 
 | # | Domanda | Per chi | Quando serve |
 |---|---|---|---|
-| Q1 | Licenza del core: requisito della dec. 124 (niente porting commerciali Mac/Windows); candidate PolyForm Shield o GPL-3.0 + CLA | chat studio di prodotto | prima della pubblicazione |
+| ~~Q1~~ | ~~Licenza~~ — **chiusa 2026-10-07**: GPL-3.0 + CLA (dec. 132) | — | — |
 | ~~Q2~~ | ~~Dominio `scambio.app`~~ — **chiusa 2026-10-04**: acquistato da GM (decisione 17) | — | — |
 | ~~Q3~~ | ~~Riconnessione spontanea~~ — **chiusa 2026-10-04** (M3): mai verso il PC | — | — |
 | ~~Q4~~ | ~~Chiamata GSM~~ — **chiusa 2026-10-05** senza misura: uguale a WhatsApp (decisione 67) | — | — |

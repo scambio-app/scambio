@@ -35,6 +35,13 @@ logica di comportamento verificata con vettori di test condivisi. Le funzioni pr
 (ponte fotocamera, agenti) a pagamento su entrambe. La tabella del §4 resta valida per Linux salvo
 che il «premium» su Linux riguarda solo queste funzioni future.
 
+**Aggiornamento 2026-10-07 (decisioni 130–134, studio di prodotto: https://claude.ai/code/artifact/870bc3cb-6c81-4d8a-88ea-7c84be0fd901).** Titolare Fermich srl.
+Linux: GPL-3.0 + CLA, gratuito, pubblico al rilascio di v1. Mac: abbonamento €2,49/mese o
+€12,99/anno, prova 7 giorni, vendita diretta. Marchio UE figurativo «Scambio» (cl. 9 e 42). Meta solo
+come «Works with…» con disclaimer. Stime (scenario base): ~13 M occhiali Meta attivi; anno 1 ~6.000
+clienti Mac (~€70k lordi; prudente ~€8k, ottimista ~€400k). Nessun concorrente fa il ciclo
+automatico completo presa → instradamento → pausa → rilascio.
+
 ## 4. Modello open-core
 
 | Livello | Contenuto | Licenza |

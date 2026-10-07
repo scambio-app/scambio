@@ -549,3 +549,31 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
      **GPL-3.0 + CLA** (open source, deterrente ma non divieto). In entrambi i casi: CLA dei
      contributori a favore del titolare (per poter riusare il codice nell'app Mac chiusa) e
      registrazione del marchio «Scambio». Consigliato un parere legale prima della pubblicazione.
+
+## 2026-10-07 — Studio di prodotto e go-to-market (fascia 130–149)
+
+Fonte: documento «Scambio — Studio di prodotto e go-to-market» (https://claude.ai/code/artifact/870bc3cb-6c81-4d8a-88ea-7c84be0fd901), con fonti e scenari.
+Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
+
+130. GM — **Mac in abbonamento: €2,49/mese o €12,99/anno**, prova di 7 giorni con carta inserita
+     all'inizio e rinnovo automatico; vendita diretta con Stripe Managed Payments (o Paddle); App
+     Store solo se un prototipo nel sandbox regge; Setapp dopo le prime recensioni. Precisa la
+     dec. 122 (proposta iniziale scartata: €12,99 una tantum con prova di 14 giorni).
+131. GM — **Titolare del prodotto: Fermich srl** (venditore aziendale; account Apple Developer come
+     organizzazione con D-U-N-S, con delega dell'amministratore).
+132. GM — **Core Linux con licenza GPL-3.0 + CLA**, pubblicato al rilascio di Linux v1. Chiude Q1.
+     Rispetto al requisito della dec. 124 la GPL è un **deterrente, non un divieto**: chi porta il
+     codice su Mac/Windows deve pubblicare tutto sotto GPL e non può usare il nome; il CLA consente
+     a Fermich di riusare il codice nell'app Mac chiusa.
+133. GM — **Marchio UE figurativo «Scambio» (nome + logo), classi 9 e 42, a nome Fermich**, dopo
+     ricerca completa su TMview e WIPO Brand Database. Motivo: in italiano «scambio» è parola
+     comune (rischio di marchio descrittivo); il figurativo è più facile da registrare.
+134. Claude — Vincoli emersi dallo studio, validi da subito:
+     (a) **Flathub**: il manifest va scritto a mano da GM e va dichiarato l'uso di codice generato
+     con IA (requisiti Flathub); alternative AUR, .deb, AppImage;
+     (b) **Meta**: solo «Works with Ray-Ban Meta and Oakley Meta glasses» nel testo descrittivo,
+     mai in nome, icona, dominio o titolo dello store; nessun logo Meta; disclaimer di non
+     affiliazione;
+     (c) **marchio**: ricerca TMview/WIPO prima del deposito; rischio percepito «scam» in inglese
+     da tenere presente nel naming del messaggio.
+     Messaggio proposto (non ancora deciso): «L'audio ti segue» / «Your audio follows you».
