@@ -205,8 +205,10 @@ riapertura (nessun segnale apposito).
     --gapplication-service`);
   - `~/.local/share/applications/app.scambio.Scambio.desktop` da
     `design/desktop/app.scambio.Scambio.desktop.in` con `@EXEC@` e `@ICON@` sostituiti (05 §5.1).
-  In entrambi i file il percorso dell'eseguibile va scritto con le regole di quoting della
-  specifica Desktop Entry (virgolette, `\\`, `$`, `` ` ``, `"`; `%` raddoppiato). Nessun
+  Nel `.desktop` il percorso dell'eseguibile segue le regole di quoting della specifica Desktop
+  Entry (virgolette, `\\`, `$`, `` ` ``, `"`; `%` raddoppiato). Nel file di servizio D-Bus,
+  che dbus-daemon interpreta come una riga di shell senza codici `%`, solo virgolette ed escape di
+  `"`, `\\`, `$`, `` ` `` (correzione dopo l'audit 1). Nessun
   `update-desktop-database`. `make uninstall-user` li rimuove. Nessun altro file fuori dalle
   cartelle di Scambio.
 - `make ui`: `blueprint-compiler compile design/ui/settings-window.blp --output
@@ -426,8 +428,8 @@ c'è, si chiede nel report: mai inventare una chiave.
 7. Lingua «Deutsch» → avviso; menu del tray in tedesco subito; riaprendo la finestra è in
    tedesco. Rimettere «Automatica».
 8. Dispositivo: con gli occhiali sul PC l'elenco è bloccato con la spiegazione. (Cambio vero di
-   dispositivo solo se GM ha un'altra cuffia accoppiata: scelta → avviso di riavvio, banner per
-   2–3 s, poi la finestra torna con il nuovo dispositivo; poi tornare agli Oakley.)
+   dispositivo solo se GM ha un'altra cuffia accoppiata: scelta → avviso di riavvio, nessun
+   banner (05 §5.10), dopo pochi istanti la finestra mostra il nuovo dispositivo; poi tornare agli Oakley.)
 9. «Cambia…» apre Impostazioni di sistema sulle scorciatoie di Scambio.
 10. «Apri» del file di configurazione apre l'editor.
 11. «Esci da Scambio» dal tray con la finestra aperta → banner «Scambio non è in esecuzione»;

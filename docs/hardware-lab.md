@@ -383,3 +383,19 @@ confrontato con la copia di M16 alla fine (identico).
 
 Conseguenza per la spec 04: il cambio di dispositivo usa `RestartUnit` sulla propria unità, non
 l'uscita con un codice (corregge la decisione 105 prima del `/goal`).
+
+## 2026-10-07 — M19: Meta+G dopo la rimozione dell'azione khotkeys (GM + Claude)
+
+Metodo: GM elimina l'azione khotkeys «Connetti Oakley» (backup del 7 ottobre in
+`~/.config/khotkeysrc.bak-20261007-scambio`); Claude interroga `action(Meta+G)` di KGlobalAccel,
+lancia `reread_configuration` del modulo khotkeys di `kded5` e, con copia di
+`~/.config/kglobalshortcutsrc` (`.bak-20261007-spec04`), chiama
+`unregister("khotkeys", "{4bc38507-…}")`.
+
+| Prova | Esito |
+|---|---|
+| Azione assente da `khotkeysrc`, anche dopo `reread_configuration` | Meta+G **resta** a khotkeys in KGlobalAccel (voce `{4bc38507-…}=Meta+G,none,Connetti Oakley`) |
+| `unregister` della voce | `true`; `action(Meta+G)` vuoto, voce tolta dal file: Meta+G libero |
+
+Conseguenza: togliere un'azione khotkeys non libera il tasto in KGlobalAccel; serve `unregister`
+della voce. Fino all'installazione della spec 04 Meta+G non fa nulla su `casa`.
