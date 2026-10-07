@@ -36,7 +36,7 @@ logica di comportamento verificata con vettori di test condivisi. Le funzioni pr
 che il «premium» su Linux riguarda solo queste funzioni future.
 
 **Aggiornamento 2026-10-07 (decisioni 130–134, studio di prodotto: https://claude.ai/code/artifact/870bc3cb-6c81-4d8a-88ea-7c84be0fd901).** Titolare Fermich srl.
-Linux: codice pubblico con **PolyForm Shield 1.0.0** + CLA (dec. 135, supera la GPL della 132): gratuito, ma nessuno può farne un prodotto concorrente; pubblico al rilascio di v1; mai chiamarlo «open source». Mac: abbonamento €2,49/mese o
+Linux: **open source GPL-3.0 + CLA** (dec. 137, che supera la 135), gratuito, pubblico al rilascio di v1. Mac e un eventuale Windows a pagamento (dec. 130, 136). Mac: abbonamento €2,49/mese o
 €12,99/anno, prova 7 giorni, vendita diretta. Marchio UE figurativo «Scambio» (cl. 9 e 42). Meta solo
 come «Works with…» con disclaimer. Stime (scenario base): ~13 M occhiali Meta attivi; anno 1 ~6.000
 clienti Mac (~€70k lordi; prudente ~€8k, ottimista ~€400k). Nessun concorrente fa il ciclo

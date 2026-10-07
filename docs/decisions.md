@@ -590,3 +590,10 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      licenza e del CLA rispetto all'obiettivo.
 136. GM — Un eventuale **porting Windows** (oggi escluso, dec. 120) sarà **a pagamento** come il Mac.
      Solo Linux è gratuito.
+
+137. GM — **Supera la 135: si torna a GPL-3.0 + CLA** (come la 132), core Linux open source
+     completo, pubblicato al rilascio di v1. Motivo: il guadagno sta su Mac/Windows a pagamento;
+     nessuno riscrive l'app per risparmiare €2,49 al mese, e un concorrente commerciale non può
+     inglobare codice GPL in un'app chiusa senza pubblicarla tutta. PolyForm Shield aggiungeva poca
+     protezione in più e toglieva i vantaggi dell'open source (fiducia, contributi, visibilità).
+     Restano: CLA (Fermich titolare, per riusare il codice nell'app Mac chiusa) e marchio (dec. 133).

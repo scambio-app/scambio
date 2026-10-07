@@ -30,7 +30,7 @@ Vedi `docs/decisions.md`, voci 1–29.
 
 | # | Domanda | Per chi | Quando serve |
 |---|---|---|---|
-| ~~Q1~~ | ~~Licenza~~ — **chiusa 2026-10-07**: PolyForm Shield 1.0.0 + CLA (dec. 135, supera la 132); parere legale prima della pubblicazione | — | — |
+| ~~Q1~~ | ~~Licenza~~ — **chiusa 2026-10-07**: GPL-3.0 + CLA (dec. 137, supera la 135) | — | — |
 | ~~Q2~~ | ~~Dominio `scambio.app`~~ — **chiusa 2026-10-04**: acquistato da GM (decisione 17) | — | — |
 | ~~Q3~~ | ~~Riconnessione spontanea~~ — **chiusa 2026-10-04** (M3): mai verso il PC | — | — |
 | ~~Q4~~ | ~~Chiamata GSM~~ — **chiusa 2026-10-05** senza misura: uguale a WhatsApp (decisione 67) | — | — |
