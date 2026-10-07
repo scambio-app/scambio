@@ -13,6 +13,7 @@ from dataclasses import dataclass, field, fields
 from pathlib import Path
 
 from scambio.i18n import Translator
+from scambio.paths import user_config_dir
 
 LOG = logging.getLogger(__name__)
 RESUME_DEFAULTS = {"generic": 0, "meta_glasses": 2000}
@@ -156,7 +157,7 @@ def template(language: str = "auto") -> str:
 
 
 def config_path() -> Path:
-    return Path.home() / ".config/scambio/config.toml"
+    return user_config_dir() / "config.toml"
 
 
 def load(path: Path | None = None) -> Config:

@@ -8,6 +8,8 @@ import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from scambio.paths import user_data_dir
+
 LOG = logging.getLogger(__name__)
 
 
@@ -65,7 +67,7 @@ class State:
 
 class Store:
     def __init__(self, path: Path | None = None) -> None:
-        self.path = path or Path.home() / ".local/share/scambio/state.json"
+        self.path = path or user_data_dir() / "state.json"
         self.value = State()
 
     def load(self) -> State:
