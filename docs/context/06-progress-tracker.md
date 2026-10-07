@@ -19,7 +19,8 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 | 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | ✅ verificata 2026-10-07 (569 test; audit 1 di Claude: codice conforme, clic sinistro su Plasma corretto con la decisione 85, d33afa1; prova reale GM passi 0–10 ok; misure M14, M15) |
 | 4 | Spec 04 — scorciatoia globale (KGlobalAccel su Plasma, portal altrove; M16) + finestra impostazioni | in corso: mock e spec approvati da GM il 2026-10-07, implementazione Codex |
 | 5 | Avvio automatico, packaging (Flatpak), prima release | da fare |
-| 6+ | Premium: widget Plasma/GNOME, ponte fotocamera iPhone, agenti | futuro |
+| 6 | **macOS** (dec. 120–122): vettori di test condivisi, app Swift da barra dei menu, firma e vendita diretta | dopo la fase 5 |
+| 7+ | Premium: widget Plasma/GNOME, ponte fotocamera iPhone, agenti | futuro |
 
 ## 3. Decisioni di prodotto prese (non ridiscutere)
 

@@ -518,3 +518,19 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
      SetConfig diagnostica le eccezioni inattese con traceback nel log e
      risponde Failed; se la risposta è già partita prima di RestartUnit,
      registra il problema senza inviare una seconda risposta.
+
+## 2026-10-07 — Orchestratore: piattaforme e modello di business (fascia orchestratore 120–129)
+
+120. GM — **Versione macOS** di Scambio: sì, **dopo Linux v1** (spec 04 + fase 5 packaging).
+     App nativa in Swift (barra dei menu), non Python; adattatori IOBluetooth, CoreAudio,
+     notifiche di sistema per il blocco, hotkey globale. Windows escluso per ora.
+121. Claude — Comportamento unico fra piattaforme: la macchina a stati resta la specifica; i suoi
+     casi di test vanno esportati in un file di vettori condiviso (eventi → azioni) che le due
+     implementazioni (Python e Swift) devono superare. Da preparare prima della fase Mac.
+122. GM — Modello di business (aggiorna le decisioni 2–3): **Linux gratuito e open source**;
+     **Mac a pagamento**, vendita diretta (Developer ID + notarizzazione, pagamenti tipo
+     Paddle/Lemon Squeezy, eventuale Setapp) con funzioni complete; App Store eventualmente in
+     versione ridotta (la pausa dei player di altre app non è fattibile nel sandbox). Le funzioni
+     premium future (ponte fotocamera, agenti) a pagamento su entrambe le piattaforme.
+     Da decidere prima della fase Mac: titolare del prodotto e dell'account Apple Developer
+     (Fermich o GM personale).

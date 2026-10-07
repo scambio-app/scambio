@@ -27,6 +27,14 @@ treno da un binario all'altro.
 - I marchi Meta, Ray-Ban e Oakley non entrano nel nome né nel logo; si citano solo in modo
   descrittivo («compatibile con occhiali Meta»).
 
+## 3b. Piattaforme e modello (aggiornamento 2026-10-07, decisioni 120–122)
+
+Linux resta la prima piattaforma, **gratuita e open source**. Dopo Linux v1 arriva una versione
+**macOS nativa a pagamento** (Swift, vendita diretta; App Store eventualmente ridotto). Stessa
+logica di comportamento verificata con vettori di test condivisi. Le funzioni premium future
+(ponte fotocamera, agenti) a pagamento su entrambe. La tabella del §4 resta valida per Linux salvo
+che il «premium» su Linux riguarda solo queste funzioni future.
+
 ## 4. Modello open-core
 
 | Livello | Contenuto | Licenza |
