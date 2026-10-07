@@ -539,3 +539,13 @@ superata non si cancella: se ne aggiunge una nuova che la cita («supera n. X»)
      scorciatoia «Connetti Oakley» di GM è sparita insieme al servizio e la decisione 99 è superata
      da sola. Meta+G resta solo a Scambio (gruppo `[app.scambio.Scambio]` in
      `kglobalshortcutsrc`). Su casa la «verifica di Plasma 6» del Q6 si fa ora in locale, non in VM.
+
+124. GM — Il **core Linux sarà pubblicato** su un repository pubblico (senza GitHub Actions o altri
+     costi; quando e dove lo definisce lo studio di prodotto), con un **requisito vincolante**:
+     nessuno deve poter prendere il lavoro e **venderlo su Mac o Windows**; l'uso e la
+     redistribuzione su Linux sono liberi. La licenza (Q1) la sceglie la chat di studio di prodotto
+     con un approfondimento, partendo da due candidate: **PolyForm Shield 1.0.0** (source-available,
+     vieta prodotti concorrenti: soddisfa il requisito alla lettera, ma non è «open source» OSI) e
+     **GPL-3.0 + CLA** (open source, deterrente ma non divieto). In entrambi i casi: CLA dei
+     contributori a favore del titolare (per poter riusare il codice nell'app Mac chiusa) e
+     registrazione del marchio «Scambio». Consigliato un parere legale prima della pubblicazione.
