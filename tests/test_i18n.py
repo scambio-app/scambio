@@ -65,8 +65,8 @@ def test_language(env, expected):
 def test_fallback_capitalization_and_values():
     tr = Translator("it", strict=True).tr
     assert tr("tray-header-released", device="").startswith("Il dispositivo")
-    assert tr("notify-priority-on-title").startswith("Priorità iPhone")
-    assert Translator("en").tr("notify-priority-on-title").startswith("iPhone")
+    assert tr("notify-priority-on-title").startswith("Priorità telefono")
+    assert Translator("en").tr("notify-priority-on-title").startswith("Phone")
     assert "il dispositivo" in tr("notify-priority-on-body", device="")
     assert tr("tray-header-released", device="A_&<B>").startswith("A_&<B>")
 

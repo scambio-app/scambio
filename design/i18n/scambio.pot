@@ -78,6 +78,7 @@ msgstr ""
 msgid "tray-detail-unavailable"
 msgstr ""
 
+#. Spec 05: la finestra sceglie il dispositivo; il percorso del file cambia nel Flatpak.
 msgid "tray-detail-not-configured"
 msgstr ""
 
@@ -431,5 +432,17 @@ msgid "config-ui-notifications"
 msgstr ""
 
 msgid "config-backend-header"
+msgstr ""
+
+#. Motivo mostrato dal portal Background (Flatpak, spec 05).
+msgid "background-reason"
+msgstr ""
+
+#. Secondo demone che non ottiene il nome (spec 05).
+msgid "daemon-already-running"
+msgstr ""
+
+#. scambio --version (spec 05).
+msgid "cli-version-help"
 msgstr ""
 

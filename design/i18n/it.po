@@ -21,11 +21,11 @@ msgstr "il dispositivo"
 #. Prima riga del menu e del tooltip.
 #. segnaposto: {device}
 msgid "tray-header-released"
-msgstr "{device} — libero per l’iPhone"
+msgstr "{device} — libero per il telefono"
 
 #. segnaposto: {device}
 msgid "tray-header-priority"
-msgstr "{device} — riservato all’iPhone"
+msgstr "{device} — riservato al telefono"
 
 #. segnaposto: {device}
 msgid "tray-header-connecting"
@@ -37,7 +37,7 @@ msgstr "{device} — sul PC"
 
 #. segnaposto: {device}
 msgid "tray-header-releasing"
-msgstr "{device} — ritorno all’iPhone…"
+msgstr "{device} — ritorno al telefono…"
 
 #. segnaposto: {device}
 msgid "tray-header-unavailable"
@@ -62,15 +62,15 @@ msgstr "Audio del PC in riproduzione"
 #. Menu: minuti arrotondati per eccesso, calcolati all’apertura.
 #. segnaposto: {minutes}
 msgid "tray-detail-idle"
-msgstr "Torna all’iPhone tra {minutes} min"
+msgstr "Torna al telefono tra {minutes} min"
 
 msgid "tray-detail-idle-soon"
-msgstr "Torna all’iPhone tra meno di un minuto"
+msgstr "Torna al telefono tra meno di un minuto"
 
 #. Tooltip: ora assoluta HH:MM, così non invecchia.
 #. segnaposto: {time}
 msgid "tray-detail-idle-at"
-msgstr "Torna all’iPhone alle {time}"
+msgstr "Torna al telefono alle {time}"
 
 msgid "tray-detail-on-pc"
 msgstr "Audio del PC sul dispositivo"
@@ -78,8 +78,9 @@ msgstr "Audio del PC sul dispositivo"
 msgid "tray-detail-unavailable"
 msgstr "Bluetooth spento o dispositivo fuori portata"
 
+#. Spec 05: la finestra sceglie il dispositivo; il percorso del file cambia nel Flatpak.
 msgid "tray-detail-not-configured"
-msgstr "Indica l’indirizzo in ~/.config/scambio/config.toml"
+msgstr "Sceglilo nelle Impostazioni"
 
 #. Mostrato finché l’errore non è visto (05 §5.4).
 msgid "tray-detail-error-connect"
@@ -98,10 +99,10 @@ msgid "tray-action-to-pc"
 msgstr "Passa al PC"
 
 msgid "tray-action-to-phone"
-msgstr "Lascia all’iPhone"
+msgstr "Lascia al telefono"
 
 msgid "tray-action-priority"
-msgstr "Priorità iPhone"
+msgstr "Priorità telefono"
 
 msgid "tray-action-settings"
 msgstr "Impostazioni…"
@@ -128,7 +129,7 @@ msgid "notify-release-failed-title"
 msgstr "{device} resta sul PC"
 
 msgid "notify-release-failed-body"
-msgstr "Non sono riuscito a lasciarlo all’iPhone."
+msgstr "Non sono riuscito a lasciarlo al telefono."
 
 #. segnaposto: {device}
 msgid "notify-unavailable-title"
@@ -158,28 +159,28 @@ msgstr "Senza, niente passaggio automatico; lo switch funziona. Controlla pactl 
 #. Switch partito fuori dal tray (scorciatoia, CLI).
 #. segnaposto: {device}
 msgid "notify-switch-to-phone-title"
-msgstr "{device} lasciato all’iPhone"
+msgstr "{device} lasciato al telefono"
 
 msgid "notify-switch-to-phone-body"
-msgstr "Priorità iPhone attiva: il PC non lo riprenderà da solo."
+msgstr "Priorità telefono attiva: il PC non lo riprenderà da solo."
 
 #. segnaposto: {device}
 msgid "notify-switch-to-pc-title"
 msgstr "{device} sul PC"
 
 msgid "notify-switch-to-pc-body"
-msgstr "Priorità iPhone disattivata."
+msgstr "Priorità telefono disattivata."
 
 #. Priorità cambiata fuori dal tray senza switch (es. scambio priority on).
 msgid "notify-priority-on-title"
-msgstr "Priorità iPhone attiva"
+msgstr "Priorità telefono attiva"
 
 #. segnaposto: {device}
 msgid "notify-priority-on-body"
 msgstr "Il PC non prenderà {device} in automatico."
 
 msgid "notify-priority-off-title"
-msgstr "Priorità iPhone disattivata"
+msgstr "Priorità telefono disattivata"
 
 #. segnaposto: {device}
 msgid "notify-priority-off-body"
@@ -224,7 +225,7 @@ msgstr "Nessuno"
 
 #. Sottotitolo: elenco bloccato mentre il dispositivo è sul PC o in passaggio.
 msgid "settings-device-busy"
-msgstr "Per cambiarlo, prima lascialo all’iPhone"
+msgstr "Per cambiarlo, prima lascialo al telefono"
 
 msgid "settings-device-empty"
 msgstr "Nessun dispositivo audio accoppiato: accoppialo nelle impostazioni Bluetooth"
@@ -234,7 +235,7 @@ msgid "settings-device-restarting"
 msgstr "Scambio si riavvia con il nuovo dispositivo"
 
 msgid "settings-release-title"
-msgstr "Torna all’iPhone dopo (minuti)"
+msgstr "Torna al telefono dopo (minuti)"
 
 msgid "settings-release-subtitle"
 msgstr "Di silenzio sul PC. Subito al blocco dello schermo e in sospensione"
@@ -246,7 +247,7 @@ msgid "settings-shortcut-title"
 msgstr "Switch intelligente"
 
 msgid "settings-shortcut-subtitle"
-msgstr "Sposta il dispositivo e attiva o toglie la Priorità iPhone"
+msgstr "Sposta il dispositivo e attiva o toglie la Priorità telefono"
 
 #. Al posto del tasto quando la scorciatoia non ha un tasto.
 msgid "settings-shortcut-unbound"
@@ -277,7 +278,7 @@ msgid "settings-notifications"
 msgstr "Notifiche"
 
 msgid "settings-notifications-subtitle"
-msgstr "Solo errori e cambi della Priorità iPhone fatti da fuori"
+msgstr "Solo errori e cambi della Priorità telefono fatti da fuori"
 
 msgid "settings-language"
 msgstr "Lingua"
@@ -323,7 +324,7 @@ msgstr "Scambio"
 
 #. Nome dell’azione nelle impostazioni delle scorciatoie del desktop (KDE e portal).
 msgid "shortcut-switch-name"
-msgstr "Switch intelligente (PC ↔ iPhone)"
+msgstr "Switch intelligente (PC ↔ telefono)"
 
 #. scambio settings senza GTK 4/libadwaita (spec 04).
 msgid "cli-error-gtk-missing"
@@ -349,10 +350,10 @@ msgid "cli-json-help"
 msgstr "Uscita in JSON"
 
 msgid "cli-switch-help"
-msgstr "Sposta il dispositivo fra PC e iPhone"
+msgstr "Sposta il dispositivo fra PC e telefono"
 
 msgid "cli-priority-help"
-msgstr "Mostra o cambia la Priorità iPhone"
+msgstr "Mostra o cambia la Priorità telefono"
 
 msgid "cli-not-running"
 msgstr "Scambio non è in esecuzione: avvialo con systemctl --user start scambio"
@@ -380,7 +381,7 @@ msgstr "Lascia il dispositivo al telefono prima della sospensione"
 
 #. Commenti del modello di config.toml (decisione 84), nella lingua del momento in cui il file viene creato.
 msgid "config-header"
-msgstr "Configurazione di Scambio. Solo dispositivi già accoppiati. Dopo una modifica: systemctl --user reload scambio"
+msgstr "Configurazione di Scambio. Solo dispositivi già accoppiati. Dopo una modifica: esci da Scambio e riaprilo dal menu"
 
 msgid "config-device-address"
 msgstr "Indirizzo Bluetooth del dispositivo (XX:XX:XX:XX:XX:XX)"
@@ -432,4 +433,16 @@ msgstr "Notifiche del desktop"
 
 msgid "config-backend-header"
 msgstr "Tempi tecnici facoltativi; i default vengono dalle misure"
+
+#. Motivo mostrato dal portal Background (Flatpak, spec 05).
+msgid "background-reason"
+msgstr "Scambio si avvia all’accesso per passare l’audio fra i tuoi dispositivi"
+
+#. Secondo demone che non ottiene il nome (spec 05).
+msgid "daemon-already-running"
+msgstr "Scambio è già in esecuzione da un’altra installazione: questa si ferma"
+
+#. scambio --version (spec 05).
+msgid "cli-version-help"
+msgstr "Mostra la versione ed esce"
 

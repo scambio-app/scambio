@@ -21,11 +21,11 @@ msgstr "das Gerät"
 #. Prima riga del menu e del tooltip.
 #. segnaposto: {device}
 msgid "tray-header-released"
-msgstr "{device} — frei für das iPhone"
+msgstr "{device} — frei für das Handy"
 
 #. segnaposto: {device}
 msgid "tray-header-priority"
-msgstr "{device} — für das iPhone reserviert"
+msgstr "{device} — für das Handy reserviert"
 
 #. segnaposto: {device}
 msgid "tray-header-connecting"
@@ -37,7 +37,7 @@ msgstr "{device} — am PC"
 
 #. segnaposto: {device}
 msgid "tray-header-releasing"
-msgstr "{device} — zurück zum iPhone…"
+msgstr "{device} — zurück zum Handy…"
 
 #. segnaposto: {device}
 msgid "tray-header-unavailable"
@@ -62,15 +62,15 @@ msgstr "PC-Audio läuft"
 #. Menu: minuti arrotondati per eccesso, calcolati all’apertura.
 #. segnaposto: {minutes}
 msgid "tray-detail-idle"
-msgstr "In {minutes} Min. zurück zum iPhone"
+msgstr "In {minutes} Min. zurück zum Handy"
 
 msgid "tray-detail-idle-soon"
-msgstr "In weniger als einer Minute zurück zum iPhone"
+msgstr "In weniger als einer Minute zurück zum Handy"
 
 #. Tooltip: ora assoluta HH:MM, così non invecchia.
 #. segnaposto: {time}
 msgid "tray-detail-idle-at"
-msgstr "Um {time} zurück zum iPhone"
+msgstr "Um {time} zurück zum Handy"
 
 msgid "tray-detail-on-pc"
 msgstr "PC-Audio über das Gerät"
@@ -78,8 +78,9 @@ msgstr "PC-Audio über das Gerät"
 msgid "tray-detail-unavailable"
 msgstr "Bluetooth aus oder Gerät außer Reichweite"
 
+#. Spec 05: la finestra sceglie il dispositivo; il percorso del file cambia nel Flatpak.
 msgid "tray-detail-not-configured"
-msgstr "Adresse in ~/.config/scambio/config.toml eintragen"
+msgstr "In den Einstellungen auswählen"
 
 #. Mostrato finché l’errore non è visto (05 §5.4).
 msgid "tray-detail-error-connect"
@@ -98,10 +99,10 @@ msgid "tray-action-to-pc"
 msgstr "Zum PC holen"
 
 msgid "tray-action-to-phone"
-msgstr "Dem iPhone überlassen"
+msgstr "Dem Handy überlassen"
 
 msgid "tray-action-priority"
-msgstr "iPhone-Vorrang"
+msgstr "Handy-Vorrang"
 
 msgid "tray-action-settings"
 msgstr "Einstellungen…"
@@ -128,7 +129,7 @@ msgid "notify-release-failed-title"
 msgstr "{device} bleibt am PC"
 
 msgid "notify-release-failed-body"
-msgstr "Rückgabe an das iPhone fehlgeschlagen."
+msgstr "Rückgabe an das Handy fehlgeschlagen."
 
 #. segnaposto: {device}
 msgid "notify-unavailable-title"
@@ -158,28 +159,28 @@ msgstr "Ohne sie kein automatischer Wechsel; der manuelle Wechsel funktioniert. 
 #. Switch partito fuori dal tray (scorciatoia, CLI).
 #. segnaposto: {device}
 msgid "notify-switch-to-phone-title"
-msgstr "{device} dem iPhone überlassen"
+msgstr "{device} dem Handy überlassen"
 
 msgid "notify-switch-to-phone-body"
-msgstr "iPhone-Vorrang an: Der PC holt es nicht selbst zurück."
+msgstr "Handy-Vorrang an: Der PC holt es nicht selbst zurück."
 
 #. segnaposto: {device}
 msgid "notify-switch-to-pc-title"
 msgstr "{device} am PC"
 
 msgid "notify-switch-to-pc-body"
-msgstr "iPhone-Vorrang aus."
+msgstr "Handy-Vorrang aus."
 
 #. Priorità cambiata fuori dal tray senza switch (es. scambio priority on).
 msgid "notify-priority-on-title"
-msgstr "iPhone-Vorrang an"
+msgstr "Handy-Vorrang an"
 
 #. segnaposto: {device}
 msgid "notify-priority-on-body"
 msgstr "Der PC übernimmt {device} nicht automatisch."
 
 msgid "notify-priority-off-title"
-msgstr "iPhone-Vorrang aus"
+msgstr "Handy-Vorrang aus"
 
 #. segnaposto: {device}
 msgid "notify-priority-off-body"
@@ -224,7 +225,7 @@ msgstr "Keines"
 
 #. Sottotitolo: elenco bloccato mentre il dispositivo è sul PC o in passaggio.
 msgid "settings-device-busy"
-msgstr "Zum Wechseln zuerst dem iPhone überlassen"
+msgstr "Zum Wechseln zuerst dem Handy überlassen"
 
 msgid "settings-device-empty"
 msgstr "Kein gekoppeltes Audiogerät: in den Bluetooth-Einstellungen koppeln"
@@ -234,7 +235,7 @@ msgid "settings-device-restarting"
 msgstr "Scambio startet mit dem neuen Gerät neu"
 
 msgid "settings-release-title"
-msgstr "Zurück zum iPhone nach (Minuten)"
+msgstr "Zurück zum Handy nach (Minuten)"
 
 msgid "settings-release-subtitle"
 msgstr "Stille am PC. Sofort bei Bildschirmsperre und Standby"
@@ -246,7 +247,7 @@ msgid "settings-shortcut-title"
 msgstr "Intelligenter Wechsel"
 
 msgid "settings-shortcut-subtitle"
-msgstr "Wechselt das Gerät und schaltet den iPhone-Vorrang ein oder aus"
+msgstr "Wechselt das Gerät und schaltet den Handy-Vorrang ein oder aus"
 
 #. Al posto del tasto quando la scorciatoia non ha un tasto.
 msgid "settings-shortcut-unbound"
@@ -277,7 +278,7 @@ msgid "settings-notifications"
 msgstr "Benachrichtigungen"
 
 msgid "settings-notifications-subtitle"
-msgstr "Nur Fehler und von außen geänderter iPhone-Vorrang"
+msgstr "Nur Fehler und von außen geänderter Handy-Vorrang"
 
 msgid "settings-language"
 msgstr "Sprache"
@@ -323,7 +324,7 @@ msgstr "Scambio"
 
 #. Nome dell’azione nelle impostazioni delle scorciatoie del desktop (KDE e portal).
 msgid "shortcut-switch-name"
-msgstr "Intelligenter Wechsel (PC ↔ iPhone)"
+msgstr "Intelligenter Wechsel (PC ↔ Handy)"
 
 #. scambio settings senza GTK 4/libadwaita (spec 04).
 msgid "cli-error-gtk-missing"
@@ -349,10 +350,10 @@ msgid "cli-json-help"
 msgstr "Ausgabe als JSON"
 
 msgid "cli-switch-help"
-msgstr "Gerät zwischen PC und iPhone wechseln"
+msgstr "Gerät zwischen PC und Handy wechseln"
 
 msgid "cli-priority-help"
-msgstr "iPhone-Vorrang anzeigen oder ändern"
+msgstr "Handy-Vorrang anzeigen oder ändern"
 
 msgid "cli-not-running"
 msgstr "Scambio läuft nicht: mit systemctl --user start scambio starten"
@@ -380,7 +381,7 @@ msgstr "Gerät vor dem Standby an das Telefon zurückgeben"
 
 #. Commenti del modello di config.toml (decisione 84), nella lingua del momento in cui il file viene creato.
 msgid "config-header"
-msgstr "Scambio-Konfiguration. Nur bereits gekoppelte Geräte. Nach einer Änderung: systemctl --user reload scambio"
+msgstr "Scambio-Konfiguration. Nur bereits gekoppelte Geräte. Nach einer Änderung: Scambio beenden und über das Menü neu öffnen"
 
 msgid "config-device-address"
 msgstr "Bluetooth-Adresse des Geräts (XX:XX:XX:XX:XX:XX)"
@@ -432,4 +433,16 @@ msgstr "Desktop-Benachrichtigungen"
 
 msgid "config-backend-header"
 msgstr "Optionale technische Zeiten; die Standardwerte stammen aus Messungen"
+
+#. Motivo mostrato dal portal Background (Flatpak, spec 05).
+msgid "background-reason"
+msgstr "Scambio startet bei der Anmeldung, damit es dein Audio zwischen deinen Geräten weitergeben kann"
+
+#. Secondo demone che non ottiene il nome (spec 05).
+msgid "daemon-already-running"
+msgstr "Scambio läuft bereits aus einer anderen Installation; diese hier wird beendet"
+
+#. scambio --version (spec 05).
+msgid "cli-version-help"
+msgstr "Version anzeigen und beenden"
 

@@ -101,7 +101,7 @@ def test_switch_and_toggle(design, state, configured, priority):
     )
     assert model.menu[4]["enabled"] == (configured and state != "unavailable")
     assert model.menu[4]["label"] == (
-        "Hand back to the iPhone" if state in {"on_pc", "connecting"} else "Move to PC"
+        "Hand back to the phone" if state in {"on_pc", "connecting"} else "Move to PC"
     )
     assert type(model.menu[5]["toggle-state"]) is int
     assert model.menu[5]["toggle-state"] == int(priority)
