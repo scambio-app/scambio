@@ -420,6 +420,31 @@ C. (facoltativa) **VM Ubuntu 24.04 GNOME, .deb**: installazione e avvio.
 
 ## 7. Note di revisione (Claude, dopo la consegna)
 
+### Audit 1 (2026-10-08, chat di rilascio)
+
+Base: `b467bce` (scambio) e `50897c7` (scambio-site). Report di Codex completo e onesto sui limiti;
+792 test, nessun salto; pacchetti e repository verificati in contenitori Ubuntu 24.04 / Debian 13 e
+in un'installazione Flatpak temporanea; CPU 0 a riposo per 10 minuti in entrambi i formati.
+Tray su connessione dedicata rimisurato su Plasma 6 (M35): conforme.
+
+Da correggere (Codex, audit 1):
+1. **Stream fantasma di speech-dispatcher** (M35): `sd_dummy` / `speech-dispatcher-dummy` conta come
+   audio e fa prendere gli occhiali appena tornano disponibili. Aggiungerli ai valori predefiniti di
+   `audio.ignore_apps` (e al modello di `config.toml`), con test.
+2. **Script del `.deb`** (`postinst`, `prerm`): `systemctl --global` solo se `/usr/bin/systemctl`
+   esiste (sistemi senza systemd), con test in contenitore senza systemd.
+3. **Migrazione D1 nel repository sbagliato**: `migrations_dir = "../scambio/packaging/site"` lega il
+   deploy del sito al checkout di Scambio. Spostare `0003_double_opt_in.sql` in
+   `scambio-site/migrations/` (cartella già esistente) e ripristinare `migrations_dir` predefinito.
+   Errore delle istruzioni di Claude, che non elencavano quella cartella fra i file assegnati.
+4. **Binding email di produzione**: `[[send_email]]` senza `remote = false`, con
+   `allowed_sender_addresses = ["hello@scambio.app"]` (Cloudflare Email Service). L'abilitazione del
+   dominio la fa Claude dalla dashboard.
+
+Fatti da Claude: FAQ definitive del sito (`67d950e` in scambio-site), contratto UI aggiornato col
+confine di fiducia. Restano a Claude: screenshot reali (dalla prova B), onboarding di Email Service,
+riscrittura della storia (164, 166), push e deploy dopo il sì di GM.
+
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
 Riletta il 2026-10-07 prima della consegna. Cosa correggerei o terrei d'occhio:

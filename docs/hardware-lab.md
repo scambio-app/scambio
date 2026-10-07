@@ -547,3 +547,21 @@ alla copia in `fase5/`, non al repo.
 | `flatpak run … settings` | la finestra GTK4 si apre su Wayland ed è identica a quella della venv; senza `--device=dri` Mesa avvisa e ripiega sul rendering software |
 | File di servizio D-Bus in `/app/share/dbus-1/services/` | Flatpak esporta **sia** `app.scambio.Scambio.service` **sia** `app.scambio.Scambio.Settings.service` (Exec riscritto in `flatpak run --command=/app/bin/scambio …`) |
 | Attivazione di `app.scambio.Scambio.Settings` subito dopo l'installazione | `ServiceUnknown`: le cartelle `exports` di Flatpak entrano in `XDG_DATA_DIRS` solo dopo un nuovo accesso. Con l'installazione di sviluppo presente vince il file in `~/.local/share/dbus-1/services/` (si è aperta la finestra della venv): **le due installazioni non vanno tenute insieme** |
+
+## 2026-10-08 — M35: tray su connessione dedicata (decisione 154) e flusso audio fantasma (Claude, senza GM)
+
+Metodo: servizio utente di casa riavviato a `b467bce` (venv editabile, quindi codice della spec 05) alle
+01:12; `RegisteredStatusNotifierItems` prima e dopo `SetConfig({"ui.tray": false})` / `true`; journal di
+Scambio e `pactl -f json list sink-inputs`.
+
+| Prova | Esito |
+|---|---|
+| Registrazione del tray | voce `:1.3524/StatusNotifierItem` (nome unico, nessun nome ben noto) |
+| `ui.tray = false` | la voce sparisce subito (connessione chiusa) |
+| `ui.tray = true` | torna **una sola** voce, su una connessione nuova (`:1.3532`) |
+| Avvio con occhiali non sul PC | `released → connecting (audio_started)` e poi `connect_failed` dopo 5 s (occhiali spenti o nella custodia) |
+| Causa dell'`audio_started` | uno stream sempre aperto di `speech-dispatcher-dummy` (binario `sd_dummy`, attivo dalle 11:45, non in pausa): conta come audio del PC |
+
+Conclusione: la decisione 154 funziona su Plasma 6. Lo stream silenzioso di speech-dispatcher, comune su
+Ubuntu, farebbe prendere gli occhiali al PC ogni volta che tornano disponibili: va escluso di default
+(correzione chiesta a Codex dopo l'audit 1).
