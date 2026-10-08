@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <style id="current-color-scheme" type="text/css">.ColorScheme-Text{color:#232629}.ColorScheme-NegativeText{color:#da4453}</style>
+  <path class="ColorScheme-Text" d="M2 7H3C3.443 7 3.864 6.804 4.149 6.464L6.007 4.25C6.672 3.458 7.654 3 8.688 3H9V5H8.688C8.245 5 7.824 5.196 7.539 5.536L5.681 7.75C5.236 8.28 4.649 8.66 4 8.854V9H2C1.448 9 1 8.552 1 8C1 7.448 1.448 7 2 7Z" fill="currentColor"/>
+  <path class="ColorScheme-Text" d="M5.779 7.986C6.033 8.136 6.267 8.317 6.475 8.525L8.218 10.268C8.687 10.737 9.322 11 9.985 11H12C12.276 11 12.5 11.224 12.5 11.5C12.5 11.776 12.276 12 12 12H9.985C9.057 12 8.166 11.631 7.51 10.975L5.768 9.232C5.619 9.083 5.452 8.954 5.271 8.847C5.041 8.703 4.967 8.402 5.105 8.169C5.243 7.935 5.542 7.854 5.779 7.986Z" fill="currentColor" opacity="0.5"/>
+  <path class="ColorScheme-Text" d="M11 1H15C15.552 1 16 1.448 16 2V5C16 5.552 15.552 6 15 6H14V7H14.5C14.776 7 15 7.224 15 7.5C15 7.776 14.776 8 14.5 8H11.5C11.224 8 11 7.776 11 7.5C11 7.224 11.224 7 11.5 7H12V6H11C10.448 6 10 5.552 10 5V2C10 1.448 10.448 1 11 1ZM11 2V5H15V2Z" fill="currentColor"/>
+</svg>

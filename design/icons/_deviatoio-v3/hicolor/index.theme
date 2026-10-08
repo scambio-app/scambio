@@ -1,0 +1,63 @@
+[Icon Theme]
+Name=Hicolor
+Comment=Scambio icons (searched only through IconThemePath)
+Directories=16x16/status,22x22/status,16x16/apps,22x22/apps,24x24/apps,32x32/apps,48x48/apps,scalable/status,scalable/apps,symbolic/apps
+
+# Disegni ritoccati per griglia; le cartelle a misura fissa stanno prima degli scalabili,
+# così a 16, 22, 24, 32 e 48 px si usano i file nitidi. Alle altre misure (20, 28, 44 px…)
+# si usa lo scalabile.
+[16x16/status]
+Size=16
+Type=Fixed
+Context=Status
+
+[22x22/status]
+Size=22
+Type=Fixed
+Context=Status
+
+[16x16/apps]
+Size=16
+Type=Fixed
+Context=Applications
+
+[22x22/apps]
+Size=22
+Type=Fixed
+Context=Applications
+
+[24x24/apps]
+Size=24
+Type=Fixed
+Context=Applications
+
+[32x32/apps]
+Size=32
+Type=Fixed
+Context=Applications
+
+[48x48/apps]
+Size=48
+Type=Fixed
+Context=Applications
+
+[scalable/status]
+Size=16
+MinSize=8
+MaxSize=512
+Type=Scalable
+Context=Status
+
+[scalable/apps]
+Size=128
+MinSize=56
+MaxSize=512
+Type=Scalable
+Context=Applications
+
+[symbolic/apps]
+Size=16
+MinSize=8
+MaxSize=512
+Type=Scalable
+Context=Applications

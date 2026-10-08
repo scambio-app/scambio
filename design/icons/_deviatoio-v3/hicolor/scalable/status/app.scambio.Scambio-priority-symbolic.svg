@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <style id="current-color-scheme" type="text/css">.ColorScheme-Text{color:#232629}.ColorScheme-NegativeText{color:#da4453}</style>
+  <path class="ColorScheme-Text" d="M2 7H4V7.146C4.649 7.34 5.236 7.72 5.681 8.25L7.539 10.464C7.668 10.618 7.825 10.743 8 10.833V12.932C7.228 12.777 6.522 12.364 6.007 11.75L4.149 9.536C3.864 9.196 3.443 9 3 9H2C1.448 9 1 8.552 1 8C1 7.448 1.448 7 2 7Z" fill="currentColor"/>
+  <path class="ColorScheme-Text" d="M5.271 7.153C5.452 7.046 5.619 6.917 5.768 6.768L7.51 5.025C7.928 4.607 8.442 4.305 9 4.142V5.202C8.711 5.326 8.445 5.505 8.218 5.732L6.475 7.475C6.267 7.683 6.033 7.864 5.779 8.014C5.542 8.146 5.243 8.065 5.105 7.831C4.967 7.598 5.041 7.297 5.271 7.153Z" fill="currentColor" opacity="0.5"/>
+  <path class="ColorScheme-Text" d="M10 9H12A1 1 0 0 1 13 10V15A1 1 0 0 1 12 16H10A1 1 0 0 1 9 15V10A1 1 0 0 1 10 9ZM10 10V14H12V10Z" fill="currentColor"/>
+  <path class="ColorScheme-Text" d="M11 4V3C11 1.895 11.895 1 13 1C14.105 1 15 1.895 15 3V4C15.552 4 16 4.448 16 5V7C16 7.552 15.552 8 15 8H11C10.448 8 10 7.552 10 7V5C10 4.448 10.448 4 11 4ZM12 4H14V3C14 2.448 13.552 2 13 2C12.448 2 12 2.448 12 3V4Z" fill="currentColor"/>
+</svg>
