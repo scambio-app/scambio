@@ -146,6 +146,11 @@ Nessuna dipendenza nuova.
 
 ## 7. Note di revisione (Claude, dopo la consegna)
 
+2026-10-08, orchestratore. Audit di `1f39ff9`…`8f5ee56` e del report 06: regex e precedenze come
+da §3.1; asset di design inclusi invariati (SHA256 nel report); 848 test verdi; candidata
+`linux-1-0-1-rc1` verificata con upgrade dalla vera 1.0.0 sigillata; 1.0.0 intatta; nessuna
+pubblicazione. Esito: **conforme**, in attesa della prova reale di GM.
+
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
 1. **Rischio regex «meta»:** con `\bmeta\b` un dispositivo chiamato per esempio «Meta Quest»
