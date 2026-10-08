@@ -640,6 +640,9 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
 152. GM — **Prima release pubblica: 1.0.0**, a condizione che passi la prova di installazione pulita
      (casa + VM con un'altra distro e GNOME). Da 1.0.0 l'API D-Bus `app.scambio.Scambio1` e il
      formato di `config.toml` seguono SemVer.
+     **Aggiornamento 2026-10-08 (GM):** niente prova di installazione pulita prima della pubblicazione;
+     le prove si fanno in produzione («il software funziona, l'abbiamo provato e straprovato»). La 1.0.0 è
+     uscita il 2026-10-08 dopo le verifiche automatiche in contenitori e l'audit di Claude.
 153. Claude — **Flatpak fattibile** (M30–M34): runtime `org.gnome.Platform` 51 senza moduli aggiuntivi
      (`pactl` incluso), permessi statici minimi: `--share=ipc`, `--socket=wayland`,
      `--socket=fallback-x11`, `--device=dri`, `--socket=pulseaudio`, `--system-talk-name=org.bluez`,
@@ -709,13 +712,21 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      su tutta la storia di entrambi i repository (audit S14).
 167. GM — **Doppio opt-in della lista d'attesa con la release** (completa la 139–140): conta solo chi
      conferma dal link ricevuto da `hello@scambio.app`; invio con Cloudflare Email Sending dal Worker.
+     **Aggiornamento 2026-10-08:** Email Sending richiede il piano Workers Paid (≈5 $/mese), non attivo
+     sull'account. In produzione `DOUBLE_OPT_IN = "false"`: le iscrizioni si salvano come `unconfirmed`
+     (consenso registrato, nessuna email). Per attivare il doppio opt-in: GM acquista Workers Paid,
+     Claude abilita il dominio in Email Service, ripristina `[[send_email]]` e mette il flag a `"true"`;
+     prima di scrivere alla lista, chiedere conferma alle voci `unconfirmed`/`legacy_unconfirmed`.
 168. Claude — **Esito dell'audit di sicurezza** (`docs/verification/05/security-audit.md`, Codex con
      Daybreak Blue, 14 punti, nessuno critico). Si correggono prima della 1.0.0: S2–S6, S8, S10–S14 e
      in parte S7 e S9 (spec 05 §3.1.10). Rischi accettati:
      (a) S1 — chiave: primaria **offline** (backup di GM, poi tolta da casa), sulla macchina di build
      solo una sottochiave di firma Ed25519 senza passphrase che **scade il 2028-10-06**, unica per apt e
      Flatpak; revoca pronta nel backup. Chiavi separate per apt e Flatpak non danno protezione reale
-     con un solo build host;
+     con un solo build host. **Stato al 2026-10-08:** la primaria è ancora nel keyring di casa (la
+     rimozione automatica è stata bloccata dal sistema di permessi); il backup è nella cartella
+     `scambio-chiave-BACKUP-OFFLINE` sulla Scrivania, coperta dal backup notturno sul NAS (GM). Da fare a
+     mano: togliere la primaria dal keyring e spostare la cartella offline;
      (b) S3 — niente `Valid-Until` nel `Release`: obbligherebbe a rifirmare il repository a scadenza fissa,
      e un ritardo bloccherebbe `apt update` a tutti; il rischio «freeze» richiede comunque il sito
      compromesso;

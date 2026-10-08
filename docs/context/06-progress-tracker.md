@@ -18,7 +18,7 @@ posizionamento, prime misure hardware; repository creato su `casa` (solo locale)
 | 2 | Spec 02 — pausa MPRIS durante presa e rilascio (decisioni 50–56; niente muto, M10); l'instradamento e il rilascio a tempo sono già nella spec 01 | ✅ verificata 2026-10-05 (418 test, prova reale GM ok dopo la correzione 68; annuncio misurato M11b; Q4 chiusa senza misura, decisione 67) |
 | 3 | Mock UI approvato → design in `design/` → spec 03 tray + notifiche | ✅ verificata 2026-10-07 (569 test; audit 1 di Claude: codice conforme, clic sinistro su Plasma corretto con la decisione 85, d33afa1; prova reale GM passi 0–10 ok; misure M14, M15) |
 | 4 | Spec 04 — scorciatoia globale (KGlobalAccel su Plasma, portal altrove; M16) + finestra impostazioni | ✅ verificata 2026-10-07 (731 test; audit 1 corretto; prova reale GM ok su Ubuntu 26.04 / Plasma 6.6.6 Wayland; misure M16–M22) |
-| 5 | Spec 05 — packaging (`.deb` + repo apt «come Chrome», Flatpak da repo proprio), GitHub `scambio-app`, release 1.0.0 | in corso: spec approvata, implementata (Codex, 804 test) e auditata (audit 1 corretto); misure M30–M35, decisioni 150–169; manca la prova di installazione di GM (A casa `.deb`, B VM Fedora/GNOME Flatpak) e la pubblicazione |
+| 5 | Spec 05 — packaging (`.deb` + repo apt «come Chrome», Flatpak da repo proprio), GitHub `scambio-app`, release 1.0.0 | ✅ **pubblicata il 2026-10-08**: github.com/scambio-app/scambio (tag firmato v1.0.0), scambio.app con download `.deb`/apt/Flatpak; verifiche dal vivo su Ubuntu 24.04, Debian 13 e Flatpak; prova umana in produzione (dec. 152) |
 | 6 | **macOS** (dec. 120–122): vettori di test condivisi, app Swift da barra dei menu, firma e vendita diretta | dopo la fase 5 |
 | 7+ | Premium: widget Plasma/GNOME, ponte fotocamera iPhone, agenti | futuro |
 
@@ -50,3 +50,4 @@ Vedi `docs/decisions.md`, voci 1–29.
 8. **Fase 4 chiusa il 2026-10-07** (spec 04 verificata su Plasma 6.6.6 Wayland). Debiti: `Gtk.ShortcutLabel` deprecato da GTK 4.22 (design, Claude); verifica GNOME in VM (Q6) prima della fase 5.
 8. Fase 5 (2026-10-07, chat di rilascio): Flatpak misurato su casa (M30–M34), scelte di GM 150–152 e 160–165, spec 05 scritta; Flathub solo come tentativo (dec. 159).
 9. Fase 5 (2026-10-08 notte): Codex ha implementato la spec 05 e le correzioni dell'audit 1 (candidata `audit-1` firmata in `~/.local/share/scambio-release/candidates/`); guida della prova in `docs/guide/prova-installazione-1.0.md`.
+10. **Fase 5 chiusa il 2026-10-08**: 1.0.0 pubblica. Aperti: doppio opt-in (Workers Paid, dec. 167), CLA Assistant da collegare (GM, accesso OAuth), primaria della chiave da togliere da casa (168a), domanda a Flathub (guida in `docs/guide/flathub-per-gm.md`), GNOME mai provato dal vivo (Q6), `Gtk.ShortcutLabel` deprecato.

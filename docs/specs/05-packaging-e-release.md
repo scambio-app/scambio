@@ -1,6 +1,6 @@
 # Spec 05 — Packaging e prima release pubblica (Linux 1.0.0)
 
-Stato: approvata (GM, 2026-10-07, dopo l'audit di sicurezza e le decisioni 166–168) · Autore: Claude (chat di rilascio) · Data: 2026-10-07
+Stato: **consegnata e pubblicata il 2026-10-08** (approvata da GM il 2026-10-07; prova umana spostata in produzione, dec. 152) · Autore: Claude (chat di rilascio) · Data: 2026-10-07
 
 ## 1. Obiettivo
 
@@ -444,6 +444,23 @@ Da correggere (Codex, audit 1):
 Fatti da Claude: FAQ definitive del sito (`67d950e` in scambio-site), contratto UI aggiornato col
 confine di fiducia. Restano a Claude: screenshot reali (dalla prova B), onboarding di Email Service,
 riscrittura della storia (164, 166), push e deploy dopo il sì di GM.
+
+### Pubblicazione (2026-10-08, notte, su richiesta esplicita di GM)
+
+- Storia di `scambio` e `scambio-site` riscritta (dec. 164, 166): autore `Fermich srl <hello@scambio.app>`,
+  MAC, percorsi e indirizzo personale sostituiti; scansione dopo la riscrittura: 0 occorrenze; tabella
+  degli hash in `docs/verification/05/commit-map.txt`; backup `git bundle` in `~/scambio-lab/backup/`.
+- Build finale da `50e722b` (storia pulita), archivio sigillato `~/.local/share/scambio-release/archive/1.0.0/`;
+  le build precedenti mai pubblicate spostate in `discarded-unpublished/`. Verifica in contenitori ok.
+- Sito: migrazioni D1 0002–0004 applicate in remoto (0 righe preesistenti), `wrangler deploy` versione
+  `826d09ac`; doppio opt-in spento (dec. 167, aggiornamento).
+- Verifiche dal vivo: `https://scambio.app/download/scambio.deb` → 302 al `.deb` (SHA256 `32a14d35…b293`,
+  identico all'archivio e alla release GitHub); in `ubuntu:24.04` e `debian:13` installazione dal sito,
+  `apt update` da `https://scambio.app/apt` firmato, candidato 1.0.0; Flatpak installato dal
+  `.flatpakref` pubblico in un'installazione temporanea, versione 1.0.0; header CSP/HSTS presenti.
+- GitHub: `scambio-app/scambio` pubblico, tag `v1.0.0` firmato con la sottochiave, release con `.deb`,
+  tarball, firme, `SHA256SUMS(.asc)` e chiave pubblica; chiave inviata a keys.openpgp.org (GM riceverà
+  l'email di verifica per `release@scambio.app`); profilo dell'organizzazione completato.
 
 ## 8. Revisione preventiva di Claude (inviata a GM prima del /goal)
 
