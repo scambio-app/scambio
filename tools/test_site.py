@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Fermich srl
-"""Exercise a local Wrangler preview, local D1 and simulated email delivery only."""
+"""Test a running local Wrangler preview; pass --double-opt-in when enabled.
 
+Use --persist-to to match an isolated Wrangler local database, if applicable.
+"""
+
+import argparse
 import hashlib
 import http.client
 import json
@@ -18,6 +22,7 @@ SITE = ROOT.parent / "scambio-site"
 WRANGLER = SITE / "node_modules/.bin/wrangler"
 SUFFIX = uuid.uuid4().hex[:12]
 COUNT = 0
+PERSIST_TO = None
 
 
 def request(path, *, method="GET", data=None, headers=None, chunked=False):
@@ -66,6 +71,7 @@ def sql(command):
                 "--file",
                 source.name,
                 "--json",
+                *(["--persist-to", PERSIST_TO] if PERSIST_TO else []),
             ],
             cwd=SITE,
             capture_output=True,
@@ -106,11 +112,16 @@ def signup(email, lang="en"):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--double-opt-in", action="store_true")
+    parser.add_argument("--persist-to")
+    args = parser.parse_args()
+    global PERSIST_TO
+    PERSIST_TO = args.persist_to
     config = tomllib.loads((SITE / "wrangler.toml").read_text())
     assert "migrations_dir" not in config["d1_databases"][0]
-    assert config["send_email"] == [
-        {"name": "EMAIL", "allowed_sender_addresses": ["hello@scambio.app"]}
-    ]
+    assert "send_email" not in config
+    assert config["vars"]["DOUBLE_OPT_IN"] == "false"
     # Migration preserves all existing fields and requires fresh confirmation.
     db = sqlite3.connect(":memory:")
     db.executescript((SITE / "schema.sql").read_text())
@@ -118,12 +129,48 @@ def main():
         "INSERT INTO waitlist VALUES (?,?,?,?,?,?,?,?)",
         ("legacy@example.test", "Mac", "Android", None, "en", "old", "old", "old"),
     )
-    for migration in sorted((SITE / "migrations").glob("*.sql")):
+    migrations = sorted((SITE / "migrations").glob("*.sql"))
+    for migration in migrations[:2]:
         db.executescript(migration.read_text())
     assert db.execute(
         "SELECT status, consent_at, token_hash FROM waitlist"
     ).fetchone() == ("legacy_unconfirmed", "old", None)
-    print("PASS migration preserves legacy records", flush=True)
+    for status in ("pending", "confirmed"):
+        db.execute(
+            "INSERT INTO waitlist VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            (
+                status + "@example.test",
+                "Linux",
+                "iPhone",
+                "Device",
+                "it",
+                "consent",
+                "created",
+                "updated",
+                status,
+                "hash" if status == "pending" else None,
+                123456 if status == "pending" else None,
+                "confirmed" if status == "confirmed" else None,
+            ),
+        )
+    before = db.execute("SELECT * FROM waitlist ORDER BY email").fetchall()
+    db.execute("INSERT INTO waitlist_daily_quota VALUES ('2026-10-08', 12)")
+    db.executescript(migrations[2].read_text())
+    assert db.execute("SELECT * FROM waitlist ORDER BY email").fetchall() == before
+    assert db.execute("SELECT count FROM waitlist_daily_quota").fetchone() == (12,)
+    db.execute("UPDATE waitlist SET status='unconfirmed' WHERE status='pending'")
+    for command in (
+        "UPDATE waitlist SET status='invalid'",
+        "UPDATE waitlist SET token_hash='duplicate'",
+    ):
+        try:
+            db.execute(command)
+        except sqlite3.IntegrityError:
+            pass
+        else:
+            raise AssertionError("Migration lost a constraint: " + command)
+    db.close()
+    print("PASS migration preserves all records, quota and constraints", flush=True)
     endpoint = "/api/waitlist"
     for origin in (
         None,
@@ -187,13 +234,91 @@ def main():
         )[0]
         assert status == (200 if index < 5 else 429), (index, status)
     print("PASS Cloudflare rate limit", flush=True)
+    for index, invalid in enumerate(
+        (
+            {"consent": False},
+            {"email": "invalid"},
+            {"computer": []},
+            {"phone": ["invalid"]},
+            {"device": []},
+        )
+    ):
+        assert (
+            request(
+                endpoint,
+                method="POST",
+                data={**signup("invalid@example.test"), **invalid},
+                headers={"CF-Connecting-IP": f"192.0.2.{150 + index}"},
+            )[0]
+            == 422
+        )
+    for index, status in enumerate(
+        ("legacy_unconfirmed", "unconfirmed", "pending", "confirmed")
+    ):
+        email = f"spec05-{SUFFIX}-{status}@example.test"
+        old_token = hashlib.sha256(email.encode()).hexdigest()
+        old_hash = hashlib.sha256(old_token.encode()).hexdigest()
+        sql(f"""INSERT INTO waitlist
+            (email, computer, phone, device, lang, consent_at, created_at, updated_at,
+             status, token_hash, token_expires, confirmed_at)
+            VALUES ('{email}', 'Linux', 'iPhone', 'Old device', 'it',
+              'old', 'old', 'old',
+              '{status}', {repr(old_hash) if status == "pending" else "NULL"},
+              {4102444800 if status == "pending" else "NULL"},
+              {"'old'" if status == "confirmed" else "NULL"})""")
+        before = row(email)
+        emails_before = set((SITE / ".wrangler/tmp/email").rglob("*.txt"))
+        result = request(
+            endpoint,
+            method="POST",
+            data=signup(email),
+            headers={"CF-Connecting-IP": f"192.0.2.{140 + index}"},
+        )
+        assert result[0] == 200
+        assert json.loads(result[2]) == {"ok": True, "confirm": args.double_opt_in}
+        after = row(email)
+        if status == "confirmed":
+            assert after == before
+        else:
+            assert after["status"] == (
+                "pending" if args.double_opt_in else "unconfirmed"
+            )
+            assert after["computer"] == "Mac" and after["phone"] == "Android"
+            assert after["lang"] == "en" and after["device"] is None
+            assert after["created_at"] == "old" and after["consent_at"] != "old"
+            assert after["confirmed_at"] is None
+            if args.double_opt_in:
+                assert token_for(after) != old_token
+            else:
+                assert after["token_hash"] is None and after["token_expires"] is None
+        if status == "confirmed" or not args.double_opt_in:
+            assert set((SITE / ".wrangler/tmp/email").rglob("*.txt")) == emails_before
+        if status == "pending":
+            assert "expired" in request("/api/confirm?t=" + old_token)[1]["location"]
+    print(
+        "PASS existing states, token invalidation and immutable confirmed rows",
+        flush=True,
+    )
     for index, lang in enumerate(("en", "it", "de")):
         email = f"spec05-{SUFFIX}-{lang}@example.test"
         payload = signup(email, lang)
         headers = {"CF-Connecting-IP": f"192.0.2.{130 + index}"}
+        emails_before = set((SITE / ".wrangler/tmp/email").rglob("*.txt"))
         initial = request(endpoint, method="POST", data=payload, headers=headers)
         assert initial[0] == 200
+        assert json.loads(initial[2]) == {"ok": True, "confirm": args.double_opt_in}
         record = row(email)
+        if not args.double_opt_in:
+            assert record["status"] == "unconfirmed" and record["confirmed_at"] is None
+            assert record["token_hash"] is None and record["token_expires"] is None
+            payload["computer"] = ["Linux", "Mac"]
+            assert (
+                request(endpoint, method="POST", data=payload, headers=headers)[2]
+                == initial[2]
+            )
+            assert row(email)["computer"] == "Mac,Linux"
+            assert set((SITE / ".wrangler/tmp/email").rglob("*.txt")) == emails_before
+            continue
         assert record["status"] == "pending" and record["confirmed_at"] is None
         first = token_for(record)
         assert first not in json.dumps(record)
@@ -222,7 +347,7 @@ def main():
         assert row(email) == confirmed
         assert set((SITE / ".wrangler/tmp/email").rglob("*.txt")) == emails_before
     print(
-        "PASS double opt-in, replacement, reuse and immutable rows in en/it/de",
+        "PASS signup, replacement and confirmation behavior in en/it/de",
         flush=True,
     )
     email = f"spec05-{SUFFIX}-expired@example.test"
@@ -235,11 +360,12 @@ def main():
         )[0]
         == 200
     )
-    token = token_for(row(email))
-    sql(f"UPDATE waitlist SET token_expires = 1 WHERE email = '{email}'")
-    assert "expired" in request("/api/confirm?t=" + token)[1]["location"]
-    assert row(email)["status"] == "pending"
-    print("PASS expired token", flush=True)
+    if args.double_opt_in:
+        token = token_for(row(email))
+        sql(f"UPDATE waitlist SET token_expires = 1 WHERE email = '{email}'")
+        assert "expired" in request("/api/confirm?t=" + token)[1]["location"]
+        assert row(email)["status"] == "pending"
+        print("PASS expired token", flush=True)
     quota = sql(
         "SELECT day, count FROM waitlist_daily_quota ORDER BY day DESC LIMIT 1"
     )[0]
@@ -267,6 +393,7 @@ def main():
         input=r"""
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
 const source = await readFile('./src/worker.js', 'utf8');
 const {default: worker} = await import('data:text/javascript;base64,' +
   Buffer.from(source).toString('base64'));
@@ -294,6 +421,43 @@ const local = new Request('http://localhost:8787/api/waitlist', {method: 'POST',
 assert.equal((await worker.fetch(local, {ALLOW_LOCAL_ORIGIN: 'true',
   WAITLIST_LIMITER: {limit: async () => ({success: true})}})).status, 200);
 console.log('PASS relative redirect, manifest tampering and explicit local origin');
+const app = await readFile('./public/app.js', 'utf8');
+const COPY = JSON.parse(await readFile('./public/copy.json', 'utf8'));
+const submit = app.slice(app.indexOf('  form.addEventListener("submit"'),
+  app.indexOf('  /* mock state change:'));
+for (const cur of ['en', 'it', 'de']) {
+  for (const confirm of [false, true]) {
+    let handler, finished;
+    const complete = new Promise(resolve => { finished = resolve; });
+    const title = {setAttribute(key, value) { this[key] = value; }};
+    const text = {setAttribute: title.setAttribute};
+    const done = {hidden: true, querySelector: tag => tag === 'h3' ? title : text,
+      focus() { this.focused = true; }};
+    const nodes = {done, email: {value: 'ui@example.test'}, device: {value: ''},
+      website: {value: ''}, consent: {checked: true}, 'form-err': {textContent: ''},
+      submit: {set disabled(value) { if (!value) finished(); }}};
+    const form = {hidden: false,
+      addEventListener: (name, callback) => {handler = callback;}};
+    vm.runInNewContext(submit, {form, COPY, cur, $: id => nodes[id],
+      checks: () => [], document: {documentElement: {lang: cur}},
+      get: (obj, path) => path.split('.').reduce((value, key) => value[key], obj),
+      FormData: class {
+        getAll(name) {return [name === 'computer' ? 'Mac' : 'Android'];}},
+      fetch: async () => ({ok: true, json: async () => ({ok: true, confirm})})});
+    handler({preventDefault() {}});
+    await complete;
+    const prefix = confirm ? 'confirm_' : 'success_';
+    assert.equal(title.textContent, COPY[cur].form[prefix + 'title']);
+    assert.equal(text.textContent, COPY[cur].form[prefix + 'text']);
+    assert.equal(title['data-k'], 'form.' + prefix + 'title');
+    assert.equal(text['data-k'], 'form.' + prefix + 'text');
+    assert.notEqual(COPY[cur].form.success_title, COPY[cur].form.confirm_title);
+    assert.ok(COPY[cur].form.success_text);
+    assert.ok(form.hidden && !done.hidden && done.focused);
+    assert.equal(nodes['form-err'].textContent, '');
+  }
+}
+console.log('PASS frontend success copy in both modes and en/it/de');
 """,
         text=True,
         check=True,
