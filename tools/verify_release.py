@@ -16,7 +16,19 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import dbusmock
-from release import APP, DIST, KEY, ROOT, SITE, Signing, digest, run, seal, version
+from release import (
+    APP,
+    DIST,
+    KEY,
+    ROOT,
+    SITE,
+    Signing,
+    digest,
+    repository_archives,
+    run,
+    seal,
+    version,
+)
 
 DOCKER_SCRIPT = r"""
 set -eu
@@ -35,18 +47,29 @@ else
     apt-get install -y --no-install-recommends dbus-x11
     test ! -e /usr/bin/systemctl
 fi
-dpkg-deb -R /artifacts/scambio_*_all.deb /tmp/old-scambio
-sed -i 's/^Version: .*/Version: 0.9.0/' /tmp/old-scambio/DEBIAN/control
-dpkg-deb --root-owner-group --build /tmp/old-scambio /tmp/scambio_0.9.0_all.deb
 mkdir -p /root/.config/scambio /root/.local/share/scambio
-printf 'sentinel\n' > /root/.config/scambio/config.toml
+printf '[device]\nprofile = "generic"\n' > /root/.config/scambio/config.toml
+cp /root/.config/scambio/config.toml /tmp/original-config.toml
 printf 'sentinel\n' > /root/.local/share/scambio/state.json
-apt-get install -y --no-install-recommends /tmp/scambio_0.9.0_all.deb
-apt-get install -y --no-install-recommends /artifacts/scambio_*_all.deb
+apt-get install -y --no-install-recommends /previous/scambio_*_all.deb
+test "$(scambio --version)" = "$SCAMBIO_PREVIOUS_VERSION"
+sed -i "s|https://scambio.app/apt|$SCAMBIO_TEST_APT|" \
+    /etc/apt/sources.list.d/scambio.sources
+apt-get update -o APT::Update::Error-Mode=any
+apt-cache policy scambio
+apt-get install -y --no-install-recommends --only-upgrade scambio
 test "$(scambio --version)" = "$SCAMBIO_EXPECTED_VERSION"
 python3 -I -c '
-from scambio.config import Config
+from pathlib import Path
+from scambio.config import Config, load, parse, resolve_profile
 assert Config().audio.ignore_apps == ("sd_dummy", "speech-dispatcher-dummy")
+assert Config().device.profile == "auto"
+assert load(Path("/root/.config/scambio/config.toml")).device.profile == "generic"
+assert load(Path("/tmp/clean-config/config.toml")).device.profile == "auto"
+assert resolve_profile("auto", "Oakley Meta") == "meta_glasses"
+assert resolve_profile("generic", "Oakley Meta") == "generic"
+explicit = parse({"policy": {"resume_delay_ms": 0}})
+assert explicit.resume_delay_explicit and explicit.policy.resume_delay_ms == 0
 '
 if [ "$SCAMBIO_TEST_SYSTEMD" = yes ]; then
     test -L /etc/systemd/user/graphical-session.target.wants/scambio.service
@@ -55,7 +78,7 @@ else
     test ! -L /etc/systemd/user/graphical-session.target.wants/scambio.service
 fi
 test ! -e /etc/apt/sources.list.d/scambio.sources.dpkg-new
-test "$(cat /root/.config/scambio/config.toml)" = sentinel
+cmp /root/.config/scambio/config.toml /tmp/original-config.toml
 sed -i "s|https://scambio.app/apt|$SCAMBIO_TEST_APT|" \
     /etc/apt/sources.list.d/scambio.sources
 apt-get update -o APT::Update::Error-Mode=any
@@ -74,9 +97,10 @@ apt-get install -y --no-install-recommends /artifacts/scambio_*_all.deb
 test "$(scambio --version)" = "$SCAMBIO_EXPECTED_VERSION"
 apt-get purge -y scambio
 test ! -e /usr/bin/scambio
-test "$(cat /root/.config/scambio/config.toml)" = sentinel
+cmp /root/.config/scambio/config.toml /tmp/original-config.toml
 if [ "$SCAMBIO_TEST_SYSTEMD" = no ]; then test ! -e /usr/bin/systemctl; fi
-printf 'PASS package lifecycle (systemd=%s)\n' "$SCAMBIO_TEST_SYSTEMD"
+printf 'PASS package lifecycle %s -> %s (systemd=%s)\n' \
+    "$SCAMBIO_PREVIOUS_VERSION" "$SCAMBIO_EXPECTED_VERSION" "$SCAMBIO_TEST_SYSTEMD"
 """
 
 
@@ -145,7 +169,26 @@ def verify_files():
     )
 
 
-def docker():
+def upgrade_source():
+    """Require an authenticated, genuinely older release, never a relabelled build."""
+    current = tuple(map(int, version().split(".")))
+    candidates = [
+        directory
+        for directory in repository_archives()
+        if tuple(map(int, directory.name.split("."))) < current
+    ]
+    if not candidates:
+        raise ValueError(
+            "No sealed previous release available for upgrade verification"
+        )
+    source = max(candidates, key=lambda path: tuple(map(int, path.name.split("."))))
+    package = source / f"scambio_{source.name}_all.deb"
+    Signing.verify(package, Path(str(package) + ".asc"))
+    print(f"Upgrade baseline: sealed {source.name}; deb SHA256 {digest(package)}")
+    return source
+
+
+def docker(previous):
     handler = functools.partial(
         http.server.SimpleHTTPRequestHandler, directory=str(SITE)
     )
@@ -166,6 +209,10 @@ def docker():
                     "--network=host",
                     "--mount",
                     f"type=bind,src={DIST},dst=/artifacts,readonly",
+                    "--mount",
+                    f"type=bind,src={previous},dst=/previous,readonly",
+                    "--env",
+                    f"SCAMBIO_PREVIOUS_VERSION={previous.name}",
                     "--env",
                     f"SCAMBIO_EXPECTED_VERSION={version()}",
                     "--env",
@@ -182,7 +229,7 @@ def docker():
             worker.join()
 
 
-def flatpak():
+def flatpak(previous):
     with tempfile.TemporaryDirectory(prefix="scambio-flatpak-verify-") as temporary:
         installation = Path(temporary) / "installation"
         installation.mkdir()
@@ -197,7 +244,7 @@ def flatpak():
             "remote-add",
             f"--gpg-import={KEY}",
             "scambio-test",
-            str(SITE / "flatpak/repo"),
+            str(previous / "ostree"),
             env=env,
         )
         run(
@@ -211,6 +258,29 @@ def flatpak():
             APP + "//stable",
             env=env,
         )
+        flatpak_version(env, previous.name)
+        old_commit = run(
+            "flatpak", "--user", "info", "--show-commit", APP, env=env, capture=True
+        ).strip()
+        assert old_commit == (previous / "ostree.commit").read_text().strip()
+        run(
+            "flatpak",
+            "--user",
+            "remote-modify",
+            f"--url={SITE / 'flatpak/repo'}",
+            "scambio-test",
+            env=env,
+        )
+        run(
+            "flatpak",
+            "--user",
+            "update",
+            "--noninteractive",
+            "--no-deps",
+            "--no-related",
+            APP,
+            env=env,
+        )
         shown = run(
             "flatpak",
             "--user",
@@ -222,19 +292,43 @@ def flatpak():
         )
         print(shown)
         permissions(shown)
-        result = run(
-            "flatpak",
-            "run",
-            "--user",
-            "--no-documents-portal",
-            "--command=scambio",
-            APP + "//stable",
-            "--version",
-            env=env,
-            capture=True,
-        )
-        assert result.strip() == version(), result
+        flatpak_version(env, version())
         negative_bus_access(env)
+        for reinstall in (True, False):
+            run("flatpak", "--user", "uninstall", "--noninteractive", APP, env=env)
+            result = subprocess.run(
+                ["flatpak", "--user", "info", APP], env=env, capture_output=True
+            )
+            assert result.returncode != 0
+            if reinstall:
+                run(
+                    "flatpak",
+                    "--user",
+                    "install",
+                    "--noninteractive",
+                    "--no-deps",
+                    "--no-related",
+                    "scambio-test",
+                    APP + "//stable",
+                    env=env,
+                )
+                flatpak_version(env, version())
+        print(f"PASS Flatpak lifecycle {previous.name} -> {version()}")
+
+
+def flatpak_version(env, expected):
+    result = run(
+        "flatpak",
+        "run",
+        "--user",
+        "--no-documents-portal",
+        "--command=scambio",
+        APP + "//stable",
+        "--version",
+        env=env,
+        capture=True,
+    )
+    assert result.strip() == expected, result
 
 
 def negative_bus_access(environment):
@@ -296,8 +390,9 @@ def main():
     parser.add_argument("--stage-site", action="store_true")
     args = parser.parse_args()
     verify_files()
-    docker()
-    flatpak()
+    previous = upgrade_source()
+    docker(previous)
+    flatpak(previous)
     if not args.stage_site:
         return
     seal()

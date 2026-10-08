@@ -881,3 +881,13 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      importare logica dal core. Il cambio di indirizzo continua a usare il riavvio della
      decisione 155: la nuova istanza risolve solo il nuovo dispositivo, inizialmente `generic`
      quando automatico e ignoto. Reload del solo profilo e rinomina non richiedono riavvio.
+213. Codex — **Candidata 1.0.1 con storia pubblicata e upgrade reale.** Gli strumenti leggono
+     l'archivio pubblico firmato anche quando `SCAMBIO_RELEASE_CANDIDATE` separa output e
+     destinazione di sigillatura. Verificano firme, inventario e hash di entrambe le fonti e
+     rifiutano una versione duplicata fra archivio pubblico e candidata; `seal()` scrive solo
+     nell'archivio della candidata. apt conserva i pacchetti pubblicati e Flatpak i commit
+     precedenti. La verifica usa la più recente versione sigillata inferiore alla candidata,
+     senza fabbricare una vecchia versione dal nuovo pacchetto: qui 1.0.0 → 1.0.1. La prova
+     Debian/Ubuntu aggiorna tramite il repository apt locale firmato e controlla che il profilo
+     `generic` scritto rimanga identico; Flatpak installa il vecchio commit firmato, aggiorna
+     dal nuovo repository, rimuove e reinstalla in un'installazione temporanea.

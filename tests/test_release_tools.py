@@ -157,3 +157,64 @@ def test_apt_discards_untrusted_staging_packages(release_tools, monkeypatch, tmp
 
     monkeypatch.setattr(release, "run", run)
     release.apt_repo()
+
+
+def test_candidate_reads_authenticated_published_history(
+    release_tools, monkeypatch, tmp_path
+):
+    release = release_tools
+    published, candidate = tmp_path / "published", tmp_path / "candidate"
+    monkeypatch.setattr(release, "PUBLISHED_ARCHIVE", published)
+    monkeypatch.setattr(release, "ARCHIVE", candidate)
+    monkeypatch.setattr(release, "CANDIDATE", "test-rc1")
+    monkeypatch.setattr(release.Signing, "verify", lambda *args, **kwargs: None)
+
+    def archive(root, version):
+        directory = root / version
+        directory.mkdir(parents=True)
+        artifact = directory / "artifact"
+        artifact.write_text("authenticated bytes " + version)
+        (directory / "manifest.json").write_text(
+            json.dumps(
+                {"version": version, "sha256": {"artifact": release.digest(artifact)}}
+            )
+        )
+        (directory / "manifest.json.asc").write_text("verified separately")
+        return directory
+
+    previous = archive(published, "1.0.0")
+    current = archive(candidate, "1.0.1")
+    assert release.repository_archives() == [previous, current]
+    assert release.archived() == [current]  # seal() only sees the candidate archive.
+    original = (previous / "artifact").read_bytes()
+    archive(candidate, "1.0.0")
+    with pytest.raises(ValueError, match="duplicates a published version"):
+        release.repository_archives()
+    assert (previous / "artifact").read_bytes() == original
+    (previous / "artifact").write_bytes(b"tampered")
+    with pytest.raises(ValueError, match="hash or path"):
+        release.repository_archives()
+
+
+def test_upgrade_source_requires_a_real_older_release(
+    release_tools, monkeypatch, tmp_path
+):
+    verify = importlib.import_module("verify_release")
+    monkeypatch.setattr(verify, "version", lambda: "1.10.0")
+    monkeypatch.setattr(verify, "repository_archives", lambda: [])
+    with pytest.raises(ValueError, match="No sealed previous"):
+        verify.upgrade_source()
+    paths = [tmp_path / value for value in ("1.0.0", "1.9.0", "1.10.0", "2.0.0")]
+    for path in paths:
+        path.mkdir()
+        (path / f"scambio_{path.name}_all.deb").write_bytes(b"actual previous package")
+    checked = []
+    monkeypatch.setattr(verify, "repository_archives", lambda: paths)
+    monkeypatch.setattr(verify.Signing, "verify", lambda *args: checked.append(args))
+    assert verify.upgrade_source() == paths[1]
+    assert checked == [
+        (
+            paths[1] / "scambio_1.9.0_all.deb",
+            paths[1] / "scambio_1.9.0_all.deb.asc",
+        )
+    ]

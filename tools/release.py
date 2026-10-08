@@ -35,6 +35,7 @@ def release_directories(candidate=None):
 
 CANDIDATE = os.environ.get("SCAMBIO_RELEASE_CANDIDATE")
 DIST, ARCHIVE = release_directories(CANDIDATE)
+PUBLISHED_ARCHIVE = release_directories()[1]
 SITE = DIST / "site"
 PRIMARY = "24A30DBED8973273A486CC7386C8855E1251E7E2"
 SIGNER = "4C23A6729A5750DDFC8745E305499CD6ECB01DE7"
@@ -249,11 +250,12 @@ def deb():
     checksums()
 
 
-def archived():
-    if not ARCHIVE.exists():
+def archived(root=None):
+    root = ARCHIVE if root is None else root
+    if not root.exists():
         return []
     found = []
-    for directory in sorted(ARCHIVE.iterdir()):
+    for directory in sorted(root.iterdir()):
         if (
             directory.is_symlink()
             or not directory.is_dir()
@@ -287,6 +289,18 @@ def archived():
     return found
 
 
+def repository_archives():
+    """Read published history into a candidate, while sealing only in ARCHIVE."""
+    current = archived()
+    if not CANDIDATE:
+        return current
+    previous = archived(PUBLISHED_ARCHIVE)
+    versions = {directory.name for directory in previous}
+    if any(directory.name in versions for directory in current):
+        raise ValueError("Candidate archive duplicates a published version")
+    return previous + current
+
+
 def latest():
     value = version()
     package = DIST / f"scambio_{value}_all.deb"
@@ -314,7 +328,7 @@ def apt_repo():
         shutil.rmtree(repository / "pool")
     pool.mkdir(parents=True, exist_ok=True)
     copied = {}
-    for source in [*archived(), DIST]:
+    for source in [*repository_archives(), DIST]:
         value = version() if source == DIST else source.name
         for package in [source / f"scambio_{value}_all.deb"]:
             signer.verify(package, Path(str(package) + ".asc"))
@@ -384,7 +398,7 @@ def flatpak():
         template.replace("@ARCHIVE@", str(source)).replace("@SHA256@", digest(source))
     )
     repository = DIST / "flatpak-repo"
-    for previous in archived():
+    for previous in repository_archives():
         shutil.copytree(previous / "ostree", repository, dirs_exist_ok=True)
     if repository.exists():
         for directory in [repository, *repository.rglob("*")]:
@@ -418,7 +432,7 @@ def flatpak():
 
 def flatpak_site():
     check()
-    archived()
+    repository_archives()
     destination = SITE / "flatpak/repo"
     shutil.copytree(DIST / "flatpak-repo", destination, dirs_exist_ok=True)
     key = base64.b64encode(KEY.read_bytes()).decode()
