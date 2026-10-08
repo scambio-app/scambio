@@ -1,0 +1,15 @@
+{
+  "source_commit": "9c6a85d173b98407a66b909e0e69dcf69a4f3694",
+  "candidate": "linux-1-0-1-rc1",
+  "artifacts": {
+    "scambio_1.0.1_all.deb": {
+      "sha256": "37da071748767f680c304bd5e462995db5970b24315cbafffd81d63323b6d782",
+      "bytes": 229580
+    },
+    "scambio-1.0.1.tar.gz": {
+      "sha256": "13e7f95979e10fa9ed5e59a697e6936ddf259119d1934b50883f34d13f2f5859",
+      "bytes": 1700383
+    }
+  },
+  "ostree_commit": "6c245a679b4270a3456a1427b7b185734521c78dc541f8e7b0e7aeb3b3d0a794"
+}

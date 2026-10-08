@@ -1,0 +1,17 @@
+{
+  "ostree_commit": "6c245a679b4270a3456a1427b7b185734521c78dc541f8e7b0e7aeb3b3d0a794",
+  "version": "1.0.1",
+  "module": "/app/lib/python3.14/site-packages/scambio/__init__.py",
+  "elapsed_seconds": 600.0999983710062,
+  "before": {
+    "cpu_seconds": 0.18,
+    "rss_kib": 43800
+  },
+  "after": {
+    "cpu_seconds": 0.18,
+    "rss_kib": 43800
+  },
+  "cpu_percent": 0.0,
+  "environment": "Private system/session buses; no device configured; healthy injected pactl; UI enabled",
+  "method": "Two /proc/self/stat endpoint samples, 600 seconds apart; no sampling loop"
+}

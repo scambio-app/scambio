@@ -1,0 +1,4 @@
+3a909c8b188523a7f923f5d675723b4b12da9bf77cf9df985cfcd0f6ed8a06ca  design/i18n/it.po
+9e6323402bd5a4a0cb87ef87c9aab3bbc4bf03d6ae8b895350ce271bf88c27ef  design/i18n/en.po
+5d7b5d25697b2f36be39901d47f8896dfbfc34af9cd9e7b5ea0977821fd5190c  design/i18n/de.po
+76888e645db211a068b8a9d5fdc22c6a6d32303cd168c9fcd9bdad9016ac3261  design/metainfo/app.scambio.Scambio.metainfo.xml

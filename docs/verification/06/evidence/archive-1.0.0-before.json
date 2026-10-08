@@ -1,0 +1,754 @@
+{
+  "SHA256SUMS": {
+    "sha256": "c5cc2ca780ba49f6e90eba1670def58eb432abcc9f831182ec746730eac56896",
+    "mode": 292
+  },
+  "SHA256SUMS.asc": {
+    "sha256": "88d2a7bf16461135139699625dec08b82027d795a86fb8cd9deaf648f6f080c4",
+    "mode": 292
+  },
+  "manifest.json": {
+    "sha256": "4c1fc2e2dc648e1bc6212fec86f3da8c59a9bfb3a29ec230a3fc11b32167d04f",
+    "mode": 292
+  },
+  "manifest.json.asc": {
+    "sha256": "b996050e59a5b4ae8a0d4cc1552aaadaae5a3965bb7286a79b288c316d33810e",
+    "mode": 292
+  },
+  "ostree/.lock": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mode": 292
+  },
+  "ostree/config": {
+    "sha256": "5c6ae1c7293f918a373e72b4a9a90bb4e6dca04cc02b584419afb5b4696bf4d8",
+    "mode": 292
+  },
+  "ostree/delta-indexes/2q/PJdVeuff2_DU9YnRIPJEg2y02EzSwTuA_PKfYX2EE.index": {
+    "sha256": "51e96e81c3ad73ef4a6ce9a0392e6b32b6f0e12945d8d6007f187543ed98273b",
+    "mode": 292
+  },
+  "ostree/delta-indexes/Tf/6gpl1F+D1V2F4u6_tZt+PugrjHyhMysUiZY3zJ6YQ.index": {
+    "sha256": "cb45de7c236760a9a25e36e28892e55c9ce4fa2522919b517440c2d23f9a84b0",
+    "mode": 292
+  },
+  "ostree/deltas/2q/PJdVeuff2_DU9YnRIPJEg2y02EzSwTuA_PKfYX2EE/0": {
+    "sha256": "15c7487042c1f774ad940e88bf1dc6228cfb79b1cb4d6f19a46b6de0f09e04a2",
+    "mode": 292
+  },
+  "ostree/deltas/2q/PJdVeuff2_DU9YnRIPJEg2y02EzSwTuA_PKfYX2EE/superblock": {
+    "sha256": "99a65e248bde3081a30c5459594983ee1040a1211f4ef0ba1ea8f49a38538f61",
+    "mode": 292
+  },
+  "ostree/deltas/Tf/6gpl1F+D1V2F4u6_tZt+PugrjHyhMysUiZY3zJ6YQ/0": {
+    "sha256": "14273c5808052008337f62caee9da9782d509bebf2be9bcbc427f53f044975cd",
+    "mode": 292
+  },
+  "ostree/deltas/Tf/6gpl1F+D1V2F4u6_tZt+PugrjHyhMysUiZY3zJ6YQ/superblock": {
+    "sha256": "e0f675f68e9a66aab31a582a0b780a0a6c56528b6eee4e111664624524af8e7b",
+    "mode": 292
+  },
+  "ostree/objects/00/8ad5334843974d78a27e7bdd3b7b552be3d0c42a389f556f6a67f17ffee95c.filez": {
+    "sha256": "78772d64060c03d1dd9d3cb8446cfb6df83de67535f1c4cb67c1fcb1630246ca",
+    "mode": 292
+  },
+  "ostree/objects/05/91e292d729d47efc238768c77ec85140f0bc6bd433ca4750e8d3c6a8f8e7a6.filez": {
+    "sha256": "7993a3403941c642ea605e636af64f9c9857d97cc6398a75e26a53e35542f0bf",
+    "mode": 292
+  },
+  "ostree/objects/07/8a2e88fcbb49552fbbf18d04046676c427fd870e1bb00a2f45bf41e2bf8da3.filez": {
+    "sha256": "f126d03b7cd5c4d4cb0d6a6c206c1fc57e226faafd493fcfd0fb09507c71bb6c",
+    "mode": 292
+  },
+  "ostree/objects/0b/4401cbb17868e759aa0b305ac6570f3fdc51fef6c0cc231e5339960629b79d.dirtree": {
+    "sha256": "0b4401cbb17868e759aa0b305ac6570f3fdc51fef6c0cc231e5339960629b79d",
+    "mode": 292
+  },
+  "ostree/objects/0c/177bf9f5c23d3d3ec9f044fb4e48982454b538d7f70a1215f85c4e563de2c9.dirtree": {
+    "sha256": "0c177bf9f5c23d3d3ec9f044fb4e48982454b538d7f70a1215f85c4e563de2c9",
+    "mode": 292
+  },
+  "ostree/objects/10/41d7411701225226ff47cb152faa7ffaa69e1d62a1685f66d7150ba11ff317.filez": {
+    "sha256": "f0d485de8d981581d76ad0784de225f87d751ccc15a5ac80ddbf19e3cb10779e",
+    "mode": 292
+  },
+  "ostree/objects/10/62ed3dec848b8833a17e7b90ad5f6544a2c47e2ee0d234677dd4ce38258e45.filez": {
+    "sha256": "8fd4e0970ad49e2c96dba9a8b55efb595dfb443d66c5529488be6f54af05446a",
+    "mode": 292
+  },
+  "ostree/objects/10/eeff198d8ae9aa012abc8517724285d2a0980cf9874d791ae28af6e7c92d87.filez": {
+    "sha256": "6c9d281af50a797136ce57f68590e53427270e06eb0effbce15c30f9ae078072",
+    "mode": 292
+  },
+  "ostree/objects/11/091881088e3b04a9ff38633a24546956c7980f1a508614aa7bbb57253bd905.filez": {
+    "sha256": "3f150cfa6e50f43d9c72b413f2b562a6f19b2ff29aa776b4313c8907f544125c",
+    "mode": 292
+  },
+  "ostree/objects/11/d4ea413f24dc4e026497c61d82f62c93e82793137c20936360eb69e33ee858.dirtree": {
+    "sha256": "11d4ea413f24dc4e026497c61d82f62c93e82793137c20936360eb69e33ee858",
+    "mode": 292
+  },
+  "ostree/objects/12/46b4bd818e4e3876c8e29e71e19a71711b941842d6f9340909f56d4bd9152f.filez": {
+    "sha256": "36bc3eb8a50927f47d2df7c697fdf0e096d14522e020726b0be3e3388bdca43c",
+    "mode": 292
+  },
+  "ostree/objects/12/d9ee2e49841797879e94ea2ba3a2b07a5ca9088edcd26ad67ff0a77f6277a2.filez": {
+    "sha256": "f7ba790e3747b3ecc99efd2fb4c55659ea3808b47c220eb4bdccd48d653fc868",
+    "mode": 292
+  },
+  "ostree/objects/13/34a50552534fbbf47530bf8aee015b9009ffb71f356c937b1a8dbf46d0a699.filez": {
+    "sha256": "e1b25fb84f1861ad43f08bfc2d4206e9999894e2bd0350fd4810fea11921c650",
+    "mode": 292
+  },
+  "ostree/objects/13/540bd4e8188b3cb38705161b47cc8e3c5c1b0c3d88d5af98aa7131988beb24.dirtree": {
+    "sha256": "13540bd4e8188b3cb38705161b47cc8e3c5c1b0c3d88d5af98aa7131988beb24",
+    "mode": 292
+  },
+  "ostree/objects/14/cda5ada6a3b098aaaa3d9c7dcce17859d73f7da32b02a6c0c09d1f37b3e500.dirtree": {
+    "sha256": "14cda5ada6a3b098aaaa3d9c7dcce17859d73f7da32b02a6c0c09d1f37b3e500",
+    "mode": 292
+  },
+  "ostree/objects/15/3f0988f8d91f69d8578edb1625d8b1d7aa55c574600dd871b86a082c0ed55a.filez": {
+    "sha256": "f5c02867d7da3fe03762f2127524430030194470d4d3710c840db2d8d229a7df",
+    "mode": 292
+  },
+  "ostree/objects/16/219d5f4466785203b48d4d59f46be0999d8374a7fa323132b14b46950c0cf6.filez": {
+    "sha256": "1238521d4858898c32e10a2ffcea6106ff8f98ac46e7f4054454ed4217c0a8f1",
+    "mode": 292
+  },
+  "ostree/objects/17/776f761fdd8355f368bdc3b40318385f5ccd1325df8aecccd26e7061c2e053.filez": {
+    "sha256": "91fc4c7d4223c4a19463a7ea487e0fa894bfd2b9d2846b6ccb40aaaf41407f47",
+    "mode": 292
+  },
+  "ostree/objects/19/dd49d83eb2dfe4b6420a73821d88d2e2ae2b222dc04c47b5b13afca29f2a0d.filez": {
+    "sha256": "54c15c77ab88167aecc111742d9228697b401962a56a7ea395e9b9e15c4919fe",
+    "mode": 292
+  },
+  "ostree/objects/1a/c51ef2e33bb8d40d91e745bd12f751e7d8778c5478f70d65e36c27b34303c7.dirtree": {
+    "sha256": "1ac51ef2e33bb8d40d91e745bd12f751e7d8778c5478f70d65e36c27b34303c7",
+    "mode": 292
+  },
+  "ostree/objects/21/aa68483286203d5ec6b2891d061ecfc048bf9012b5e0f0c424539ed0812594.filez": {
+    "sha256": "dc20cd03e006f67213e7766ab1964886ac51b3298d1d32357f607ce52d5ccac8",
+    "mode": 292
+  },
+  "ostree/objects/25/6b7e48918a5ef5864ecf1febe838d4b783c64dd5f8c8298690530d3463c111.filez": {
+    "sha256": "3b8afa350b0790e3b9c3cbe310ce409b398de96803d7ddcbb08f8f74f8f7d3f7",
+    "mode": 292
+  },
+  "ostree/objects/2a/b9c7f130203af3888d80cce7172ba62c7afeab490179df12187afc92cf34f8.filez": {
+    "sha256": "0e096214d87a5196daa910cf12b169600aa25decebf1a4bac97191148494e4d5",
+    "mode": 292
+  },
+  "ostree/objects/2b/03cd555d3063b3de75015148e1ac1157e83ec3e4a428dee62e5a3b64428bcf.filez": {
+    "sha256": "f1c47c83367206940037452079ed1841375281b041d5b458f8dc2c125014b9c2",
+    "mode": 292
+  },
+  "ostree/objects/2c/46fcad627ed7c2d1256e46c62dc12918a656cdbdbc7fbb352c72c5b187b64b.dirtree": {
+    "sha256": "2c46fcad627ed7c2d1256e46c62dc12918a656cdbdbc7fbb352c72c5b187b64b",
+    "mode": 292
+  },
+  "ostree/objects/2d/f56e57528533b1a3e704483ccf1ae221e72ba14e2cbfa338f67c6229b0fbdf.filez": {
+    "sha256": "5a2e321bf3cacfa169d87ea97f76d3a54a7787bec7c99712e9054277bc0dfc1f",
+    "mode": 292
+  },
+  "ostree/objects/2f/35f06b243c8512e0933c202b4e335c0d030bb27e58b2adaae2a38c8dfe72d8.filez": {
+    "sha256": "a49d44b8f3c8cbab8094ba245af781425287643dc27b2f41069534d057f91e5b",
+    "mode": 292
+  },
+  "ostree/objects/2f/c31f862098ebb23f6789ebb3de1e3c38e88ecfd3d52270ee66d6836e5ddc71.dirtree": {
+    "sha256": "2fc31f862098ebb23f6789ebb3de1e3c38e88ecfd3d52270ee66d6836e5ddc71",
+    "mode": 292
+  },
+  "ostree/objects/30/1fa285b35ccf2ebdb7699c10cfdde380314078ee79037c9c2afafee27dcb5d.dirtree": {
+    "sha256": "301fa285b35ccf2ebdb7699c10cfdde380314078ee79037c9c2afafee27dcb5d",
+    "mode": 292
+  },
+  "ostree/objects/35/53d9212f2af6fd86a0ecdb0a6125e8282fb7365b22adf2d6a02e1a1824a311.filez": {
+    "sha256": "db7dec8b02f435f2bfb47d15b2be1b320d5e74b33e7340faab5eba8b1c74f2a8",
+    "mode": 292
+  },
+  "ostree/objects/35/9255d1cf52a28b406d5b85625fdba5c1c75462a404eeccfffb6ee144fcf6d2.dirtree": {
+    "sha256": "359255d1cf52a28b406d5b85625fdba5c1c75462a404eeccfffb6ee144fcf6d2",
+    "mode": 292
+  },
+  "ostree/objects/38/3c421be4b447e07b8bcb453a47bea8dc6af82b9510dd312ad88a41fad9536c.dirtree": {
+    "sha256": "383c421be4b447e07b8bcb453a47bea8dc6af82b9510dd312ad88a41fad9536c",
+    "mode": 292
+  },
+  "ostree/objects/3a/f475f75a75ce837565564d8d08be6baad59bb973da92cb0f4517009ca92390.filez": {
+    "sha256": "aca38edb15c276b1cab941afb3af0781892ebb8a77b037918eb4bd7690a8bd45",
+    "mode": 292
+  },
+  "ostree/objects/3b/3d33f3b5588d13091388e09775a5337eb7e47ac7c644332b4265d175cf82a1.filez": {
+    "sha256": "eaad0175af20cb1c2ee5a8a5a8cc9e319682ed9949511eeead45739b32b12d83",
+    "mode": 292
+  },
+  "ostree/objects/3b/92958e2eb58606bb2ac93d1442c575a88495276ec0769068ec43906ace46ed.filez": {
+    "sha256": "f456d38a424f134c2f8cbd1801b103f4771127d3328c419f93fbc761391cad5a",
+    "mode": 292
+  },
+  "ostree/objects/3d/77093931583f72aeaa89a9c63703932b8dd3d924e8a225e26c5e621bbc43e5.dirtree": {
+    "sha256": "3d77093931583f72aeaa89a9c63703932b8dd3d924e8a225e26c5e621bbc43e5",
+    "mode": 292
+  },
+  "ostree/objects/3e/35ee09894d83c1e04c0eb663b0eb548f0ece559573e36b3e47390d9333e668.dirtree": {
+    "sha256": "3e35ee09894d83c1e04c0eb663b0eb548f0ece559573e36b3e47390d9333e668",
+    "mode": 292
+  },
+  "ostree/objects/40/f8c67118074c00c0f3d41f912b869b5361afef5c48599973c79378ed5ccb8c.dirtree": {
+    "sha256": "40f8c67118074c00c0f3d41f912b869b5361afef5c48599973c79378ed5ccb8c",
+    "mode": 292
+  },
+  "ostree/objects/41/995bca23eba2f78ea9d7369897c6cf561bc3fc3a6727fbe83299a9d5e99623.dirtree": {
+    "sha256": "41995bca23eba2f78ea9d7369897c6cf561bc3fc3a6727fbe83299a9d5e99623",
+    "mode": 292
+  },
+  "ostree/objects/42/ec19937b366f6eb3b0dfaca3a8533a1d6d7ccd0820777ba51c380421c61782.dirtree": {
+    "sha256": "42ec19937b366f6eb3b0dfaca3a8533a1d6d7ccd0820777ba51c380421c61782",
+    "mode": 292
+  },
+  "ostree/objects/44/6a0ef11b7cc167f3b603e585c7eeeeb675faa412d5ec73f62988eb0b6c5488.dirmeta": {
+    "sha256": "446a0ef11b7cc167f3b603e585c7eeeeb675faa412d5ec73f62988eb0b6c5488",
+    "mode": 292
+  },
+  "ostree/objects/47/2d6f4a9780ee295055feeea0916e6aa35b28bd9602d632fad38a94846d4e84.dirtree": {
+    "sha256": "472d6f4a9780ee295055feeea0916e6aa35b28bd9602d632fad38a94846d4e84",
+    "mode": 292
+  },
+  "ostree/objects/48/d7d2f74b9abe71b6d4759b7130171d3783186aa2a64fd59356ff8adb67688d.dirtree": {
+    "sha256": "48d7d2f74b9abe71b6d4759b7130171d3783186aa2a64fd59356ff8adb67688d",
+    "mode": 292
+  },
+  "ostree/objects/49/44c4f407e2a95c0569639784ca6ff4d33357a0621271463e947a872266479a.filez": {
+    "sha256": "b5e43547c6f3b22377b98203cfe224e8438b5a58b81f87b1839564b9796d6e2e",
+    "mode": 292
+  },
+  "ostree/objects/49/d38d8cc0c773ff30200139ea57d77c58a0ec0b3628895fe6f84bc9815aa8bd.dirtree": {
+    "sha256": "49d38d8cc0c773ff30200139ea57d77c58a0ec0b3628895fe6f84bc9815aa8bd",
+    "mode": 292
+  },
+  "ostree/objects/4b/aac4053df2d2df1edd94c96c549c5c0862fc30cbd24bd95ddaa8d818e4e173.filez": {
+    "sha256": "6f4d352ed6877697ae24b337a5ae70a5911bfa069733f3cc5224516f3ad57b28",
+    "mode": 292
+  },
+  "ostree/objects/4c/e4ccaf1a26702e1db008a5e9bbfab68479292308cbb836e6f02e4c67ffbc4a.filez": {
+    "sha256": "bbad9fd3f33da8cb9d12406679fc6728553444eb54e391a90d0b365da824352d",
+    "mode": 292
+  },
+  "ostree/objects/4d/fea0a65d45f83d55d85e2eebfb59b7e3ee82b8c7ca1332b14899637cc9e984.commit": {
+    "sha256": "4dfea0a65d45f83d55d85e2eebfb59b7e3ee82b8c7ca1332b14899637cc9e984",
+    "mode": 292
+  },
+  "ostree/objects/4d/fea0a65d45f83d55d85e2eebfb59b7e3ee82b8c7ca1332b14899637cc9e984.commitmeta": {
+    "sha256": "995077b29c7bc062cfea5573111ce75f83460e2cc9cc3fc2b5784872852a33fb",
+    "mode": 292
+  },
+  "ostree/objects/4d/fea0a65d45f83d55d85e2eebfb59b7e3ee82b8c7ca1332b14899637cc9e984.commitmeta2": {
+    "sha256": "35f01973796fb824cb46a94b4502aacb3781e70fcd77e55528d9bdb9048e5e44",
+    "mode": 292
+  },
+  "ostree/objects/4e/4d1f92203234170a2f139bf587df888e70700a2150a48b048d3dc4cef0f166.dirtree": {
+    "sha256": "4e4d1f92203234170a2f139bf587df888e70700a2150a48b048d3dc4cef0f166",
+    "mode": 292
+  },
+  "ostree/objects/4f/03c27f0e4868794564900e9adaa3b432ed554268ee3caa17ddb3cf5de27a46.dirtree": {
+    "sha256": "4f03c27f0e4868794564900e9adaa3b432ed554268ee3caa17ddb3cf5de27a46",
+    "mode": 292
+  },
+  "ostree/objects/50/8a7f42b93e36f6922363d9e9f54a6a1caef2cc28024efc32dff2c55fdfbef7.filez": {
+    "sha256": "8d79a61e296750560e4dbccb9fca555f698218c0e10961d48392d6fb62868a6e",
+    "mode": 292
+  },
+  "ostree/objects/50/da7d5a4661a69f3e5ad7238bbde18532f958b38ae67afae6fb17f11c69971c.dirtree": {
+    "sha256": "50da7d5a4661a69f3e5ad7238bbde18532f958b38ae67afae6fb17f11c69971c",
+    "mode": 292
+  },
+  "ostree/objects/53/27da73d9deafb3d728a5e5e12383e9a26a4790d5a0707a9a9960c02d5ee6cb.filez": {
+    "sha256": "857cd34eae974ff1b6a71702d338f5d220c79c0bbd5fe9db4e28bff72fc83cc8",
+    "mode": 292
+  },
+  "ostree/objects/55/6c173e252df34c4364560ac334a0cbffe4301aa6518eb69f0ebd5616766fc9.filez": {
+    "sha256": "69c65226d825a728647f82cfe34af8a692cbffbd6a11ac0ba569332a3be8c6be",
+    "mode": 292
+  },
+  "ostree/objects/56/9992860377ce56bd9217a6f335b366a13a6ad2781ff4a1a1550caa99fcd928.dirtree": {
+    "sha256": "569992860377ce56bd9217a6f335b366a13a6ad2781ff4a1a1550caa99fcd928",
+    "mode": 292
+  },
+  "ostree/objects/56/c8c184d732109af1a1aaa3dc8172750e11dce4948e8d80306f99fea938e71a.dirtree": {
+    "sha256": "56c8c184d732109af1a1aaa3dc8172750e11dce4948e8d80306f99fea938e71a",
+    "mode": 292
+  },
+  "ostree/objects/57/a95f6eeb8c1ba7124cf62525dea02f441f3b8bbc495726be605c635f772e25.dirtree": {
+    "sha256": "57a95f6eeb8c1ba7124cf62525dea02f441f3b8bbc495726be605c635f772e25",
+    "mode": 292
+  },
+  "ostree/objects/5b/1293ee86df54244e6dfb907d987241252ac75c3b280fecb25d5e4ca06515b5.filez": {
+    "sha256": "d7fd9d2fec268dcda3c467344479907c1e9a5c1f63b2e6d186d12de3a333cd66",
+    "mode": 292
+  },
+  "ostree/objects/5f/95f460ab232d585d5b0a91cbcb5bbbbe5c5651e50ef33e94c0e40af255da89.filez": {
+    "sha256": "f821d1620251148c1455f18c816cb04054b2c8215a5661f58d4fe0f3525a42b3",
+    "mode": 292
+  },
+  "ostree/objects/5f/cbcb94d9c21f8eb41a02d5d92de95047114dd96fe48ea11eaef094d7890609.filez": {
+    "sha256": "fd8f10324c5db539455938afcfcf776c98682ecc439b7810c6a6a42d3fe608db",
+    "mode": 292
+  },
+  "ostree/objects/61/f04180ac13a079db7104f3f63326aaeaf7ecddaf7a1b85318cbe0b3a437a1b.dirtree": {
+    "sha256": "61f04180ac13a079db7104f3f63326aaeaf7ecddaf7a1b85318cbe0b3a437a1b",
+    "mode": 292
+  },
+  "ostree/objects/62/b4a754c59e86e3fadd019f23cdbd85e87542bcbb6bff3d1e4773c54a9d0b1c.dirtree": {
+    "sha256": "62b4a754c59e86e3fadd019f23cdbd85e87542bcbb6bff3d1e4773c54a9d0b1c",
+    "mode": 292
+  },
+  "ostree/objects/65/2e9db85f523a48c8a5abcc5be6c1ca3208815df7ac3dcbc221ec3ea9b3dea1.filez": {
+    "sha256": "cecd3f7892e1ca8ab57d1d5968af07cc0bb259fccf2941f3969f0d807881d6ab",
+    "mode": 292
+  },
+  "ostree/objects/68/6adb8aed5226e95722d6d3b9b3493ba02293238528c7a3aeea76dbbc375ff8.filez": {
+    "sha256": "3948b9d8345d8fc3e8bd16bbbf0c39aa815c959d26ae854d9f8956a383e93156",
+    "mode": 292
+  },
+  "ostree/objects/68/b24b7883d882b7e346f1e45a964da4743b4dc0f9ffe2e11ed9d23125babb0a.filez": {
+    "sha256": "3850e29f9df8dd0b13a57105324dafddabd27efe6aa7620dd1424d02022ab07b",
+    "mode": 292
+  },
+  "ostree/objects/68/fb3ae66bb68009697473e21a701330e0c36b1890b426ff5965f4f501281dc2.dirtree": {
+    "sha256": "68fb3ae66bb68009697473e21a701330e0c36b1890b426ff5965f4f501281dc2",
+    "mode": 292
+  },
+  "ostree/objects/6b/496b4f7575064f5c608a1ea6effae9035e056f5151156889a20d33cb95040b.filez": {
+    "sha256": "99a4d3e84c1a65894ff3e07e243b35a9d44af69bf5154e5045a35dd85a5ead4a",
+    "mode": 292
+  },
+  "ostree/objects/6c/74d5ed88249ebc6ff1a653189205f135c4a5c8035a4aee93ce88c3ba487fc1.filez": {
+    "sha256": "6357c8b1e30bf2fea901e0b9f01e619b456e819300cc6986922e22d0a995e98c",
+    "mode": 292
+  },
+  "ostree/objects/6d/85fd3faceff787e70b048fe4b7e57964648afbf95c6fd6a52fcd88c1250595.dirtree": {
+    "sha256": "6d85fd3faceff787e70b048fe4b7e57964648afbf95c6fd6a52fcd88c1250595",
+    "mode": 292
+  },
+  "ostree/objects/6e/09e4d0dff60fe790f036a2ba49c5f12f8f547627944b94749d77dad6fab40e.dirtree": {
+    "sha256": "6e09e4d0dff60fe790f036a2ba49c5f12f8f547627944b94749d77dad6fab40e",
+    "mode": 292
+  },
+  "ostree/objects/6e/48033e5bd04ac6958834aa5a0c3a80d01cb3d7c18c03eac9b56ca1f83cc9a8.dirtree": {
+    "sha256": "6e48033e5bd04ac6958834aa5a0c3a80d01cb3d7c18c03eac9b56ca1f83cc9a8",
+    "mode": 292
+  },
+  "ostree/objects/74/45ffa074dd27679fd6c6a0cd321f1e19e91adcaef03e85f66054695bcb234c.filez": {
+    "sha256": "ab42ebf5eddc6fe0ac3d85303f56f7000176cfcfceb4b4732a6bef4bdde001b6",
+    "mode": 292
+  },
+  "ostree/objects/74/79fbe508145b9e030b87d9218426a819665cd7d55398bc72654a37988417b8.dirtree": {
+    "sha256": "7479fbe508145b9e030b87d9218426a819665cd7d55398bc72654a37988417b8",
+    "mode": 292
+  },
+  "ostree/objects/74/fc40e67c6d149253ba273c580cf64b84a885cdf643c52733650eaac53ebc11.filez": {
+    "sha256": "ce92914a5620ca8e9c17941c7ad5b1bc202c840601ef10c80f7218f919b710d5",
+    "mode": 292
+  },
+  "ostree/objects/79/6f69ebe98c6f9939899f2cd96ea1765a484f6570305dae4e7922cb278798f2.filez": {
+    "sha256": "8a3571de14ff52673e9096339b4cbd2154bce64b6c1f3d951f6c6f5130d5a007",
+    "mode": 292
+  },
+  "ostree/objects/7a/d788908f83f47acffc930e50ca27dadf4ad781346f7568c42b9dd921fbe9af.dirtree": {
+    "sha256": "7ad788908f83f47acffc930e50ca27dadf4ad781346f7568c42b9dd921fbe9af",
+    "mode": 292
+  },
+  "ostree/objects/7b/2098fa9c7a814e8b7116da1df5f69af200ff262f01dd490ff1bdbde8ad7f13.dirtree": {
+    "sha256": "7b2098fa9c7a814e8b7116da1df5f69af200ff262f01dd490ff1bdbde8ad7f13",
+    "mode": 292
+  },
+  "ostree/objects/7b/5bd77f55ba08bfe6f78fab1835bfffbf6ebcb2161a75eb0243ccb90a729546.filez": {
+    "sha256": "ebe63944a7ab112134e8351fb782a786b0550e3148a85f04a12ba0c4cc3cba6d",
+    "mode": 292
+  },
+  "ostree/objects/7d/626198d76a272e424b0c5313bcca01ac0bf3976d57351ddc17b2ca64d6dd38.dirtree": {
+    "sha256": "7d626198d76a272e424b0c5313bcca01ac0bf3976d57351ddc17b2ca64d6dd38",
+    "mode": 292
+  },
+  "ostree/objects/81/58e9f2f8f4a4a3a2268b98abaa5d71cf778ae027f5a101c03b8c2311ce3ee6.filez": {
+    "sha256": "5170b8bd53c306909562309a50691b7d24d7d42374987b2b416fd3e759edfc94",
+    "mode": 292
+  },
+  "ostree/objects/82/636c8471e9657d19ff51e87362a6f05545e6fd6c3f9a5bc06286ca46ba9ad9.dirtree": {
+    "sha256": "82636c8471e9657d19ff51e87362a6f05545e6fd6c3f9a5bc06286ca46ba9ad9",
+    "mode": 292
+  },
+  "ostree/objects/85/6b096b61efb3434fde99801d1736fee20449387d7368874803927d5598fb5c.filez": {
+    "sha256": "2d1852a132e10f7a6b282e79c6797e1b1b05028a18514ba1e63503d579a59743",
+    "mode": 292
+  },
+  "ostree/objects/85/90fe2d8857a31bf227cb73001f92a2ae8c15a3e20d9213423afb1f4e55e9da.filez": {
+    "sha256": "395573e67e61bf32f2668f2b6e946bfb5b03f9bbbe13bef66b3b588383849a78",
+    "mode": 292
+  },
+  "ostree/objects/87/75d59dd15f4193c21fa02db6d8719c848085d8d4e2f23f43ac87344d766d9b.filez": {
+    "sha256": "3a625f6a1416a798312b3ffd153b8a5fd5efb5ccd429875d58cdd79f1e8e93d1",
+    "mode": 292
+  },
+  "ostree/objects/8b/83940c9845341cd2efc95277f4777f76f602355e3da9eb8ec9025029b5991e.dirtree": {
+    "sha256": "8b83940c9845341cd2efc95277f4777f76f602355e3da9eb8ec9025029b5991e",
+    "mode": 292
+  },
+  "ostree/objects/8b/fcd7dde969cf6cadca994c39b8c8b7a02294266a1d43b55ad4774c462878cc.filez": {
+    "sha256": "ff76e1ac0ac121360afcd2af57c665afb1493bbf679bdd17e1edb21f8966d09e",
+    "mode": 292
+  },
+  "ostree/objects/8e/ae32c46b0c5b12abbf5148e2228edd9b102e0b12c380942a06bf6f6d3f9464.filez": {
+    "sha256": "9b20953f5e8a46265558d0f0abe9c65bc687fdf4e65b0649355bf03b624b5e08",
+    "mode": 292
+  },
+  "ostree/objects/8e/e0ff80c2e38f5cc40d40c3179bebee46acd0cf37c1294a95b4e05210f01f82.filez": {
+    "sha256": "01820e44c1a6f5a999c0c460f854ad425708e105bd11744e21afea10a14aaf87",
+    "mode": 292
+  },
+  "ostree/objects/91/2071cf2782e3eccb596c409f1ae424428f46982cd9103f688e382f681fe46e.filez": {
+    "sha256": "3c99a365cf0939e6081810926b4eae10ecc8fcd61a889a87be82d0e3d54e921c",
+    "mode": 292
+  },
+  "ostree/objects/92/03e567fed5e76d5e00315871c40b34f04d32378370df038062773615c4470f.dirtree": {
+    "sha256": "9203e567fed5e76d5e00315871c40b34f04d32378370df038062773615c4470f",
+    "mode": 292
+  },
+  "ostree/objects/93/2385a5c9e6dcf27740368f120c6203478bef2af8b785f9b0cfa3255b12c657.filez": {
+    "sha256": "c4fbba59b1a6a9416231331b12109a45daddbd246744406edf4427e59fbf9bf5",
+    "mode": 292
+  },
+  "ostree/objects/94/6602f3f0685217ff75f15a4232487d6e90a8ed770ce972c21a61e9fd539af1.filez": {
+    "sha256": "b6087e971d516f89219d7aa4455f50d85d267f4a2cd157c46109accf8c60e3f2",
+    "mode": 292
+  },
+  "ostree/objects/94/d6775a7ed9cac507a29876454653745612fa51d738e9fc6ce0365cf88d54d9.filez": {
+    "sha256": "1c4fe3a4d737c90faf9307b0e31f231d9edcd7397eb4029d782e0a647a945d6f",
+    "mode": 292
+  },
+  "ostree/objects/96/31d4023dc93b72fe75fc2f0c4f2751e754cb532d933353824534e2675d8a79.filez": {
+    "sha256": "d38ddc11f7dbc46697bbe34ecf7288c6e6efdce660e418be59c660747434f068",
+    "mode": 292
+  },
+  "ostree/objects/96/c0791256f404d6abf5066f26de2ba17b7270931c8e2018f488482ac9964f5b.dirtree": {
+    "sha256": "96c0791256f404d6abf5066f26de2ba17b7270931c8e2018f488482ac9964f5b",
+    "mode": 292
+  },
+  "ostree/objects/99/32e2f0e92cfb688755c4a096df5741a14d45140f0af9fd5394f265a9ecf7cc.dirtree": {
+    "sha256": "9932e2f0e92cfb688755c4a096df5741a14d45140f0af9fd5394f265a9ecf7cc",
+    "mode": 292
+  },
+  "ostree/objects/9a/7ad1f995e6098fd5f625d1235e32fd75e555dacc52d33682f5ce3871c16c75.filez": {
+    "sha256": "fe1441797b69c52caec045cdd382a3bd3918d55df88b3148d81c9d131f19f817",
+    "mode": 292
+  },
+  "ostree/objects/9e/7127ac29f8acffd933a9538cb87f6ce98b54ffe2cd325b934e6e8dd755de3f.filez": {
+    "sha256": "7eefe1c213f995661470977087de3699deabb3b8a509182838fc7c70412e4f0f",
+    "mode": 292
+  },
+  "ostree/objects/9e/d6130a7d3cb808eb4d119146b04d5dd655b2f36d17bb620b6cf81e8aa49b0d.dirtree": {
+    "sha256": "9ed6130a7d3cb808eb4d119146b04d5dd655b2f36d17bb620b6cf81e8aa49b0d",
+    "mode": 292
+  },
+  "ostree/objects/a1/b40c13a6f054b0a93b9463a08e48a33ae09b1bc65de0b4c6173809cc437162.filez": {
+    "sha256": "6f94168a29eb4cf9cda8e45f23e396bd98dedbb8230baa648f9d9282e9294edf",
+    "mode": 292
+  },
+  "ostree/objects/a2/4e25c05e10fd94efa1942f569bd3f4952e88ec16a783222e8a358555ad9748.filez": {
+    "sha256": "eb59ddb2677e6aaba71580af9be6f16e044206b7e151a3e80f05249d5f9e28f4",
+    "mode": 292
+  },
+  "ostree/objects/a4/778f3dbeae3d9f93481f7e981d9487b66b55ebff79efafa29bf586a5186fab.dirtree": {
+    "sha256": "a4778f3dbeae3d9f93481f7e981d9487b66b55ebff79efafa29bf586a5186fab",
+    "mode": 292
+  },
+  "ostree/objects/a6/1e83bb32b3386919312baef359e6c9fde91c9b09b9a591a6e0f339a210682c.dirtree": {
+    "sha256": "a61e83bb32b3386919312baef359e6c9fde91c9b09b9a591a6e0f339a210682c",
+    "mode": 292
+  },
+  "ostree/objects/a8/1c91a1a8cb85146bd698164c6cf8d45038d9899e8d72fa05120228cb607cac.filez": {
+    "sha256": "1e495b77ff62cefe0cfeccbaf82edd4c16a0512a90b86ce1c3180337f9446a6f",
+    "mode": 292
+  },
+  "ostree/objects/a8/73b3906104c00a3bbd55a64e8384a2c3585d766ae9005e1ac708b0a6a566a8.filez": {
+    "sha256": "ff919e1188251aa40f18b3ca6f4bfc349f6a32793fafbc41e6fce207f0f05d54",
+    "mode": 292
+  },
+  "ostree/objects/a8/8d140fb454392fadd2b75fb819d160127f039d8d22b377c5fa1617b858e8d0.filez": {
+    "sha256": "09b2fe23bc12db7577a488a029eb998592e6302bf6a0cca5137c9ce9b462b28d",
+    "mode": 292
+  },
+  "ostree/objects/af/46c031ea0f8353105df2c794bca1299cfa0ca8d7fe4a123d1b0057c083e284.filez": {
+    "sha256": "5c246c32d48e8c85ebc78147fcbb5e40ed6644927cdea6fe865c25cbfaa5b344",
+    "mode": 292
+  },
+  "ostree/objects/b2/3f4877dbf6ccf342f74b8308ebc987d11e58d81ce158574fc1894234020f4e.filez": {
+    "sha256": "b62d8356f8423d55c46611478a628129d8435d8367e857c8f5b6b56553caa791",
+    "mode": 292
+  },
+  "ostree/objects/b3/b2b43fd3cd0b08231f3549faee87b35ad0f3803ff4a430a8c4aaec39cc71be.filez": {
+    "sha256": "31b7a44198615a212dc854bfaa3d2e45dee816ddba7e49e09dcac62646e2f5a8",
+    "mode": 292
+  },
+  "ostree/objects/b3/c4a39c3b453c50fc36d5aae332eb7de0442d16910c7aac4092aabb7a9882a8.filez": {
+    "sha256": "3ace64cdc7921b9a41aecc1b5cb9518a99842f1f82d1ee78b75c80bb4b727ab6",
+    "mode": 292
+  },
+  "ostree/objects/b5/826874052d94d99c9da34f9b5eb29e6adf329d65225913ee775effe647f5ae.filez": {
+    "sha256": "770e659940996bb837e8ed2dfed362f15acadbd5918d648c8c7cfd669d63568d",
+    "mode": 292
+  },
+  "ostree/objects/b6/6c30080f2246ad885798a57ea96589e4cdf741ba414ea6c1f9aa7cff050748.filez": {
+    "sha256": "ed2b0c23d7614a972194ac201cd6b7816b044cf6df9be192b997da350877ce8e",
+    "mode": 292
+  },
+  "ostree/objects/b6/b183b0943475a34becce09657f6529ef9cf09215441daeb296b1f8f3065621.dirtree": {
+    "sha256": "b6b183b0943475a34becce09657f6529ef9cf09215441daeb296b1f8f3065621",
+    "mode": 292
+  },
+  "ostree/objects/b7/b495d1e42f18314e4ee0d5ed4b8938ca6693707234c7cbd3b6c1d50f354e72.filez": {
+    "sha256": "0be122da1536d8d1dd0bb4bab55b0a9a6edd1095c548372065a1f23ca617d36b",
+    "mode": 292
+  },
+  "ostree/objects/b9/55098b06ece634ad51bea3b36822bd7e87ac23efe5b05d2c037ac11244d172.filez": {
+    "sha256": "dfe98390f062ab0c9992866f651d950738afa650d963938f6bb70e3bf4904ce5",
+    "mode": 292
+  },
+  "ostree/objects/bc/16ea8bc786b66712bde7e0d58cf2a781a5d8f02bd68853a070728364b96f83.filez": {
+    "sha256": "e9c802bde790793ec5c6a68deee037f4f06304767ea27aed73a7715a6acba4b0",
+    "mode": 292
+  },
+  "ostree/objects/c0/5fe173c7179f0a34727c0c7b6f0ba9c34790cb4f323cc3dcfaa90ec12cfda8.dirtree": {
+    "sha256": "c05fe173c7179f0a34727c0c7b6f0ba9c34790cb4f323cc3dcfaa90ec12cfda8",
+    "mode": 292
+  },
+  "ostree/objects/c1/61d8b34fe7cd4ddfb4a705c8b81712702e52651f9ea2f34d8983458a9f25a3.dirtree": {
+    "sha256": "c161d8b34fe7cd4ddfb4a705c8b81712702e52651f9ea2f34d8983458a9f25a3",
+    "mode": 292
+  },
+  "ostree/objects/c3/87f06122fe3040c4af1379e68616d88c9f18acf0a11c887e4fd2b69e558d03.dirtree": {
+    "sha256": "c387f06122fe3040c4af1379e68616d88c9f18acf0a11c887e4fd2b69e558d03",
+    "mode": 292
+  },
+  "ostree/objects/c3/dbe92651b9c59559b394b6f6e16404d8a24d78d580892189f3d7cdb5a8a9a6.filez": {
+    "sha256": "2465ff5d3cf0b31a9e9eba4b78cccd5e480fac7d6292b6bcb38b42c4281b80af",
+    "mode": 292
+  },
+  "ostree/objects/c3/eea9fd68412bf764c82971e278c05b2c1c6d764b2c32490cda330654d3a548.dirtree": {
+    "sha256": "c3eea9fd68412bf764c82971e278c05b2c1c6d764b2c32490cda330654d3a548",
+    "mode": 292
+  },
+  "ostree/objects/c5/614c180a116e11a06c5d823f90a4656d29b9ecade1aaaf03aa0788cc1a50b7.dirtree": {
+    "sha256": "c5614c180a116e11a06c5d823f90a4656d29b9ecade1aaaf03aa0788cc1a50b7",
+    "mode": 292
+  },
+  "ostree/objects/c7/ca59214d0415118c1603c609e18df251a7fa2d1748bc193f932d32a7475c91.filez": {
+    "sha256": "3d497a81d6072e9322286cef4727c943334bf461526db68ae90b8b08ddd9c8f0",
+    "mode": 292
+  },
+  "ostree/objects/ca/7c45ccdfadb5016e2bead08e20fed37494c0a4866be4499e087b427c2124c2.dirtree": {
+    "sha256": "ca7c45ccdfadb5016e2bead08e20fed37494c0a4866be4499e087b427c2124c2",
+    "mode": 292
+  },
+  "ostree/objects/cb/2e3b85228333e8b823a787e20845f9bcc3071e9b95954a7b145308265777d1.filez": {
+    "sha256": "6b804ae91c4c9d55b29868409bed89a4e0f14759cc6669a9a105093fdc6278b5",
+    "mode": 292
+  },
+  "ostree/objects/cb/48ed1b4b2ed04992a36503e3a916d65af8d50406c3a031d9a34115675697f8.filez": {
+    "sha256": "f93884a5fe659e6ab9dde210ed5ae2245b79ee486011cfe5b8f690d950e59f50",
+    "mode": 292
+  },
+  "ostree/objects/cb/ca41b8c0871567fb7bd4a67d4954830571dd415e7466bd9d9501227f879fa6.filez": {
+    "sha256": "198c5b9a40740b1dee41fb3a4d095e7ea4791711d0e3ce9ab1add62dfa655fb3",
+    "mode": 292
+  },
+  "ostree/objects/cc/700d46f407c6c5ab2d5dde474366a928b7398277e61162e7f8ec06f469f07e.filez": {
+    "sha256": "0c35044f38487112618b62951f563a7b8a4d5656174d61f524c570995de819d7",
+    "mode": 292
+  },
+  "ostree/objects/cc/706180a9ce2ed3fadbe248985bc794f453ee9b7a11329b15779b6828241385.dirtree": {
+    "sha256": "cc706180a9ce2ed3fadbe248985bc794f453ee9b7a11329b15779b6828241385",
+    "mode": 292
+  },
+  "ostree/objects/cf/01f32e9ae92524012f164b16a7687aa03289dc8b027e1485ea08dcbcdb411d.filez": {
+    "sha256": "aeb2dea8c3dcd85c9f644306142596c0e568f4cc12f0c32c6a338360250bd202",
+    "mode": 292
+  },
+  "ostree/objects/d0/327c569f4fa359a97ac3dc8d58df9ae7c640e9f92f9550a74734377213efee.filez": {
+    "sha256": "672260c6ac5688949f872ac465e0d1dd9819b3d3b02e1c40268edf778cca6a7d",
+    "mode": 292
+  },
+  "ostree/objects/d6/d0eeb554f65081244dd454be0811741374f74e50ede626fcf805bfa97eef12.dirtree": {
+    "sha256": "d6d0eeb554f65081244dd454be0811741374f74e50ede626fcf805bfa97eef12",
+    "mode": 292
+  },
+  "ostree/objects/d9/b99c362627f1c762c8dd2eabfbb17e3ee393384f99f87b7fab86ae462254af.dirtree": {
+    "sha256": "d9b99c362627f1c762c8dd2eabfbb17e3ee393384f99f87b7fab86ae462254af",
+    "mode": 292
+  },
+  "ostree/objects/da/4efe0559cf5bb99cb3f71b92b51e0b00a677ee40cbeb90c208ba5990fe11c4.dirtree": {
+    "sha256": "da4efe0559cf5bb99cb3f71b92b51e0b00a677ee40cbeb90c208ba5990fe11c4",
+    "mode": 292
+  },
+  "ostree/objects/da/a3c97557ae7dfdbf0d4f589d120f244836cb4d84cd2c13b80fcf29f617d841.commit": {
+    "sha256": "daa3c97557ae7dfdbf0d4f589d120f244836cb4d84cd2c13b80fcf29f617d841",
+    "mode": 292
+  },
+  "ostree/objects/da/a3c97557ae7dfdbf0d4f589d120f244836cb4d84cd2c13b80fcf29f617d841.commitmeta": {
+    "sha256": "46b871d09970b8c939693d42dfd4afbd15c5dd4860f9e9071183c9e69c05a587",
+    "mode": 292
+  },
+  "ostree/objects/da/a3c97557ae7dfdbf0d4f589d120f244836cb4d84cd2c13b80fcf29f617d841.commitmeta2": {
+    "sha256": "ccf0d8484c704b013555daa37cae58a4d9a19de709745004209dede9d4de17d5",
+    "mode": 292
+  },
+  "ostree/objects/db/48245e5e63c83b22aa0381d6c414743a3fc22afaf350be29d264e33694eb01.filez": {
+    "sha256": "7e279b712487ee4cbe954eb39bf731a93bdc82c1ee3c39f68cf8f8bf473944e7",
+    "mode": 292
+  },
+  "ostree/objects/db/66b3dfa053b7bb2d72bf612e19e8a3737b2f1ab7be39202fe3c5d3ad1ed466.filez": {
+    "sha256": "29aea1591a90edd981a70ed1f517db2db67f28b8001b88c0c8be1eeb21e19989",
+    "mode": 292
+  },
+  "ostree/objects/db/9c05739b0905166e82009075debaec8df717d5542114c82f11aaa4b3ab4448.filez": {
+    "sha256": "54202c449a55e60570820f5375766fd4de6ef94ca2ef951eedca31a1cedfb41d",
+    "mode": 292
+  },
+  "ostree/objects/db/b67eff818dff10909f5a04edae6a6bf3859f7f9fc3575a01af8b2a7fb61505.dirtree": {
+    "sha256": "dbb67eff818dff10909f5a04edae6a6bf3859f7f9fc3575a01af8b2a7fb61505",
+    "mode": 292
+  },
+  "ostree/objects/dc/0f4b023535297db189ef2f68be57854f52eb5e06c461b3d69600312043c8e3.filez": {
+    "sha256": "1ac88e7259d33fbffcaae3ba6052389cb9bc931ea90c37a62cb97169e08dbb67",
+    "mode": 292
+  },
+  "ostree/objects/dc/8ff8c5429513d9fce15d33a7b527410b5a200d895e57fc508cf0d1a6f931f6.filez": {
+    "sha256": "32eb8dff4537ba8d802ea5c78cb52bb710324f187d132d6ccc32d85a88a13d70",
+    "mode": 292
+  },
+  "ostree/objects/dc/9b779ccdda9fb6bcdf251806c8f818c00eaf190f5f579834d2903e35f39eea.dirtree": {
+    "sha256": "dc9b779ccdda9fb6bcdf251806c8f818c00eaf190f5f579834d2903e35f39eea",
+    "mode": 292
+  },
+  "ostree/objects/de/621f0bea6c3e322b0605a96c7c27516c75efb588b63237a05a9992e81375b8.filez": {
+    "sha256": "68c049b9a64c02c4195a5c648c760f6f62f70fdd7e0e3f4f9f4edd0cfa795f2f",
+    "mode": 292
+  },
+  "ostree/objects/e2/588bd21f01b983e6a34f0432f35f8b0916638ff8bc3e7503d4fd6cf74f3d94.filez": {
+    "sha256": "470501963a276642afb74f812a86aa536df7638702232446374473ce9cc2e7f3",
+    "mode": 292
+  },
+  "ostree/objects/e4/208eead0727806b0dcddd663894210d36a66c455e0929311828de24316839d.dirtree": {
+    "sha256": "e4208eead0727806b0dcddd663894210d36a66c455e0929311828de24316839d",
+    "mode": 292
+  },
+  "ostree/objects/eb/1f5a6ac16cef6a8fa551a87cfff90925320a5ce4075fd79de3c17066f206f2.filez": {
+    "sha256": "713ad0e1a94c1591ae246f552bd7308cc1b5d8a9fcdc2cf3f627351ad54bff79",
+    "mode": 292
+  },
+  "ostree/objects/eb/b181de5d628dba93660ed109dea63fe2f0f5d0182cd6b5ceee489e2094a10b.filez": {
+    "sha256": "67135ca001188a1f52400809d5c86af0c8ef9d329e9ccc8b1534aaa48e585f9d",
+    "mode": 292
+  },
+  "ostree/objects/f0/b93db67024251f7f6cd837653124717d5b5851fc520306905102152d3555dd.filez": {
+    "sha256": "59b8ba7cb3f1a11f2f9fdb0e26ba7ddaca4f34d2f19186ef0062732f87444d7c",
+    "mode": 292
+  },
+  "ostree/objects/f4/815c099ab7722f4cac053e831b37572964346c96012dad986a491ab11a1a03.dirtree": {
+    "sha256": "f4815c099ab7722f4cac053e831b37572964346c96012dad986a491ab11a1a03",
+    "mode": 292
+  },
+  "ostree/objects/f8/c019229cd331d520eba7a18d47e4609519935e190810ba91220cf080946172.filez": {
+    "sha256": "74e8ae3e3e7491619cb7a8c405c7b933d714ae9a0ed90dfcdc7067ea84b696bf",
+    "mode": 292
+  },
+  "ostree/objects/fa/99619a36dd7a48c6a6f17a938e167e4c19b3786deff9f888d1dfe65b3a662d.filez": {
+    "sha256": "1d97aeecac6009d9f32dd37da66c0adabab7e89607dc1a356185cd19e64a952c",
+    "mode": 292
+  },
+  "ostree/objects/fc/89ba8ea322c56e9b3938aef3d27dd16a5aa639f1699e953a6ef2dc59eebcd3.dirtree": {
+    "sha256": "fc89ba8ea322c56e9b3938aef3d27dd16a5aa639f1699e953a6ef2dc59eebcd3",
+    "mode": 292
+  },
+  "ostree/objects/fc/dd2214506375e58db7d1d3b4fa88facbabef2c91ff78d32c83ac45f557a33c.filez": {
+    "sha256": "8025dfa489c30eac5151428ca1daac4af9732c3f773e560401aed81248d06462",
+    "mode": 292
+  },
+  "ostree/objects/fe/a47b200a793347f1773a12fd3bef621db29e6fc81c948edf1a143a3746d61a.commit": {
+    "sha256": "fea47b200a793347f1773a12fd3bef621db29e6fc81c948edf1a143a3746d61a",
+    "mode": 292
+  },
+  "ostree/objects/fe/a47b200a793347f1773a12fd3bef621db29e6fc81c948edf1a143a3746d61a.commitmeta": {
+    "sha256": "d1316f439eb74c180de2d20217586c79f72156ac0565ba88d7bc56356c5fe70d",
+    "mode": 292
+  },
+  "ostree/objects/fe/a47b200a793347f1773a12fd3bef621db29e6fc81c948edf1a143a3746d61a.commitmeta2": {
+    "sha256": "53a73f720651c41e9e2e171482227bc33e0612239e744ee7cb585e0861e556bd",
+    "mode": 292
+  },
+  "ostree/objects/ff/407fc650fbf7eb1ba972c306c8c0cedf8e4db1c8e5a79cbe17ad14d250e1e8.filez": {
+    "sha256": "0464a7980f2880bb9aa50c3d673dd7b73b44fa68090d0988a3a1a7586a81b54c",
+    "mode": 292
+  },
+  "ostree/refs/heads/app/app.scambio.Scambio/x86_64/stable": {
+    "sha256": "cad74b73acfb664a547166b15f6be12560548645c2f5775af77db6b076f0158d",
+    "mode": 292
+  },
+  "ostree/refs/heads/appstream/x86_64": {
+    "sha256": "b4cfb4f85851d202509567f8b98c0e9f4aa17e44fca505ba07db6171ce35d54c",
+    "mode": 292
+  },
+  "ostree/refs/heads/appstream2/x86_64": {
+    "sha256": "2618d978794cc458cd91bf8e5fdf208560ca1ae50ede307da5e8d6ccaf59ac91",
+    "mode": 292
+  },
+  "ostree/refs/heads/archive/v1.0.0": {
+    "sha256": "cad74b73acfb664a547166b15f6be12560548645c2f5775af77db6b076f0158d",
+    "mode": 292
+  },
+  "ostree/summaries/a8a6cc787d5d2d4f0b2e49a6d6c4ec04de975ae424e873ab152ff82cf45e868e.gz": {
+    "sha256": "ccf5032f2c5142e6ff24f88601bcf9eac39b6d5651c8418a8f10c8671817331e",
+    "mode": 292
+  },
+  "ostree/summaries/fb03a7c6c1b734ad5990983d9b02a9626c2668ea1308a1e5ca66b824dcd7c99d.idx.sig": {
+    "sha256": "977a1a50b89b3972685836f23bc368c5eec892005ad8919e490f1d1a19f96c08",
+    "mode": 292
+  },
+  "ostree/summary": {
+    "sha256": "dcb55bc14aa23befa6e21309dc489b269cc5c13f34cb4ed937270baf0a401b81",
+    "mode": 292
+  },
+  "ostree/summary.idx": {
+    "sha256": "fb03a7c6c1b734ad5990983d9b02a9626c2668ea1308a1e5ca66b824dcd7c99d",
+    "mode": 292
+  },
+  "ostree/summary.idx.sig": {
+    "sha256": "977a1a50b89b3972685836f23bc368c5eec892005ad8919e490f1d1a19f96c08",
+    "mode": 292
+  },
+  "ostree/summary.sig": {
+    "sha256": "46a5cdece7b03a6917471c42016d8efde37a8f0add5dace5f9f476f1eb76e1ad",
+    "mode": 292
+  },
+  "ostree.commit": {
+    "sha256": "cad74b73acfb664a547166b15f6be12560548645c2f5775af77db6b076f0158d",
+    "mode": 292
+  },
+  "scambio-1.0.0.tar.gz": {
+    "sha256": "c5df6b73274efbc20fd37022a5dd18a5bfb1109b4943b412cc86ace45b50dd9a",
+    "mode": 292
+  },
+  "scambio-1.0.0.tar.gz.asc": {
+    "sha256": "505dc471c3a25477a66eef0e24731ab827246943b5b3aec83c5dcbdd1f26e3ac",
+    "mode": 292
+  },
+  "scambio_1.0.0_all.deb": {
+    "sha256": "32a14d35c95c533fa5c01b41e62bcc41b6ce904336969aafcbec2a4fd740b293",
+    "mode": 292
+  },
+  "scambio_1.0.0_all.deb.asc": {
+    "sha256": "580cf2bf5a29a85398a5ab0f86600737cdbfc324f8e60a37ec65d616fc55069c",
+    "mode": 292
+  }
+}

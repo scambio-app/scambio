@@ -1,0 +1,4 @@
+desktop-file-validate /tmp/scambio-06-desktop-my6u66ik/usr/share/applications/app.scambio.Scambio.desktop
+PASS
+desktop-file-validate /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-build/files/share/applications/app.scambio.Scambio.desktop
+PASS

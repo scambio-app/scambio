@@ -1,0 +1,45 @@
+
+ ⛅️ wrangler 4.148.0
+────────────────────
+Your Worker has access to the following bindings:
+Binding                                                                   Resource                  Mode
+env.EMAIL (unrestricted - senders: hello@scambio.app)                     Send Email                local
+env.DB (scambio-waitlist)                                                 D1 Database               local
+env.WAITLIST_LIMITER (5 requests/60s)                                     Rate Limit                local
+env.ASSETS                                                                Assets                    local
+env.DOUBLE_OPT_IN ("true")                                                Environment Variable      local
+env.ALLOW_LOCAL_ORIGIN ("false")                                          Environment Variable      local
+env.WAITLIST_DAILY_QUOTA ("1000")                                         Environment Variable      local
+
+⎔ Starting local server...
+Wrangler detected this dev session is running in an AI agent.
+The Local Explorer API is available at http://127.0.0.1:8897/cdn-cgi/local/explorer/api
+Useful routes:
+  GET http://127.0.0.1:8897/cdn-cgi/local/explorer/api/local/workers - local Workers and bindings
+  POST http://127.0.0.1:8897/cdn-cgi/local/explorer/api/local/scheduled?worker=<name> - invoke a Worker's scheduled handler; cron is required (see the OpenAPI schema for the full request)
+  GET http://127.0.0.1:8897/cdn-cgi/local/explorer/api/storage/kv/namespaces - KV namespaces
+  GET http://127.0.0.1:8897/cdn-cgi/local/explorer/api/d1/database - D1 databases
+  GET http://127.0.0.1:8897/cdn-cgi/local/explorer/api/r2/buckets - R2 buckets
+  GET http://127.0.0.1:8897/cdn-cgi/local/explorer/api/workers/durable_objects/namespaces - Durable Object namespaces
+  GET http://127.0.0.1:8897/cdn-cgi/local/explorer/api/workflows - Workflows
+  POST http://127.0.0.1:8897/cdn-cgi/local/explorer/api/local/observability/query - run a read-only SQL query (SELECT/WITH only) over captured request traces and console logs. Tables: spans, logs (read attributes via json(attributes)). Example:
+    curl -X POST http://127.0.0.1:8897/cdn-cgi/local/explorer/api/local/observability/query -H 'Content-Type: application/json' -d '{"sql":"SELECT service, name, outcome, duration_ms FROM spans WHERE parent_id IS NULL LIMIT 20"}'
+  POST http://127.0.0.1:8897/cdn-cgi/local/explorer/api/local/observability/clear - clear all captured traces and logs
+If the routes above don't cover what you need, fetch the full OpenAPI schema (large - use only as a last resort):
+  GET http://127.0.0.1:8897/cdn-cgi/local/explorer/api - OpenAPI schema
+[wrangler:info] Ready on http://127.0.0.1:8897
+[wrangler:info] GET /download/scambio.deb 302 Found (55ms)
+[wrangler:info] HEAD /download/scambio.deb 302 Found (6ms)
+[wrangler:info] GET /download/latest.json 200 OK (1ms)
+[wrangler:info] GET /scambio_1.0.1_all.deb 200 OK (5ms)
+[wrangler:info] GET /scambio_1.0.1_all.deb.asc 200 OK (5ms)
+[wrangler:info] GET /SHA256SUMS 200 OK (6ms)
+[wrangler:info] GET /SHA256SUMS.asc 200 OK (4ms)
+[wrangler:info] GET /apt/dists/stable/InRelease 200 OK (4ms)
+[wrangler:info] GET /apt/dists/stable/Release 200 OK (9ms)
+[wrangler:info] GET /apt/dists/stable/Release.gpg 200 OK (14ms)
+[wrangler:info] GET /apt/dists/stable/main/binary-all/Packages 200 OK (9ms)
+[wrangler:info] GET /apt/pool/main/s/scambio/scambio_1.0.1_all.deb 200 OK (9ms)
+[wrangler:info] GET /flatpak/scambio.flatpakref 200 OK (9ms)
+[wrangler:info] GET /flatpak/scambio.flatpakrepo 200 OK (9ms)
+[wrangler:info] GET /flatpak/repo/summary 200 OK (10ms)

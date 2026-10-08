@@ -1,0 +1,166 @@
+{
+  "base": "http://127.0.0.1:8897",
+  "only_local_get_head": true,
+  "passed": 15,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/download/scambio.deb",
+      "status": 302,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "cache-control": "no-cache",
+        "location": "/scambio_1.0.1_all.deb"
+      }
+    },
+    {
+      "method": "HEAD",
+      "path": "/download/scambio.deb",
+      "status": 302,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "cache-control": "no-cache",
+        "location": "/scambio_1.0.1_all.deb"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/download/latest.json",
+      "status": 200,
+      "bytes": 131,
+      "sha256": "14c58445d3fab635db163ea1ec5ec26f7dc1613c36fb196df90b0459fab4906e",
+      "headers": {
+        "content-type": "application/json",
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/scambio_1.0.1_all.deb",
+      "status": 200,
+      "bytes": 229580,
+      "sha256": "37da071748767f680c304bd5e462995db5970b24315cbafffd81d63323b6d782",
+      "headers": {
+        "content-type": "application/vnd.debian.binary-package",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/scambio_1.0.1_all.deb.asc",
+      "status": 200,
+      "bytes": 228,
+      "sha256": "013be34367882f88d694d1719ded912e239ab3982680a7ce8c4d2a15de2f1422",
+      "headers": {
+        "content-type": "application/pgp-keys",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/SHA256SUMS",
+      "status": 200,
+      "bytes": 175,
+      "sha256": "1c8581c4c75fa50f9fb077102762d6accef31b248b6b46e04b2638a676af8cd8",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/SHA256SUMS.asc",
+      "status": 200,
+      "bytes": 228,
+      "sha256": "b27537a264e910967128dad24fc0d96cb39dfb9a13728f8437cf3ed44506a733",
+      "headers": {
+        "content-type": "application/pgp-keys",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apt/dists/stable/InRelease",
+      "status": 200,
+      "bytes": 630,
+      "sha256": "0b1f9dd32b63cd8730e78431909e84dff1f93ca467243424308dab65cbb504cd",
+      "headers": {
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apt/dists/stable/Release",
+      "status": 200,
+      "bytes": 353,
+      "sha256": "fd11fc40181f014ba1a33374cb3a2a598c31ac6049401f3703a79bd23a9d9fc9",
+      "headers": {
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apt/dists/stable/Release.gpg",
+      "status": 200,
+      "bytes": 119,
+      "sha256": "47052722f055509c6b4452b2fe5e6e1ff27d37f45ccbf375d0e6e92d6ce51948",
+      "headers": {
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apt/dists/stable/main/binary-all/Packages",
+      "status": 200,
+      "bytes": 1386,
+      "sha256": "98e33c546431e459faf9b2256d484200137e50b1fd8343e2153200fa93f641fe",
+      "headers": {
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apt/pool/main/s/scambio/scambio_1.0.1_all.deb",
+      "status": 200,
+      "bytes": 229580,
+      "sha256": "37da071748767f680c304bd5e462995db5970b24315cbafffd81d63323b6d782",
+      "headers": {
+        "content-type": "application/vnd.debian.binary-package",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/flatpak/scambio.flatpakref",
+      "status": 200,
+      "bytes": 924,
+      "sha256": "94c2139fcd9bb188677714bff2061aceffd9ac998d10b75a991f7dcfa1c2958e",
+      "headers": {
+        "content-type": "application/vnd.flatpak.ref",
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/flatpak/scambio.flatpakrepo",
+      "status": 200,
+      "bytes": 839,
+      "sha256": "ee2192e307be516ee2f1d94ff3daa9fca677e20f35e0962d044e273fd41230cf",
+      "headers": {
+        "content-type": "application/vnd.flatpak.repo",
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/flatpak/repo/summary",
+      "status": 200,
+      "bytes": 2053,
+      "sha256": "a24394397f4c714b75ac8fc321e2a64cd0e3c2f573ab391c6efbff83ad864670",
+      "headers": {
+        "cache-control": "no-cache"
+      }
+    }
+  ]
+}

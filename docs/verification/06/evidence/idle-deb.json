@@ -1,0 +1,17 @@
+{
+  "deb_sha256": "37da071748767f680c304bd5e462995db5970b24315cbafffd81d63323b6d782",
+  "version": "1.0.1",
+  "module": "/tmp/scambio-artifact-measure-s4tbcozc/venv/lib/python3.14/site-packages/scambio/__init__.py",
+  "elapsed_seconds": 600.0999945240037,
+  "before": {
+    "cpu_seconds": 0.12,
+    "rss_kib": 38724
+  },
+  "after": {
+    "cpu_seconds": 0.12,
+    "rss_kib": 38724
+  },
+  "cpu_percent": 0.0,
+  "environment": "Private system/session buses; no device configured; healthy injected pactl; UI enabled",
+  "method": "Two /proc/self/stat endpoint samples, 600 seconds apart; no sampling loop"
+}
