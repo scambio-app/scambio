@@ -31,8 +31,10 @@ you sit down. Scambio does the switching for you:
 
 It lives in the system tray, has a small settings window, uses no network and collects nothing.
 
-**Works with** Ray-Ban Meta and Oakley Meta glasses and any Bluetooth headphones without
-multipoint. If your headphones already support multipoint, you probably don't need Scambio.
+**Works with** Ray-Ban Meta and Oakley Meta glasses, and is meant for Bluetooth headphones without
+multipoint too. Tested so far on Oakley Meta HSTN glasses with an iPhone, on Kubuntu with KDE Plasma;
+see what we know about other models at [scambio.app/#compat](https://scambio.app/#compat). If your
+headphones already support multipoint, you probably don't need Scambio.
 
 ## Install
 
@@ -123,8 +125,9 @@ Your settings stay in your home folder; delete the folders above if you want the
 
 ## FAQ
 
-**Does it drop my phone calls?** No. If the computer takes the device mid-call, the call stays
-on your phone's speaker or earpiece; press the shortcut to send the device back to the phone.
+**Does it drop my phone calls?** Not in our tests with WhatsApp calls on an iPhone: if the computer
+takes the device mid-call, the call stays on your phone's speaker or earpiece; press the shortcut to
+send the device back to the phone. Regular phone calls and Android aren't tested yet.
 
 **Does it need root or a background service with special rights?** No. It runs as your user and
 talks to BlueZ, PipeWire and your desktop over D-Bus. It never pairs, unpairs or trusts devices.
@@ -132,15 +135,12 @@ talks to BlueZ, PipeWire and your desktop over D-Bus. It never pairs, unpairs or
 **Where is the tray menu?** Click the glasses icon in the system tray: it shows where the device is and lets you switch, toggle phone priority, open the settings or quit.
 
 **Is there a Mac version?** It's coming as a paid app. Join the waitlist at
-[scambio.app](https://scambio.app).
-
-## Contributing
-
-Bug reports and ideas are welcome in [Issues](https://github.com/scambio-app/scambio/issues).
-Before your first pull request you'll be asked to sign the
-[Contributor License Agreement](CLA.md); see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-**How Scambio is made.** Designed, reviewed and tested by a human on real hardware; written with
+**How Scambio is made.** One person at Fermich srl directs the project, makes the product decisions
+and tests it every day with real glasses and a real phone. The specifications, code reviews, design
+and many of the hardware measurements are written with Anthropic's Claude; the code, tests and
+packaging are written by OpenAI's Codex from those specifications. Every product decision,
+specification, review and hardware measurement is documented in [`docs/`](docs/) (in Italian), and
+the rules the agents follow are in [AGENTS.md](AGENTS.md). made.** Designed, reviewed and tested by a human on real hardware; written with
 AI coding agents. Every product decision, specification, security review and hardware measurement
 is documented in [`docs/`](docs/) (in Italian), and the rules the agents follow are in
 [AGENTS.md](AGENTS.md).

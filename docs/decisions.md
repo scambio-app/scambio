@@ -801,3 +801,53 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
 171. GM — Prossimo fronte: lancio e promozione della 1.0.0 Linux, in una chat dedicata
      (decisioni 180–199). Niente recensioni false né account fittizi; Meta solo come «Works
      with», con disclaimer di non affiliazione.
+
+## 2026-10-08 — Lancio e promozione della 1.0.0 Linux (chat di lancio; numeri 180–199)
+
+Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del sito, che non ha remote:
+`~/development/scambio-site/docs/lancio/`.
+
+180. GM — **I testi di lancio li scrive GM a mano**, in inglese e con la sua voce; Claude prepara per ogni
+     canale regole, scaletta, fatti e risposte alle obiezioni e poi controlla solo fatti e regole sulle
+     bozze. Motivo: Hacker News («Please don't put generated text in HN posts»), r/gnome, This Week in
+     GNOME e altri vietano testi generati o ritoccati con l'IA. GM pubblica a suo nome, dichiara di esserne
+     l'autore; niente account fittizi, voti chiesti o commenti su richiesta.
+181. Claude — **Pagina di lancio** (brief alla chat «Sito ed email»): download Linux come pulsante primario
+     ovunque tranne su Mac e Windows desktop, dove è primaria la lista d'attesa; video demo muto in loop con
+     sottotitoli per lingua, senza player esterni; mock di «How it works» in versione Linux (Super+G, «— on
+     the PC»); `og:image`; sezione `#compat`; deploy solo dopo il sì di GM sull'anteprima.
+182. Claude — **Compatibilità dichiarata a quattro livelli**: provato (Oakley Meta HSTN + iPhone su Kubuntu /
+     KDE Plasma), dovrebbe funzionare (altri occhiali Meta, Android), potrebbe funzionare (Ray-Ban Stories,
+     Ray-Ban Meta Audio, cuffie di altre marche), non serve (cuffie con multipoint). Mai più «any Bluetooth
+     headphones»; le chiamate si descrivono come misurate: WhatsApp su iPhone (M2), GSM e Android non
+     provati. Allineati README e sito.
+183. Claude — **Misura del lancio senza dati personali**: nessun analytics, cookie o parametro di
+     tracciamento; contatori nel Worker per file e per giorno (UTC) sui download e sui controlli degli
+     aggiornamenti apt/Flatpak, senza IP, user agent, referrer o paese, dichiarati in una riga
+     dell'informativa; per la domanda Mac/Windows contano solo gli iscritti `confirmed`.
+184. GM — **Lancio lunedì 12 ottobre 2026** (GM libero fino al 15; il 14 esce Plasma 6.8 e il 15 Ubuntu
+     26.10): un canale importante al giorno — r/linux (12), r/kde e KDE Discuss (13, r/kde col sì dei
+     moderatori), Lemmy (14), r/RaybanMeta col sì dei moderatori (15), poi canali minori, Fedora (19).
+     **Show HN rinviato** a non prima dell'8 novembre: GM non ha un account HN con storia e dal marzo 2026
+     HN blocca gli Show HN degli account nuovi. r/gnome non prima del 5 novembre (quattro settimane di
+     storia pubblica per i progetti con IA) e solo dopo una prova reale su GNOME. Saltati r/opensource e
+     GNOME Discourse (regole contro i progetti scritti con l'IA). Condizioni per partire: prova reale dei
+     pacchetti pubblicati installati dal sito e primaria della chiave tolta da casa (168a); se la prova
+     trova un problema serio, il lancio slitta al 19.
+185. GM — Account: Reddit personale già esistente; nuovi account **a nome di GM** su Hacker News, KDE
+     Identity, Fedora, Ubuntu One e Lemmy. Li crea GM.
+186. GM — **Dichiarazione esatta dei ruoli** nel README, sul sito e nei post: GM dirige, prende le decisioni
+     di prodotto e prova ogni giorno su hardware reale; specifiche, revisioni, design e molte misure con
+     Claude; codice, test e pacchetti con Codex; tutto pubblico in `docs/`. Supera la formulazione del README
+     dell'8 ottobre mattina («Designed, reviewed and tested by a human»), che il repo stesso smentiva.
+187. GM — **1.0.1 prima del lancio**: il profilo `meta_glasses` (ritardo di ripresa che copre l'annuncio
+     vocale, M11b) si sceglie da solo quando il nome del dispositivo contiene Meta, Ray-Ban od Oakley; oggi
+     il default è `generic` e un nuovo utente Meta sente l'annuncio sopra l'audio. Lo smista
+     l'orchestratore a Codex; se non è pronta per domenica 11 si parte con una nota nel README.
+188. GM — **Conservazione dei dati della lista d'attesa**: fino a 12 mesi dopo che Scambio è disponibile per
+     tutti i computer scelti (scelta multipla; Linux è già disponibile), mai oltre 24 mesi dall'iscrizione,
+     o fino alla cancellazione. Sostituisce «until Scambio launches plus 12 months». Il tetto dei 24 mesi è
+     una precisazione di Claude, da confermare da GM.
+189. GM — **Social**: account Mastodon del progetto solo con pubblicazione programmata (Buffer); i post li
+     prepara Claude, li approva GM, e la bio dichiara che sono scritti con l'aiuto dell'IA; le risposte alle
+     persone le scrive GM. Instagram al lancio Mac, con uno strumento di programmazione (tipo Metricool).
