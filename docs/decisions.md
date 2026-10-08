@@ -791,3 +791,13 @@ Registrate dall'orchestratore perché la chat di studio non raggiungeva casa.
      stessa verifica di firme/hash e stesso rifiuto di sovrascrivere una versione sigillata.
      Il sito locale riceve solo la candidata verificata. Nessuna promozione automatica,
      mescolanza fra archivi o sostituzione di versioni pubblicate: il rilascio resta a Claude/GM.
+
+## 2026-10-08 — Dopo la 1.0.0 (orchestratore, decise da GM con Claude)
+
+170. GM — Si attiva Cloudflare Workers Paid (~5 $/mese) sull'account personale per l'invio
+     email del doppio opt-in della waitlist (Email Sending richiede il piano Paid). Il pagamento
+     lo fa GM; poi Claude fa l'onboarding di `scambio.app` in Email Sending, ripristina il
+     binding `EMAIL`, imposta `DOUBLE_OPT_IN = "true"` e prova il giro completo.
+171. GM — Prossimo fronte: lancio e promozione della 1.0.0 Linux, in una chat dedicata
+     (decisioni 180–199). Niente recensioni false né account fittizi; Meta solo come «Works
+     with», con disclaimer di non affiliazione.
