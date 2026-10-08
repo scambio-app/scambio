@@ -387,7 +387,7 @@ msgid "config-device-address"
 msgstr "Indirizzo Bluetooth del dispositivo (XX:XX:XX:XX:XX:XX)"
 
 msgid "config-device-profile"
-msgstr "Profilo del dispositivo: generic oppure meta_glasses"
+msgstr "Profilo del dispositivo: auto (riconosce gli occhiali Meta dal nome), oppure generic o meta_glasses per sceglierlo tu"
 
 msgid "config-policy-grab-delay"
 msgstr "Millisecondi di audio prima di prendere il dispositivo"

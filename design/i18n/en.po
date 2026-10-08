@@ -387,7 +387,7 @@ msgid "config-device-address"
 msgstr "Bluetooth address of the device (XX:XX:XX:XX:XX:XX)"
 
 msgid "config-device-profile"
-msgstr "Device profile: generic or meta_glasses"
+msgstr "Device profile: auto (recognises Meta glasses from the name), or generic or meta_glasses to choose it yourself"
 
 msgid "config-policy-grab-delay"
 msgstr "Milliseconds of audio before taking the device"

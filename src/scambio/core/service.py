@@ -18,11 +18,13 @@ from gi.repository import Gio, GLib
 from scambio import __version__
 from scambio.api import BUS_NAME, INTERFACE, PATH, introspection_xml
 from scambio.config import (
+    RESUME_DEFAULTS,
     Config,
     ConfigInvalid,
     config_path,
     load,
     prepare_update,
+    resolve_profile,
     window_values,
 )
 from scambio.core.audio import Audio
@@ -43,7 +45,7 @@ from scambio.core.shortcuts import Shortcuts
 from scambio.gio import register_object, signal_add
 from scambio.i18n import Translator
 from scambio.state import Store
-from scambio.text import logger
+from scambio.text import display_text, logger
 from scambio.ui import DisabledUi, Ui, start_ui
 
 LOG = logger(__name__)
@@ -109,6 +111,7 @@ class Service:
         self.timers: dict[str, int] = {}
         self.idle_release_at = 0
         self.name = ""
+        self.profile_name = ""
         self.closed = False
         self.initialized = False
         self.repairing = False
@@ -119,6 +122,8 @@ class Service:
         self.disconnect_pending = False
         self.registration = 0
         self.owned = False
+        self.logged_profile: tuple[str, str] | None = None
+        self._update_profile()
         self.signals: list[int] = []
         self.info = Gio.DBusNodeInfo.new_for_xml(introspection_xml()).interfaces[0]
         self.published: dict[str, GLib.Variant] = {}
@@ -140,6 +145,7 @@ class Service:
             LOG.error(Translator(self.config.language).tr("daemon-already-running"))
             return False
         self.owned = True
+        self._update_profile()
         self.background.start(self.config.language)
         self.registration = register_object(
             self.bus, PATH, self.info, self._method, self._get, None
@@ -167,7 +173,7 @@ class Service:
         if self.closed or self.stopping:
             return
         if not self.initialized and event.kind in {"Switch", "SetPriority"}:
-            self.ctx, actions = step(self.ctx, event, self.config.policy)
+            self.ctx, actions = step(self.ctx, event, self.policy)
             self._actions(actions)
             self._publish()
             return
@@ -196,16 +202,41 @@ class Service:
             while self.events and not self.closed:
                 current = self.events.popleft()
                 if current.kind == "DeviceName":
-                    self.name = str(current.value)
+                    self.profile_name = str(current.value)
+                    self.name = display_text(self.profile_name)
+                    self._update_profile()
                 else:
                     before = self.ctx
-                    self.ctx, actions = step(self.ctx, current, self.config.policy)
+                    self.ctx, actions = step(self.ctx, current, self.policy)
                     if before == self.ctx and not actions:
                         LOG.debug("Ignored event %s in %s", current, self.ctx.state)
                     self._actions(actions)
                 self._publish()
         finally:
             self.processing = False
+
+    def _update_profile(self) -> None:
+        self.profile = resolve_profile(self.config.device.profile, self.profile_name)
+        self.profile_source = (
+            "auto" if self.config.device.profile == "auto" else "config"
+        )
+        self.policy = replace(
+            self.config.policy,
+            resume_delay_ms=(
+                self.config.policy.resume_delay_ms
+                if self.config.resume_delay_explicit
+                else RESUME_DEFAULTS[self.profile]
+            ),
+        )
+        identity = self.profile, self.profile_source
+        if self.owned and identity != self.logged_profile:
+            self.logged_profile = identity
+            LOG.info(
+                "device profile: %s (%s); name=%r",
+                self.profile,
+                "auto, from name" if self.profile_source == "auto" else "config",
+                self.name,
+            )
 
     def _initialize(self) -> None:
         if self.closed:
@@ -418,6 +449,8 @@ class Service:
             "Locked": self.ctx.locked,
             "DeviceAddress": self.config.device.address,
             "DeviceName": self.name,
+            "DeviceProfile": self.profile,
+            "DeviceProfileSource": self.profile_source,
             "DeviceConnected": self.ctx.device_connected,
             "IdleReleaseAt": self.idle_release_at,
             "LastError": self.ctx.last_error,
@@ -597,6 +630,7 @@ class Service:
 
     def _apply_config(self, config: Config) -> None:
         self.config = config
+        self._update_profile()
         self.bluez.reload(config)
         self.session.reload(config)
         self.audio.reload(config)

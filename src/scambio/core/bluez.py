@@ -33,6 +33,7 @@ class BlueZ:
         self.objects: dict[str, Any] = {}
         self.path = ""
         self.name = ""
+        self.raw_name = ""
         self.connected = False
         self.available = False
         self.ready = False
@@ -59,6 +60,11 @@ class BlueZ:
         self.loading = True
         self.queued.clear()
         self.objects.clear()
+        self.path = ""
+        if self.raw_name:
+            self.name = ""
+            self.raw_name = ""
+            self.emit(Event("DeviceName", ""))
         self.available = False
         self.emit(Event("Availability", False))
 
@@ -119,9 +125,10 @@ class BlueZ:
                 path, props = candidate, p
                 break
         self.path = path
-        name = display_text(props.get("Alias", ""))
-        if self.name != name or force:
-            self.name = name
+        name = str(props.get("Alias", props.get("Name", "")))
+        if self.raw_name != name or force:
+            self.raw_name = name
+            self.name = display_text(name)
             self.emit(Event("DeviceName", name))
         connected = bool(props.get("Connected", False))
         available = bool(

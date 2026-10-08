@@ -117,6 +117,13 @@
   </supports>
 
   <releases>
+    <release version="1.0.1" date="2026-10-11">
+      <description>
+        <p>Ray-Ban Meta and Oakley Meta glasses are now recognised from their name: when Scambio takes the glasses, your computer’s audio resumes after the glasses’ voice announcement instead of over it. No setting needed; an explicit device profile in the configuration still wins.</p>
+        <p xml:lang="it">Gli occhiali Ray-Ban Meta e Oakley Meta vengono riconosciuti dal nome: quando Scambio prende gli occhiali, l’audio del computer riprende dopo l’annuncio vocale degli occhiali invece che sopra. Non serve nessuna impostazione; un profilo scritto nella configurazione vince sempre.</p>
+        <p xml:lang="de">Ray-Ban-Meta- und Oakley-Meta-Brillen werden jetzt am Namen erkannt: Wenn Scambio die Brille übernimmt, läuft das Audio des Computers erst nach der Sprachansage der Brille weiter statt darüber. Keine Einstellung nötig; ein ausdrücklich gesetztes Geräteprofil in der Konfiguration hat weiterhin Vorrang.</p>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-10-08">
       <description>
         <p>First public release for Linux.</p>

@@ -66,7 +66,11 @@ class Ports:
 @pytest.fixture
 def executor(tmp_path):
     ports = Ports()
-    cfg = Config(device=Device(ADDRESS), policy=Policy(resume_delay_ms=2000))
+    cfg = Config(
+        device=Device(ADDRESS),
+        policy=Policy(resume_delay_ms=2000),
+        resume_delay_explicit=True,
+    )
     service = Service(
         gio_bus(Gio.BusType.SESSION),
         cfg,
@@ -241,7 +245,7 @@ def test_profile_reload_keeps_current_resume_timer(executor):
     s, _ = executor
     s.config_file.write_text(
         TEMPLATE.replace('address = ""', f'address = "{ADDRESS}"').replace(
-            'profile = "generic"', 'profile = "meta_glasses"'
+            'profile = "auto"', 'profile = "meta_glasses"'
         )
     )
     s._execute(A("StartTimer", "RESUME", 3210))

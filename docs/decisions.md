@@ -860,3 +860,24 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      vendita diretta resta solo come riserva per le funzioni che il sandbox non consente, da
      valutare dopo le prove di fattibilità sul Mac della chat Mac (fase 6, decisioni 220–259).
 
+## 2026-10-08 — Spec 06, profilo automatico (Codex, decisioni tecniche 210–219)
+
+210. Codex — **Configurazione dichiarata e policy effettiva separate.** Il parser conserva
+     `device.profile = "auto"` e la presenza di `policy.resume_delay_ms` con il flag interno
+     `Config.resume_delay_explicit` (non è una nuova chiave TOML). Il servizio risolve il profilo
+     con la regex della spec e passa alla macchina a stati una copia della policy con il ritardo
+     effettivo. Uno zero esplicito prevale come qualsiasi altro valore; la configurazione su
+     disco non viene riscritta. Il ricalcolo non invia azioni ai timer già programmati.
+211. Codex — **Nome completo per il riconoscimento, testo limitato per UI e log.** BlueZ emette
+     l'evento già esistente `DeviceName` con `Alias`, oppure `Name` solo se `Alias` manca; un alias
+     vuoto non ripiega sul nome. Il servizio riconosce dal nome completo, poi espone e registra
+     il testo sanificato e limitato della decisione 168/S10. Rimozione del dispositivo o perdita
+     di BlueZ azzerano il nome usato dall'automatico. Nessuna nuova sottoscrizione o polling.
+     Si registra una riga per cambio della coppia (profilo effettivo, origine), anche se cambia
+     soltanto l'origine; rinomine equivalenti e reload identici non duplicano il log.
+212. Codex — **API additiva e cambio dispositivo invariato.** `DeviceProfile` e
+     `DeviceProfileSource` sono proprietà di sola lettura pubblicate tramite il confronto già
+     usato da `PropertiesChanged`; la CLI le stampa tramite il suo `GetAll` esistente, senza
+     importare logica dal core. Il cambio di indirizzo continua a usare il riavvio della
+     decisione 155: la nuova istanza risolve solo il nuovo dispositivo, inizialmente `generic`
+     quando automatico e ignoto. Reload del solo profilo e rinomina non richiedono riavvio.

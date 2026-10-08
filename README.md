@@ -46,7 +46,7 @@ then install Scambio.
 For Ubuntu 24.04 or later, Debian 13 or later, and distributions based on them (Linux Mint 22,
 Pop!_OS 24.04, …).
 
-1. Download **[scambio_1.0.0_all.deb](https://scambio.app/download/scambio.deb)** (also on the
+1. Download **[scambio_1.0.1_all.deb](https://scambio.app/download/scambio.deb)** (also on the
    [GitHub release page](https://github.com/scambio-app/scambio/releases/latest)).
 2. Open it with a double click and install it.
 
@@ -115,6 +115,17 @@ Scambio works on its own; most days you never touch it.
 Advanced timings and ignored apps live in `~/.config/scambio/config.toml` (Flatpak:
 `~/.var/app/app.scambio.Scambio/config/scambio/config.toml`); *Settings → Configuration file*
 opens it. After editing, quit Scambio from the tray and open it again from the menu.
+
+From 1.0.1, the default device profile is `auto`: names containing the word “Meta”,
+“Ray-Ban”/“RayBan” or “Oakley” select the glasses profile, which waits 2 seconds before
+resuming your computer's audio after connecting. Other names use the generic profile.
+`scambio status` shows `DeviceProfile` and `DeviceProfileSource`.
+
+**Upgrading from 1.0.0 with Meta glasses:** an existing `profile = "generic"` is kept.
+Under `[device]`, change it to `profile = "auto"` or remove the line to enable automatic
+recognition. Explicit `generic` or `meta_glasses` profiles always win, as does an explicit
+`policy.resume_delay_ms` timing. Renaming the device in Bluetooth settings also updates
+automatic recognition; a timing change applies to the next resume.
 
 ### Uninstall
 

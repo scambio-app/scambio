@@ -91,6 +91,8 @@ def test_cli_switch_priority_persistence(daemon, fake_pactl, tmp_path):
         "Locked",
         "DeviceAddress",
         "DeviceName",
+        "DeviceProfile",
+        "DeviceProfileSource",
         "DeviceConnected",
         "IdleReleaseAt",
         "LastError",

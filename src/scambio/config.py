@@ -33,7 +33,7 @@ class ConfigInvalid(ValueError):
 @dataclass(frozen=True)
 class Device:
     address: str = ""
-    profile: str = "generic"
+    profile: str = "auto"
 
 
 @dataclass(frozen=True)
@@ -85,11 +85,24 @@ class Config:
     language: str = "auto"
     tray: bool = True
     notifications: bool = True
+    # Preserve presence separately: an explicit zero must override automatic defaults.
+    resume_delay_explicit: bool = False
+
+
+def resolve_profile(configured: str, name: str) -> str:
+    """Resolve only the configured device's name; explicit profiles always win."""
+    if configured != "auto":
+        return configured
+    return (
+        "meta_glasses"
+        if re.search(r"\bmeta\b|ray-?ban|oakley", name, re.IGNORECASE)
+        else "generic"
+    )
 
 
 TEMPLATE = """[device]
 address = ""
-profile = "generic"
+profile = "auto"
 
 [policy]
 grab_delay_ms = 500
@@ -217,8 +230,8 @@ def parse(data: dict[str, object]) -> Config:
     address = string(d, "address", "").upper()
     if address and not re.fullmatch(r"(?:[0-9A-F]{2}:){5}[0-9A-F]{2}", address):
         raise ConfigInvalid("address: invalid Bluetooth address")
-    profile = string(d, "profile", "generic")
-    if profile not in {"generic", "meta_glasses"}:
+    profile = string(d, "profile", "auto")
+    if profile not in {"auto", "generic", "meta_glasses"}:
         raise ConfigInvalid("profile: unknown device profile")
     p = section("policy", {f.name for f in fields(Policy)})
     policy = Policy(
@@ -228,7 +241,13 @@ def parse(data: dict[str, object]) -> Config:
         integer(p, "sink_timeout_seconds", 5, 1, 30),
         integer(p, "sleep_release_timeout_seconds", 4, 1, 10),
         integer(p, "unblock_silence_seconds", 10, 1, 120),
-        integer(p, "resume_delay_ms", RESUME_DEFAULTS[profile], 0, 10000),
+        integer(
+            p,
+            "resume_delay_ms",
+            RESUME_DEFAULTS[resolve_profile(profile, "")],
+            0,
+            10000,
+        ),
     )
     a = section("audio", {f.name for f in fields(Audio)})
 
@@ -282,6 +301,7 @@ def parse(data: dict[str, object]) -> Config:
         language,
         bool(ui.get("tray", True)),
         bool(ui.get("notifications", True)),
+        resume_delay_explicit="resume_delay_ms" in p,
     )
 
 

@@ -21,6 +21,8 @@
     <property name="Locked" type="b" access="read"/>
     <property name="DeviceAddress" type="s" access="read"/>
     <property name="DeviceName" type="s" access="read"/>
+    <property name="DeviceProfile" type="s" access="read"/>
+    <property name="DeviceProfileSource" type="s" access="read"/>
     <property name="DeviceConnected" type="b" access="read"/>
     <property name="IdleReleaseAt" type="t" access="read"/>
     <property name="LastError" type="s" access="read"/>
