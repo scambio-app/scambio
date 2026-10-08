@@ -140,10 +140,10 @@ Bug reports and ideas are welcome in [Issues](https://github.com/scambio-app/sca
 Before your first pull request you'll be asked to sign the
 [Contributor License Agreement](CLA.md); see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-**How Scambio is made.** Most of the code was written by AI coding agents (OpenAI Codex) from
-specifications and audits written with Anthropic's Claude, and tested on real hardware by the
-maintainer. The specifications, measurements and decisions are all in [`docs/`](docs/) (in
-Italian); the rules the agents follow are in [AGENTS.md](AGENTS.md).
+**How Scambio is made.** Designed, reviewed and tested by a human on real hardware; written with
+AI coding agents. Every product decision, specification, security review and hardware measurement
+is documented in [`docs/`](docs/) (in Italian), and the rules the agents follow are in
+[AGENTS.md](AGENTS.md).
 
 ## License
 
