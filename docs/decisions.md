@@ -851,3 +851,6 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
 189. GM — **Social**: account Mastodon del progetto solo con pubblicazione programmata (Buffer); i post li
      prepara Claude, li approva GM, e la bio dichiara che sono scritti con l'aiuto dell'IA; le risposte alle
      persone le scrive GM. Instagram al lancio Mac, con uno strumento di programmazione (tipo Metricool).
+172. GM — Conferma il tetto della decisione 188: i dati della lista d'attesa si cancellano comunque
+     dopo 24 mesi dall'iscrizione. Approva la spec 06 (1.0.1, profilo automatico) e il suo avvio a
+     Codex; decisioni tecniche di Codex per la spec 06 nell'intervallo 210–219.

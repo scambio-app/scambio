@@ -1,6 +1,6 @@
 # Spec 06 — Profilo del dispositivo automatico (Linux 1.0.1)
 
-Stato: bozza · Autore: Claude (orchestratore) · Data: 2026-10-08 · Scadenza: domenica 11 ottobre 2026
+Stato: approvata (GM, 2026-10-08) · Autore: Claude (orchestratore) · Data: 2026-10-08 · Scadenza: domenica 11 ottobre 2026
 
 ## 1. Obiettivo
 
