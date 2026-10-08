@@ -854,3 +854,9 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
 172. GM — Conferma il tetto della decisione 188: i dati della lista d'attesa si cancellano comunque
      dopo 24 mesi dall'iscrizione. Approva la spec 06 (1.0.1, profilo automatico) e il suo avvio a
      Codex; decisioni tecniche di Codex per la spec 06 nell'intervallo 210–219.
+173. GM — **Mac App Store come canale principale** (supera in parte le dec. 122 e 130): la vendita
+     diretta dal sito ha troppo attrito e poca visibilità; il pubblico arriva da Instagram e
+     l'abbonamento con prova si fa nell'App Store. L'app Mac si progetta **sandbox-first**; la
+     vendita diretta resta solo come riserva per le funzioni che il sandbox non consente, da
+     valutare dopo le prove di fattibilità sul Mac della chat Mac (fase 6, decisioni 220–259).
+
