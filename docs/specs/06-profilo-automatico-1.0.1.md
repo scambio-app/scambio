@@ -5,10 +5,13 @@ Stato: approvata (GM, 2026-10-08) · Autore: Claude (orchestratore) · Data: 202
 ## 1. Obiettivo
 
 Oggi il default del profilo dispositivo è `generic` (`resume_delay_ms = 0`). Così un nuovo utente
-con occhiali Meta, quando Scambio rilascia il dispositivo e la musica dell'iPhone riparte, sente
-l'annuncio vocale degli occhiali sovrapposto all'audio (M11b). Il profilo `meta_glasses` esiste
-già e copre l'annuncio con un ritardo di ripresa di 2000 ms (dec. M11, voce 340), ma bisogna
-sceglierlo a mano in configurazione.
+con occhiali Meta, quando Scambio **prende** gli occhiali sul PC, sente l'audio del PC (video o
+musica rimessi in riproduzione dopo la pausa della presa) sovrapposto all'annuncio vocale che gli
+occhiali fanno alla connessione: l'audio diventa udibile circa 1,0–1,3 s dopo la comparsa del sink
+(M11b, M12). Il profilo `meta_glasses` esiste già e copre l'annuncio con un ritardo di ripresa di
+2000 ms (voce 340), ma bisogna sceglierlo a mano. L'audio dell'iPhone non è di competenza di
+Scambio e non cambia (05-ui-context §1). *Correzione dell'orchestratore del 2026-10-08: la prima
+stesura parlava per errore della musica dell'iPhone al rilascio; segnalato da Codex nel report 06.*
 
 Con la 1.0.1 il profilo si sceglie **da solo**, in base al nome del dispositivo configurato.
 Esce come Linux 1.0.1, prima del lancio di lunedì 12 ottobre (dec. 187).
@@ -18,7 +21,7 @@ voce `profile` scritta a mano:
 
 - il log del demone dice una volta `device profile: meta_glasses (auto, from name)`;
 - `scambio status` mostra il profilo effettivo;
-- alla ripresa la musica riparte dopo l'annuncio, non sopra.
+- alla presa, l'audio del PC riprende negli occhiali dopo l'annuncio vocale, non sopra.
 
 ## 2. Decisioni applicabili
 
@@ -81,7 +84,7 @@ eventuali testi nuovi vanno chiesti nel report.
 - Nome vuoto o assente → `generic`.
 - `Alias` cambiato dall'utente in un nome che non corrisponde → torna `generic`.
   È voluto: chi rinomina deve poter uscire dall'automatico.
-- Cambio di profilo durante un rilascio in corso: il ritardo già programmato non si modifica;
+- Cambio di profilo durante una presa in corso: il ritardo di ripresa già programmato non si modifica;
   il nuovo vale dalla ripresa successiva.
 - Configurazione con `profile` sconosciuto → `ConfigInvalid`, come oggi.
 
@@ -130,12 +133,14 @@ Nessuna dipendenza nuova.
 - [ ] Candidata 1.0.1 costruita e verificata come in spec 05: firme, hash, install, upgrade da
   1.0.0 e rimozione su Ubuntu 24.04 e Debian 13; Flatpak.
 - [ ] La 1.0.0 sigillata è intatta.
+- [ ] AppStream 1.0.1 e chiave `config-device-profile` (en/it/de) sono già in `design/` (Claude,
+  2026-10-08): usali, non duplicarli.
 - [ ] `docs/verification/06/report.md` contiene:
   - le evidenze;
   - le richieste per `02-architecture.md`;
   - la misura CPU/RSS a riposo;
-  - la checklist di prova reale per GM: occhiali Meta con config pulita, ripresa dopo
-    l'annuncio, upgrade da 1.0.0 con `profile` già scritto.
+  - la checklist di prova reale per GM: occhiali Meta con config pulita, ripresa dell'audio del PC
+    dopo l'annuncio alla presa, upgrade da 1.0.0 con `profile` già scritto.
 - [ ] Decisioni tecniche in `docs/decisions.md`, nell'intervallo **210–219**.
 - [ ] Prova reale eseguita da GM: … · Firma: GM, data.
 
