@@ -387,6 +387,19 @@ def apt_repo():
     latest()
 
 
+def copy_repository(source, destination):
+    """Unseal only the derived copy, including OSTree's writable lock/config files."""
+
+    def writable():
+        if destination.exists():
+            for item in [destination, *destination.rglob("*")]:
+                item.chmod(0o755 if item.is_dir() else 0o644)
+
+    writable()  # Also allow retrying an interrupted copy/build.
+    shutil.copytree(source, destination, dirs_exist_ok=True)
+    writable()
+
+
 def flatpak():
     value = check()
     dist()
@@ -399,11 +412,7 @@ def flatpak():
     )
     repository = DIST / "flatpak-repo"
     for previous in repository_archives():
-        shutil.copytree(previous / "ostree", repository, dirs_exist_ok=True)
-    if repository.exists():
-        for directory in [repository, *repository.rglob("*")]:
-            if directory.is_dir():
-                directory.chmod(0o755)
+        copy_repository(previous / "ostree", repository)
     epoch = run("git", "show", "-s", "--format=%ct", "HEAD", capture=True).strip()
     run("flatpak-builder", "--show-manifest", manifest)
     run(

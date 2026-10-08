@@ -218,3 +218,26 @@ def test_upgrade_source_requires_a_real_older_release(
             paths[1] / "scambio_1.9.0_all.deb.asc",
         )
     ]
+
+
+def test_copy_sealed_repository_is_writable_without_mutating_source(
+    release_tools, tmp_path
+):
+    source, destination = tmp_path / "sealed", tmp_path / "build"
+    source.mkdir()
+    (source / ".lock").write_bytes(b"")
+    (source / "config").write_text("original config")
+    for path in source.iterdir():
+        path.chmod(0o444)
+    source.chmod(0o555)
+    try:
+        for _ in range(2):
+            release_tools.copy_repository(source, destination)
+            assert (destination / "config").read_text() == "original config"
+            (destination / ".lock").open("a").close()
+            (destination / "config").write_text("updated copy")
+            assert (source / "config").read_text() == "original config"
+            assert (source / "config").stat().st_mode & 0o777 == 0o444
+            assert source.stat().st_mode & 0o777 == 0o555
+    finally:
+        source.chmod(0o755)

@@ -891,3 +891,9 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      Debian/Ubuntu aggiorna tramite il repository apt locale firmato e controlla che il profilo
      `generic` scritto rimanga identico; Flatpak installa il vecchio commit firmato, aggiorna
      dal nuovo repository, rimuove e reinstalla in un'installazione temporanea.
+214. Codex — **Permessi della copia OSTree di lavoro.** Copiare un archivio sigillato conserva
+     anche il file `.lock` e `config` in modalità 0444: la prima build 1.0.1 ha fallito
+     l'esportazione per questo motivo. Dopo la copia, e prima di ripeterla in caso di
+     interruzione, il tooling rende scrivibili file e directory soltanto nella destinazione
+     derivata sotto `dist/`. L'archivio sorgente non viene modificato né collegato con hard link.
+     Un test verifica la scrittura della copia, la ripetizione e l'invarianza dell'originale.
