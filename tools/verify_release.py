@@ -267,7 +267,7 @@ def flatpak(previous):
             "flatpak",
             "--user",
             "remote-modify",
-            f"--url={SITE / 'flatpak/repo'}",
+            f"--url={(SITE / 'flatpak/repo').as_uri()}",
             "scambio-test",
             env=env,
         )

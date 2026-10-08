@@ -897,3 +897,9 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      interruzione, il tooling rende scrivibili file e directory soltanto nella destinazione
      derivata sotto `dist/`. L'archivio sorgente non viene modificato né collegato con hard link.
      Un test verifica la scrittura della copia, la ripetizione e l'invarianza dell'originale.
+215. Codex — **URL locale esplicito nella verifica dell'upgrade Flatpak.** A differenza di
+     `remote-add`, `remote-modify --url` non converte un percorso assoluto in un URL locale.
+     La sonda usa `Path.as_uri()` (`file://`); senza questa conversione `flatpak update`
+     può terminare con successo lasciando installata la vecchia versione. Il controllo
+     successivo di `scambio --version` ha rilevato il problema; il ciclo con URL corretto
+     verifica upgrade, permessi, accessi D-Bus negati, rimozione e reinstallazione reali.
