@@ -903,3 +903,45 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      può terminare con successo lasciando installata la vecchia versione. Il controllo
      successivo di `scambio --version` ha rilevato il problema; il ciclo con URL corretto
      verifica upgrade, permessi, accessi D-Bus negati, rimozione e reinstallazione reali.
+
+## 2026-10-08 — Sito ed email (chat «Sito ed email»; numeri 200–209)
+
+200. GM — **Email di conferma**: hero **statico** (render degli occhiali con la luce accesa
+     sull'asta destra, JPEG 1200×640, ~22 KB); **nessuna email di benvenuto** dopo la conferma.
+     Email light-first con tema scuro disegnato (art direction in `scambio-site/design/brief/`);
+     un solo template riusabile anche per gli annunci (`design/email/layout.html`).
+201. GM — **Selettore lingue «asta degli occhiali»** (`<scambio-temple>`, web component senza
+     dipendenze): è l'**asta destra** come sugli occhiali veri (cerniera a destra), più grande sul
+     telefono, aggancio con proiezione della velocità. Provato da GM su iPhone e PC. Render degli
+     occhiali specchiati di conseguenza su pagina ed email. Fase 2 (header del sito, demo PC↔iPhone)
+     solo dopo il sì di GM sulla pagina di conferma.
+202. GM — **Conferma dell'iscrizione con Cloudflare Turnstile** (proposta reCAPTCHA di GM sostituita
+     con Turnstile: stesso fornitore del sito, gratis, senza cookie): il link dell'email apre una
+     pagina che verifica e conferma da sola; il GET non modifica più nulla, conferma solo il POST
+     con token Turnstile. Ferma la conferma automatica da parte degli scanner di posta.
+203. Claude — **Disiscrizione = cancellazione della riga**, più una ricevuta pseudonima
+     (HMAC dell'indirizzo, date di consenso e revoca, canale) solo per chi aveva confermato:
+     l'informativa promette la cancellazione e serve comunque poter dimostrare di aver rispettato la
+     revoca. Le richieste mai confermate si cancellano e basta (cron: entro 7 giorni).
+204. Claude — **Link di disiscrizione = `sid` casuale + HMAC con segreto del Worker** invece di un
+     token salvato come hash: nel DB non c'è nulla che basti a costruire un link, lo stesso link vale
+     in ogni email futura e all'invio non si scrive nulla. Segreti `UNSUBSCRIBE_KEY`/`RECEIPT_KEY` in
+     `~/.config/scambio-site/` (copia nel gestore password di GM). One-click RFC 8058: POST senza
+     controlli d'origine né rate limit, 200 senza redirect; il GET mostra solo la pagina.
+205. Claude — Header dell'email: From «Scambio <hello@scambio.app>», `List-Unsubscribe` +
+     `List-Unsubscribe-Post` anche nella conferma (nel corpo: «Non eri tu? Annulla la richiesta»),
+     `Auto-Submitted`, `Content-Language`; niente Reply-To (hello@ arriva già a GM via catch-all).
+     Limite di reinvio della conferma: 15 min tra due invii, 3 ogni 7 giorni.
+206. GM — **Pulsante blu in tema scuro #3C69F5** su tutto il sito, email e pagine (contrasto AA
+     4,6:1; prima 3,87:1). **Piè di pagina** con «Un prodotto di Fermich srl» (link a fermich.cloud),
+     P. IVA, sede e privacy@.
+207. GM — **Nuovo marchio «Deviatoio» v3**: scambio ferroviario visto dall'alto, ramo acceso blu
+     (dove sta l'audio) e lama staccata da una fessura sottile, gamba bassa (telefono) più corta del
+     13 %. Applicato a icona dell'app (`scambio/design/icons/hicolor/{scalable,symbolic}/apps`), sito,
+     favicon, og:image, email. **Le icone di stato del tray restano quelle della 1.0.0** fino alla
+     prova dal vivo su casa; proposta pronta (set «T2»: ramo acceso + dispositivo) in
+     `design/icons/_deviatoio-v3/`.
+208. Claude — Pagina di lancio (brief 01 della chat «Lancio») implementata con i testi revisionati;
+     anteprima su URL di preview del Worker (`preview_urls = true`, `workers_dev` resta spento).
+     Contatori aggregati, email, Turnstile e disiscrizione nel Worker: spec
+     `scambio-site/docs/specs/01-worker-lancio.md` a Codex, in due fasi (contatori prima).
