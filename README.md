@@ -44,7 +44,8 @@ then install Scambio.
 For Ubuntu 24.04 or later, Debian 13 or later, and distributions based on them (Linux Mint 22,
 Pop!_OS 24.04, …).
 
-1. Download **[scambio_1.0.0_all.deb](https://scambio.app/download/scambio.deb)**.
+1. Download **[scambio_1.0.0_all.deb](https://scambio.app/download/scambio.deb)** (also on the
+   [GitHub release page](https://github.com/scambio-app/scambio/releases/latest)).
 2. Open it with a double click and install it.
 
 The package also adds the Scambio APT repository, so updates arrive with your regular system
@@ -93,8 +94,32 @@ Open **Scambio** from your applications menu and pick your headphones or glasses
   only while you have it open.
 
 <p align="center">
-  <img src="design/screenshots/tray.png" width="360" alt="Scambio tray menu">
+  <img src="design/screenshots/settings-dark.png" width="360" alt="Scambio settings window, dark style">
 </p>
+
+## Using Scambio
+
+Scambio works on its own; most days you never touch it.
+
+| You want to… | Do this |
+|---|---|
+| Listen on the computer | Just press play. Scambio takes the device from the phone, pauses the video for the couple of seconds the switch takes, then resumes it in your ears. |
+| Give it back to the phone | Nothing: after 2 minutes of silence (change it in *Settings*), when you lock the screen or before suspend, the phone gets it back. |
+| Switch by hand | Press <kbd>Super</kbd>+<kbd>G</kbd>, or use *Move to PC* / *Hand back to the phone* in the tray menu or the settings window. Handing it back with the shortcut also turns on *Phone priority*; taking it again turns it off. |
+| Keep the computer's hands off | Turn on **Phone priority** (tray menu or settings). The computer won't take the device until you turn it off or press the shortcut. |
+| Use other headphones | *Settings → Device*: pick any paired Bluetooth headphones. Hand the current device back to the phone first. |
+| Check what's happening | `scambio status` in a terminal (Flatpak: `flatpak run app.scambio.Scambio status`). |
+
+Advanced timings and ignored apps live in `~/.config/scambio/config.toml` (Flatpak:
+`~/.var/app/app.scambio.Scambio/config/scambio/config.toml`); *Settings → Configuration file*
+opens it. After editing, quit Scambio from the tray and open it again from the menu.
+
+### Uninstall
+
+- `.deb`: `sudo apt remove scambio` (this also removes the Scambio APT source).
+- Flatpak: `flatpak uninstall app.scambio.Scambio`.
+
+Your settings stay in your home folder; delete the folders above if you want them gone.
 
 ## FAQ
 
@@ -103,6 +128,8 @@ on your phone's speaker or earpiece; press the shortcut to send the device back 
 
 **Does it need root or a background service with special rights?** No. It runs as your user and
 talks to BlueZ, PipeWire and your desktop over D-Bus. It never pairs, unpairs or trusts devices.
+
+**Where is the tray menu?** Click the glasses icon in the system tray: it shows where the device is and lets you switch, toggle phone priority, open the settings or quit.
 
 **Is there a Mac version?** It's coming as a paid app. Join the waitlist at
 [scambio.app](https://scambio.app).
