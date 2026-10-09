@@ -1,0 +1,4 @@
+P: app.scambio.Scambio:4: cid-contains-uppercase-letter app.scambio.Scambio
+I: app.scambio.Scambio:76: developer-name-tag-deprecated
+
+✔ Validation was successful: infos: 1, pedantic: 1

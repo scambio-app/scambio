@@ -952,3 +952,18 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      senza token con un limite di frequenza (su iPhone la verifica non si completava). Gli asset di
      rilascio del sito restano quelli della 1.0.0. La candidata 1.0.1 non è pubblicata finché non
      viene ricostruita con la nuova icona.
+
+## 2026-10-09 — Spec 06, candidata rc2 con Deviatoio v3 (Codex)
+
+216. Codex — **Ricostruzione rc2 dallo stesso HEAD, senza alterare la rc1.** La candidata
+     `linux-1-0-1-rc2` usa il commit `60d2d42`, con le icone applicative approvate in `5fd3004`.
+     Un worktree temporaneo pulito permette di usare i controlli di release esistenti senza
+     spostare, ignorare nel repository o committare i file GitHub non tracciati di GM.
+     Restano versione 1.0.1, branch Flatpak `stable` e sottochiave di firma della spec 05;
+     gli archivi della rc1 e della 1.0.0 sono solo sorgenti di verifica, mai destinazioni.
+     Dopo i cicli di upgrade reali, si confrontano gli SHA256 delle icone installate con il
+     commit approvato e quelli del tray con la 1.0.0 sigillata, validando anche desktop e
+     AppStream. Il sito riceve soltanto gli asset verificati nei percorsi già usati, con
+     rebase locale e controllo del padre del commit. Nessuna promozione o pubblicazione.
+     Nel trasferimento dal worktree si copiano soltanto artefatti e repository, escludendo
+     `flatpak-build/`: è una directory di lavoro con `var/run` collegato al `/run` dell'host.

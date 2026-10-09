@@ -1,0 +1,42 @@
++ dpkg-deb --extract /tmp/scambio-rc2-build/dist/candidates/linux-1-0-1-rc2/scambio_1.0.1_all.deb /tmp/scambio-rc2-artifact-h5rig736/extracted
++ ~/development/scambio/.venv/bin/python -m venv --system-site-packages /tmp/scambio-rc2-artifact-h5rig736/venv
++ /tmp/scambio-rc2-artifact-h5rig736/venv/bin/python -I -c import sysconfig; print(sysconfig.get_path('purelib'))
++ /tmp/scambio-rc2-artifact-h5rig736/venv/bin/python -I -c 
+import json, os, signal, sys, tempfile, time
+from pathlib import Path
+from gi.repository import GLib
+import scambio
+from scambio.core.service import run
+for name in ('DBUS_SYSTEM_BUS_ADDRESS','DBUS_SESSION_BUS_ADDRESS'):
+    assert 'dbusmock_data_' in os.environ[name], name
+fake = "import sys,signal; args=sys.argv[1:]; signal.pause() if 'subscribe' in args else print('pactl 17.0' if args==['--version'] else 'default' if args==['get-default-sink'] else '[]')"
+root = Path(tempfile.mkdtemp(prefix='scambio-rc2-idle-'))
+(root/'config.toml').write_text('[shortcut]\npreferred = ""\n')
+(root/'state.json').write_text('{}')
+def usage():
+    fields=Path('/proc/self/stat').read_text().split(')',1)[1].split()
+    return {'cpu_seconds':(int(fields[11])+int(fields[12]))/os.sysconf('SC_CLK_TCK'),
+            'rss_kib':int(fields[21])*os.sysconf('SC_PAGE_SIZE')//1024}
+def begin():
+    before=usage(); start=time.monotonic()
+    print('MEASUREMENT_STARTED',flush=True)
+    def end():
+        after=usage(); elapsed=time.monotonic()-start
+        print('RESULT '+json.dumps({'version':scambio.__version__,'module':scambio.__file__,
+              'elapsed_seconds':elapsed,'before':before,'after':after,
+              'cpu_percent':100*(after['cpu_seconds']-before['cpu_seconds'])/elapsed,
+              'environment':'Private system/session buses; no device configured; healthy injected pactl; UI enabled',
+              'method':'Two /proc/self/stat endpoint samples, 600 seconds apart; no sampling loop'}),flush=True)
+        os.kill(os.getpid(), signal.SIGTERM)
+        return False
+    GLib.timeout_add(600000,end)
+    return False
+GLib.timeout_add(1000,begin)
+raise SystemExit(run(root/'config.toml',root/'state.json',[sys.executable,'-I','-c',fake]))
+
+Cannot load state; using defaults: invalid state
+Cannot acquire sleep inhibitor: g-dbus-error-quark: GDBus.Error:org.freedesktop.DBus.Error.Name…
+No screen lock source available
+MEASUREMENT_STARTED
+RESULT {"version": "1.0.1", "module": "/tmp/scambio-rc2-artifact-h5rig736/venv/lib/python3.14/site-packages/scambio/__init__.py", "elapsed_seconds": 600.0835994740191, "before": {"cpu_seconds": 0.11, "rss_kib": 38508}, "after": {"cpu_seconds": 0.11, "rss_kib": 38508}, "cpu_percent": 0.0, "environment": "Private system/session buses; no device configured; healthy injected pactl; UI enabled", "method": "Two /proc/self/stat endpoint samples, 600 seconds apart; no sampling loop"}
+

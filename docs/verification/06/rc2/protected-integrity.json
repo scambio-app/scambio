@@ -1,0 +1,23 @@
+{
+  "release_1_0_0": {
+    "files": 188,
+    "entries": 328,
+    "sha256_and_modes_unchanged": true
+  },
+  "rc1_archive": {
+    "files": 256,
+    "entries": 441,
+    "sha256_and_modes_unchanged": true
+  },
+  "rc1_dist": {
+    "files": 663,
+    "entries": 1128,
+    "sha256_and_modes_unchanged": true
+  },
+  "gm_github": {
+    "files": 2,
+    "entries": 3,
+    "sha256_and_modes_unchanged": true
+  },
+  "no_public_archive_1_0_1": true
+}

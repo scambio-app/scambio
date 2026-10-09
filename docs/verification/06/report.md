@@ -258,3 +258,148 @@ misure, nessuna scrittura o operazione sul registro.
 
 La sola voce non soddisfatta della checklist di done è la prova reale firmata di GM.
 Il goal non è dichiarato completo finché questa evidenza manca.
+
+## Rc2 — Deviatoio v3, 2026-10-09
+
+**Candidata `linux-1-0-1-rc2` costruita e verificata da `60d2d42f3bd3f71c8a4d47c6ec969b05aad3e689`.**
+Il lavoro precedente sopra resta l'evidenza storica della rc1. Questa sezione identifica
+la candidata da consegnare a Claude/GM per il seguito; non chiude la prova umana della spec.
+
+### Perimetro e sorgente
+
+Incarico dell'orchestratore: ricostruzione della Linux 1.0.1 dopo il commit di design
+`5fd3004`, senza modifica del comportamento o delle icone di stato. Codice, test, tooling,
+packaging e versione sono identici alla sorgente della rc1 (`9c6a85d`; [confronto](rc2/source-integrity.json)); cambia il contenuto
+approvato di `design/` e la documentazione già presente in HEAD. Nessun file di design è
+stato modificato da Codex; nessuna decisione di prodotto o asset necessario mancante.
+
+Build in un worktree temporaneo pulito dello stesso HEAD, con gli strumenti della spec 05.
+Questo evita di spostare o committare `design/icons/_deviatoio-v3/github/`, presente nel
+checkout di GM. Il tarball non contiene tale cartella. Output finale:
+`dist/candidates/linux-1-0-1-rc2/`; sigillo separato:
+`~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/`.
+
+```sh
+# Nel worktree pulito a 60d2d42; VENV indica la venv di sviluppo esistente.
+SCAMBIO_RELEASE_CANDIDATE=linux-1-0-1-rc2 make dist deb apt-repo flatpak flatpak-site
+SCAMBIO_RELEASE_CANDIDATE=linux-1-0-1-rc2 make verify VENV="$SCAMBIO_DEV_VENV"
+```
+
+La sigillatura usa `tools/release.py:seal()` solo dopo `make verify` riuscito. Lo staging
+sul sito copia gli stessi byte verificati, senza ricostruire né promuovere la versione.
+
+### Artefatti e firme
+
+[Build](rc2/build.log), [verifica completa](rc2/verify.log), [sigillatura](rc2/seal.log),
+[inventario artefatti](rc2/artifacts.json), [manifest](rc2/candidate-manifest.json) e
+[firma del manifest](rc2/candidate-manifest.json.asc).
+
+| Artefatto | Byte | SHA256 / commit OSTree |
+|---|---:|---|
+| `scambio_1.0.1_all.deb` | 235654 | `8b58c23bb52379f8f0b8482208b920afc0b031b1578fb44d2e6bab5c5935e2e8` |
+| `scambio-1.0.1.tar.gz` | 1806898 | `afcbea3c0e0df285ef4020f504a05cf25fe9bc61608afa24c11b4857097b25af` |
+| Flatpak `app.scambio.Scambio/x86_64/stable` | — | `dbf64320aa22673bc6451aedee650ea2e0c2bfaa0ed6821cfb4d7c9c8014b13e` |
+
+Firme distaccate di deb/tarball/SHA256SUMS, `InRelease` e `Release.gpg`, repository OSTree
+e manifest verificati con la sottochiave `4C23A6729A5750DDFC8745E305499CD6ECB01DE7`.
+Il manifest sigillato elenca 309 file; file 0444 e directory 0555.
+
+### Checklist rc2 e icone installate
+
+| Controllo | Esito / evidenza |
+|---|---|
+| `make check` | **PASS**, 848 test, zero saltati, format/lint/mypy verdi; [log](rc2/make-check.log) |
+| Ubuntu 24.04 e Debian 13, con systemd | **PASS**, vera 1.0.0 → apt upgrade 1.0.1 → remove/purge → reinstall/purge; [log](rc2/verify.log) |
+| Ubuntu 24.04 e Debian 13, senza systemd | **PASS**, stesso ciclo e assenza di systemctl verificata prima/dopo |
+| Configurazione e stato nell'upgrade | **PASS**, `profile = "generic"` e sentinella preservati; nuovo default `auto` e precedenze verificati col Python installato |
+| Flatpak temporaneo, GNOME Platform 51 | **PASS**, commit 1.0.0 sigillato → rc2 → rimozione/reinstallazione/rimozione; permessi esatti e tre accessi D-Bus negati |
+| Installazione diretta rc2 e rimozione delle icone | **PASS**, [Ubuntu](rc2/icons-ubuntu-24.04.log), [Debian](rc2/icons-debian-13.log) |
+| SVG applicativi e di stato installati | **PASS**, SHA256, XML e caricamento GdkPixbuf a 128 px; [sonda](rc2/check-icons.py), [hash attesi](rc2/expected-icons.json) |
+| `.desktop` e metainfo installati | **PASS**, `desktop-file-validate` e `appstreamcli validate --pedantic --no-net` nei container e sul deploy Flatpak temporaneo |
+| Export Flatpak desktop/hicolor | **PASS**, desktop esportato valido, entrambe le icone esportate identiche a quelle installate; [log](rc2/idle-flatpak.log) |
+| Catalogo AppStream Flatpak | **PASS**, [validazione](rc2/flatpak-appstream-validation.log), [catalogo](rc2/flatpak-appstream.xml), [icone generate](rc2/flatpak-appstream.json) |
+| Integrità della 1.0.0, della rc1 e dei file GM | **PASS**, [inventario prima](rc2/protected-before.json) e [confronto dopo](rc2/protected-integrity.json) |
+| Prova Bluetooth/audio reale e audit visivo desktop | **Non eseguiti da Codex**; resta la checklist GM precedente, da eseguire con gli hash rc2 |
+
+Le icone installate in `share/icons/hicolor/` e nella copia dati
+`share/scambio/design/icons/hicolor/` coincidono byte per byte con `5fd3004`:
+
+- `scalable/apps/app.scambio.Scambio.svg`: `51afa23b6861a24811ff25fb2951f89f2258ab9a3bfb1c8e4116d2ea8e6d9b16`;
+- `symbolic/apps/app.scambio.Scambio-symbolic.svg`: `71d04c3ca64c612584ea14d53e8db146c69afbf2f3634ea2e3e00647bdf87f4a`.
+
+Il desktop ha `Icon=app.scambio.Scambio`; AppStream ha l'ID corrispondente e
+`launchable=app.scambio.Scambio.desktop`, release 1.0.1. I PNG del catalogo a
+[64 px](rc2/appstream-icon-64.png) e [128 px](rc2/appstream-icon-128.png) sono nuovi rispetto
+alla rc1; il 128 px è stato anche ispezionato: è Deviatoio v3. Le sei icone attive
+`scalable/status/` coincidono con quelle estratte dalla **vera 1.0.0 sigillata**.
+
+L'AppStream sorgente/installato conserva solo il pedantico sull'ID maiuscolo; quello
+aggregato Flatpak aggiunge l'informazione `developer-name-tag-deprecated`. Entrambi i
+validatori terminano con exit 0. Come nella rc1, il catalogo generato elenca anche varianti
+48 px/HiDPI mentre il repository esporta i PNG 64/128 px; nessuna modifica manuale ai dati
+generati. Lintian senza errori, avvisi preesistenti su percorsi assoluti e manpage; restano
+1056 warning esterni PyGObject/asyncio. `flatpak-builder --show-manifest` eseguito;
+`flatpak-builder-lint` non disponibile per i prerequisiti GI mancanti
+([sonda](rc2/flatpak-lint-prerequisites.log)), omissione consentita dalla spec 05 §3.1.5.3.
+
+### Integrità, sito e limiti
+
+Confrontati SHA256 e permessi prima/dopo: **188 file** della 1.0.0 sigillata, **256 file**
+dell'archivio rc1, **663 file** del suo `dist/`, **2 file** GitHub non tracciati di GM,
+tutti identici. Nessuna cartella 1.0.1 nell'archivio pubblico.
+
+Nel sito: rebase locale su `4fc35e02713d88ef47ca69a11a464bb033278330`; HEAD verificato
+prima del commit e padre verificato dopo. Commit **`3a8c721d3f8d248615d424605e57b201870ede1f`**,
+109 percorsi di rilascio, 317 file confrontati con lo staging
+([inventario](rc2/site-assets.json)). Tutti gli altri file tracciati e il file non
+tracciato `docs/specs/01-report-migrazione.txt` sono identici al preflight. Nessun HTML,
+CSS, JS, Worker, configurazione, migration o asset di marketing modificato.
+
+Anteprima `wrangler dev --local` su `127.0.0.1:8897`, poi fermata: **15 GET/HEAD PASS**,
+redirect relativo alla 1.0.1, byte/hash, MIME e cache di deb/firme/apt/Flatpak
+([risultati](rc2/site-routes.json)). Nessun invio email, operazione D1 remota, deploy,
+push, tag o release GitHub.
+
+Preparazione corretta prima delle verifiche finali: i symlink alle directory venv/dist
+non soddisfacevano il controllo di albero pulito; la verifica ha poi usato esplicitamente
+la venv di sviluppo. La sonda idle Flatpak verificava inizialmente il percorso del bus
+privato dentro il sandbox, dove Flatpak lo riscrive: il controllo viene fatto nel processo
+padre prima dell'avvio. La copia della directory di lavoro Flatpak seguiva `var/run → /run`:
+interrotta e rimossa la copia parziale, sono stati trasferiti soltanto i deliverable
+(decisione 216). Nessuna di queste prove intermedie è contata come superata.
+
+### Misure a riposo, consegna e proprietà
+
+Due letture di `/proc/self/stat` distanti almeno 600 s, su bus D-Bus privati, senza
+Bluetooth reale, nessun dispositivo configurato, pactl sano simulato e UI abilitata.
+Deb estratto e modulo installato in una venv temporanea; Flatpak installato in una
+`FLATPAK_USER_DIR` temporanea con runtime condiviso in lettura, poi rimosso. La
+[sonda allegata](rc2/artifact-probes.py) registra SHA256 del deb o commit OSTree e il
+percorso del modulo realmente caricato. I timer appartengono alla sonda, non al demone.
+
+| Artefatto | Intervallo | CPU aggiuntiva | RSS iniziale/finale |
+|---|---:|---:|---:|
+| [Deb rc2](rc2/idle-deb.json) | 600.084 s | 0 s / 0% | 38508 / 38508 KiB |
+| [Flatpak rc2](rc2/idle-flatpak.json) | 600.100 s | 0 s / 0% | 42616 / 42348 KiB |
+
+RSS del deb identica, quella Flatpak scende di 268 KiB. Sono misure degli artefatti rc2
+nello scenario dichiarato; non dimostrano la ripresa audio sugli occhiali, l'avvio al login
+o la resa nel tray di un desktop reale. Gli avvisi della sonda su stato iniziale/sorgenti
+di blocco assenti sono coerenti con i bus vuoti della prova. Non sono state cambiate
+configurazione, scorciatoie o servizio reali di GM.
+
+Decisione tecnica nuova: **216** (217–219 libere). File modificati in `scambio`:
+`docs/decisions.md`, questo report e i nuovi allegati sotto `docs/verification/06/rc2/`.
+Il commit di evidenza non modifica i sorgenti dei pacchetti. In `scambio-site` soltanto i
+percorsi elencati in `site-assets.json`; commit locale sopra.
+
+Regole lette in ordine; graphify `query`, `affected`, `path` consultati e grafo aggiornato.
+Nel sito `graphify affected` segnala il grafo assente: lettura diretta dei percorsi già
+noti, nessuna ricerca `grep`/`rg`/`find`. Contesto storico tramite il solo MCP
+`agvm-scambio`, brain `scambio_brain`, ricerca `7f15786e-53fc-4f97-b587-4781bc829f1a` e
+ispezione successiva; memoria verificata contro repo/report, nessuna scrittura nel brain.
+
+Nessuna richiesta nuova per `design/` e nessuna domanda di prodotto aperta. Per Claude:
+audit della rc2, aggiornamento di tracker/contesti e brain alla milestone; restano valide
+le richieste architetturali sopra. La prova umana non è simulata né firmata: la rc2 è pronta
+per il seguito dell'orchestratore, senza autorizzazione implicita alla pubblicazione.

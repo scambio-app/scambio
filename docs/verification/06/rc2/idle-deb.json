@@ -1,0 +1,17 @@
+{
+  "version": "1.0.1",
+  "module": "/tmp/scambio-rc2-artifact-h5rig736/venv/lib/python3.14/site-packages/scambio/__init__.py",
+  "elapsed_seconds": 600.0835994740191,
+  "before": {
+    "cpu_seconds": 0.11,
+    "rss_kib": 38508
+  },
+  "after": {
+    "cpu_seconds": 0.11,
+    "rss_kib": 38508
+  },
+  "cpu_percent": 0.0,
+  "environment": "Private system/session buses; no device configured; healthy injected pactl; UI enabled",
+  "method": "Two /proc/self/stat endpoint samples, 600 seconds apart; no sampling loop",
+  "deb_sha256": "8b58c23bb52379f8f0b8482208b920afc0b031b1578fb44d2e6bab5c5935e2e8"
+}

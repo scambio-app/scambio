@@ -1,0 +1,39 @@
++ gpg --homedir /tmp/scambio-key-check-j0_u5ude --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-j0_u5ude/pubring.kbx' created
+gpg: /tmp/scambio-key-check-j0_u5ude/trustdb.gpg: trustdb created
++ gpgv --homedir /tmp/scambio-verify-key-v8vkgd5p --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc2/scambio_1.0.1_all.deb.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc2/scambio_1.0.1_all.deb
+gpgv: Signature made Fri Oct  9 19:49:50 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpgv --homedir /tmp/scambio-verify-key-whcoahov --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc2/scambio-1.0.1.tar.gz.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc2/scambio-1.0.1.tar.gz
+gpgv: Signature made Fri Oct  9 19:49:50 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpgv --homedir /tmp/scambio-verify-key-kg6xumqo --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc2/SHA256SUMS.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc2/SHA256SUMS
+gpgv: Signature made Fri Oct  9 19:49:50 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ sha256sum --check SHA256SUMS
+scambio-1.0.1.tar.gz: OK
+scambio_1.0.1_all.deb: OK
++ gpgv --homedir /tmp/scambio-verify-key-o4e8l_f5 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc2/site/apt/dists/stable/InRelease
+gpgv: Signature made Fri Oct  9 19:49:50 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpgv --homedir /tmp/scambio-verify-key-jvp6hq7m --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc2/site/apt/dists/stable/Release.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc2/site/apt/dists/stable/Release
+gpgv: Signature made Fri Oct  9 19:49:50 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ appstreamcli validate --pedantic --no-net ~/development/scambio/design/metainfo/app.scambio.Scambio.metainfo.xml
+P: app.scambio.Scambio:4: cid-contains-uppercase-letter app.scambio.Scambio
+
+✔ Validation was successful: pedantic: 1
++ gpgv --homedir /tmp/scambio-verify-key-7cp4jiqq --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/manifest.json.asc ~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/manifest.json
+gpgv: Signature made Fri Oct  9 19:53:39 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpgv --homedir /tmp/scambio-verify-key-7i_2w_9w --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/archive/1.0.0/manifest.json.asc ~/.local/share/scambio-release/archive/1.0.0/manifest.json
+gpgv: Signature made Thu Oct  8 02:35:45 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
+PASS copied artifacts and both authenticated archives

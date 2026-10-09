@@ -1,0 +1,19 @@
+{
+  "release": "1.0.1",
+  "launchable": "app.scambio.Scambio.desktop",
+  "icons": [
+    {
+      "path": "/icons/64x64/app.scambio.Scambio.png",
+      "bytes": 2638,
+      "sha256": "a8397c5ceaa8e6e2744e7398d4bd6ca803404118249af264fe34326dcebe6c74",
+      "changed_from_rc1": true
+    },
+    {
+      "path": "/icons/128x128/app.scambio.Scambio.png",
+      "bytes": 6422,
+      "sha256": "c0b8fd58572874dc8bf016ded084a97d251a3b5b7890cf718665bae76a1560f2",
+      "changed_from_rc1": true
+    }
+  ],
+  "note": "As in rc1, the generated XML lists additional 48px/HiDPI variants while the repository exports the 64px and 128px PNGs."
+}

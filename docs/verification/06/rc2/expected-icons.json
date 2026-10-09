@@ -1,0 +1,21 @@
+{
+  "approved_commit": "5fd3004",
+  "files": {
+    "share/icons/hicolor/scalable/apps/app.scambio.Scambio.svg": "51afa23b6861a24811ff25fb2951f89f2258ab9a3bfb1c8e4116d2ea8e6d9b16",
+    "share/scambio/design/icons/hicolor/scalable/apps/app.scambio.Scambio.svg": "51afa23b6861a24811ff25fb2951f89f2258ab9a3bfb1c8e4116d2ea8e6d9b16",
+    "share/icons/hicolor/scalable/status/app.scambio.Scambio-connecting-symbolic.svg": "a8b4033e9862842908bd81db4795d711c005befe6700fc39a0430024c0f0deb0",
+    "share/scambio/design/icons/hicolor/scalable/status/app.scambio.Scambio-connecting-symbolic.svg": "a8b4033e9862842908bd81db4795d711c005befe6700fc39a0430024c0f0deb0",
+    "share/icons/hicolor/scalable/status/app.scambio.Scambio-error-symbolic.svg": "06eaae8862504e3014a303763c4f5540e855abd0c12dc92c237e75ecd5413d32",
+    "share/scambio/design/icons/hicolor/scalable/status/app.scambio.Scambio-error-symbolic.svg": "06eaae8862504e3014a303763c4f5540e855abd0c12dc92c237e75ecd5413d32",
+    "share/icons/hicolor/scalable/status/app.scambio.Scambio-on-pc-symbolic.svg": "7f5d1ea921d3fad9d2548e22fcf9b06e4ba1513f4976f7716d8ec5a6cb5375ce",
+    "share/scambio/design/icons/hicolor/scalable/status/app.scambio.Scambio-on-pc-symbolic.svg": "7f5d1ea921d3fad9d2548e22fcf9b06e4ba1513f4976f7716d8ec5a6cb5375ce",
+    "share/icons/hicolor/scalable/status/app.scambio.Scambio-priority-symbolic.svg": "96214c441c4fd92b9ce18c762df3214164374c83b6bfa0d1dee1940503b92a51",
+    "share/scambio/design/icons/hicolor/scalable/status/app.scambio.Scambio-priority-symbolic.svg": "96214c441c4fd92b9ce18c762df3214164374c83b6bfa0d1dee1940503b92a51",
+    "share/icons/hicolor/scalable/status/app.scambio.Scambio-released-symbolic.svg": "636a70ad1d3bd0387b5ffe86fa841cc6f4001525079a765ae6707a5caf386eaf",
+    "share/scambio/design/icons/hicolor/scalable/status/app.scambio.Scambio-released-symbolic.svg": "636a70ad1d3bd0387b5ffe86fa841cc6f4001525079a765ae6707a5caf386eaf",
+    "share/icons/hicolor/scalable/status/app.scambio.Scambio-unavailable-symbolic.svg": "63d24c592953c85ed86606b95552c6d72f5d949f4f4be8f75b6f05178f018bb4",
+    "share/scambio/design/icons/hicolor/scalable/status/app.scambio.Scambio-unavailable-symbolic.svg": "63d24c592953c85ed86606b95552c6d72f5d949f4f4be8f75b6f05178f018bb4",
+    "share/icons/hicolor/symbolic/apps/app.scambio.Scambio-symbolic.svg": "71d04c3ca64c612584ea14d53e8db146c69afbf2f3634ea2e3e00647bdf87f4a",
+    "share/scambio/design/icons/hicolor/symbolic/apps/app.scambio.Scambio-symbolic.svg": "71d04c3ca64c612584ea14d53e8db146c69afbf2f3634ea2e3e00647bdf87f4a"
+  }
+}

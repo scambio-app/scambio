@@ -1,0 +1,19 @@
++ git status --porcelain
++ git tag --list v1.0.1
++ flatpak --default-arch
++ ostree --repo=/tmp/scambio-rc2-build/dist/candidates/linux-1-0-1-rc2/flatpak-repo rev-parse app/app.scambio.Scambio/x86_64/stable
++ ostree --repo=/tmp/scambio-rc2-build/dist/candidates/linux-1-0-1-rc2/flatpak-repo refs --create=archive/v1.0.1 dbf64320aa22673bc6451aedee650ea2e0c2bfaa0ed6821cfb4d7c9c8014b13e
++ git rev-parse HEAD
++ gpg --homedir /tmp/scambio-key-check-wxdow4v9 --batch --with-colons --show-keys /tmp/scambio-rc2-build/packaging/keys/scambio-archive-keyring.gpg
+gpg: keybox '/tmp/scambio-key-check-wxdow4v9/pubring.kbx' created
+gpg: /tmp/scambio-key-check-wxdow4v9/trustdb.gpg: trustdb created
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/manifest.json.asc --detach-sign ~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/manifest.json
++ gpgv --homedir /tmp/scambio-verify-key-unpo7wqd --keyring /tmp/scambio-rc2-build/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/manifest.json.asc ~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/manifest.json
+gpgv: Signature made Fri Oct  9 19:53:39 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
++ gpgv --homedir /tmp/scambio-verify-key-khtxfssx --keyring /tmp/scambio-rc2-build/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/manifest.json.asc ~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1/manifest.json
+gpgv: Signature made Fri Oct  9 19:53:39 2026 CEST
+gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
+gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
+Verified sealed candidate: [PosixPath('~/.local/share/scambio-release/candidates/linux-1-0-1-rc2/1.0.1')]

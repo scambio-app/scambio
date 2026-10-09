@@ -1,0 +1,19 @@
+{
+  "source_commit": "60d2d42f3bd3f71c8a4d47c6ec969b05aad3e689",
+  "rc1_source": "9c6a85d173b98407a66b909e0e69dcf69a4f3694",
+  "unchanged_paths": [
+    "src",
+    "tests",
+    "tools",
+    "packaging",
+    "Makefile",
+    "pyproject.toml"
+  ],
+  "approved_icon_commit": "5fd3004",
+  "approved_sha256": {
+    "design/icons/hicolor/scalable/apps/app.scambio.Scambio.svg": "51afa23b6861a24811ff25fb2951f89f2258ab9a3bfb1c8e4116d2ea8e6d9b16",
+    "design/icons/hicolor/symbolic/apps/app.scambio.Scambio-symbolic.svg": "71d04c3ca64c612584ea14d53e8db146c69afbf2f3634ea2e3e00647bdf87f4a"
+  },
+  "tarball_icons_match": true,
+  "gm_github_absent_from_tarball_and_deb": true
+}

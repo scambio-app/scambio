@@ -1,0 +1,3 @@
+flatpak_builder_lint installed: False
+AppStream: Namespace AppStream not available
+OSTree: Namespace OSTree not available
