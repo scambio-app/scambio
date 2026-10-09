@@ -1,5 +1,5 @@
 {
-  "archive": "/home/vax/.local/share/scambio-release/archive/1.0.0",
+  "archive": "~/.local/share/scambio-release/archive/1.0.0",
   "files_checked": 188,
   "bytes_and_file_modes_unchanged": true,
   "manifest_signature_verified_in": "seal.log"

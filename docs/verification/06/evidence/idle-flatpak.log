@@ -1,4 +1,4 @@
-+ flatpak --user remote-add --gpg-import=/home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg scambio-test /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-repo
++ flatpak --user remote-add --gpg-import=~/development/scambio/packaging/keys/scambio-archive-keyring.gpg scambio-test ~/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-repo
 + flatpak --user install --noninteractive --no-deps --no-related scambio-test app.scambio.Scambio//stable
 Installing app/app.scambio.Scambio/x86_64/stable
 dbus-daemon[3068746]: [session uid=1000 pid=3068746 pidfd=4] Reloaded configuration

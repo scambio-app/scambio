@@ -1,19 +1,19 @@
 .venv/bin/python tools/release.py dist
 + git status --porcelain
 + git tag --list v1.0.1
-+ gpg --homedir /tmp/scambio-key-check-lsbr1t_5 --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-lsbr1t_5 --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-lsbr1t_5/pubring.kbx' created
 gpg: /tmp/scambio-key-check-lsbr1t_5/trustdb.gpg: trustdb created
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
-+ gpgv --homedir /tmp/scambio-verify-key-2p6bnxtg --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-2p6bnxtg --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
 gpgv: Signature made Thu Oct  8 18:01:08 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
-+ gpg --homedir /tmp/scambio-key-check-ht1jg9gt --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-ht1jg9gt --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-ht1jg9gt/pubring.kbx' created
 gpg: /tmp/scambio-key-check-ht1jg9gt/trustdb.gpg: trustdb created
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
-+ gpgv --homedir /tmp/scambio-verify-key-fpcq5ohx --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-fpcq5ohx --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
 gpgv: Signature made Thu Oct  8 18:01:08 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
@@ -22,24 +22,24 @@ gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
 + git tag --list v1.0.1
 + git status --porcelain
 + git tag --list v1.0.1
-+ gpg --homedir /tmp/scambio-key-check-_wm53yhj --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-_wm53yhj --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-_wm53yhj/pubring.kbx' created
 gpg: /tmp/scambio-key-check-_wm53yhj/trustdb.gpg: trustdb created
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
-+ gpgv --homedir /tmp/scambio-verify-key-wuz1s1ht --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-wuz1s1ht --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
 gpgv: Signature made Thu Oct  8 18:01:09 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
-+ gpg --homedir /tmp/scambio-key-check-2vro0m6h --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-2vro0m6h --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-2vro0m6h/pubring.kbx' created
 gpg: /tmp/scambio-key-check-2vro0m6h/trustdb.gpg: trustdb created
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
-+ gpgv --homedir /tmp/scambio-verify-key-l69jf2ko --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-l69jf2ko --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
 gpgv: Signature made Thu Oct  8 18:01:09 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
 + git show -s --format=%ct HEAD
-+ make install PREFIX=/usr DESTDIR=/tmp/scambio-deb-ejxes4it/root SYSTEMD_USER_UNIT=1 PYTHON_LIB=lib/python3/dist-packages PYTHON=/home/vax/development/scambio/.venv/bin/python
++ make install PREFIX=/usr DESTDIR=/tmp/scambio-deb-ejxes4it/root SYSTEMD_USER_UNIT=1 PYTHON_LIB=lib/python3/dist-packages PYTHON=~/development/scambio/.venv/bin/python
 make[1]: Entering directory '/tmp/scambio-deb-ejxes4it/scambio-1.0.1'
 blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
 [33m[1mwarning: Gtk.ShortcutLabel is deprecated[0m
@@ -47,7 +47,7 @@ at design/ui/settings-window.blp line 90 column 13:
 [2m  90 |[0m            ShortcutLabel shortcut_label {
      [2m|            ^^^^^^^^^^^^^[0m
 
-/home/vax/development/scambio/.venv/bin/python tools/install.py install --prefix "/usr" --destdir "/tmp/scambio-deb-ejxes4it/root" --python-lib "lib/python3/dist-packages" --systemd
+~/development/scambio/.venv/bin/python tools/install.py install --prefix "/usr" --destdir "/tmp/scambio-deb-ejxes4it/root" --python-lib "lib/python3/dist-packages" --systemd
 Processing /tmp/scambio-deb-ejxes4it/scambio-1.0.1
   Preparing metadata (pyproject.toml): started
   Preparing metadata (pyproject.toml): finished with status 'done'
@@ -55,14 +55,14 @@ Building wheels for collected packages: scambio
   Building wheel for scambio (pyproject.toml): started
   Building wheel for scambio (pyproject.toml): finished with status 'done'
   Created wheel for scambio: filename=scambio-1.0.1-py3-none-any.whl size=85657 sha256=2ea7402127d568550c191a97867c180322e6910bc449ebad3d4b493ef037f903
-  Stored in directory: /home/vax/.cache/pip/wheels/84/b2/17/82ac1191e2e4ec5fbe07482710b1bb8336457abf72f691ce4c
+  Stored in directory: ~/.cache/pip/wheels/84/b2/17/82ac1191e2e4ec5fbe07482710b1bb8336457abf72f691ce4c
 Successfully built scambio
 Installing collected packages: scambio
 Successfully installed scambio-1.0.1
 make[1]: Leaving directory '/tmp/scambio-deb-ejxes4it/scambio-1.0.1'
-+ dpkg-deb --root-owner-group --build /tmp/scambio-deb-ejxes4it/root /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
-dpkg-deb: building package 'scambio' in '/home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb'.
-+ lintian --fail-on error /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
++ dpkg-deb --root-owner-group --build /tmp/scambio-deb-ejxes4it/root ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
+dpkg-deb: building package 'scambio' in '~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb'.
++ lintian --fail-on error ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
 W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (in test syntax) [postinst:7]
 W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (in test syntax) [postrm:5]
 W: scambio: command-with-path-in-maintainer-script /usr/bin/gtk-update-icon-cache (plain script) [postinst:8]
@@ -72,49 +72,49 @@ W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (in test s
 W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (plain script) [postinst:5]
 W: scambio: command-with-path-in-maintainer-script /usr/bin/systemctl (plain script) [prerm:5]
 W: scambio: no-manual-page [usr/bin/scambio]
-+ gpg --homedir /tmp/scambio-key-check-o0xwttqg --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-o0xwttqg --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-o0xwttqg/pubring.kbx' created
 gpg: /tmp/scambio-key-check-o0xwttqg/trustdb.gpg: trustdb created
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb.asc --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
-+ gpgv --homedir /tmp/scambio-verify-key-6c2nr4p6 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb.asc --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
++ gpgv --homedir /tmp/scambio-verify-key-6c2nr4p6 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
 gpgv: Signature made Thu Oct  8 18:01:11 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
-+ gpg --homedir /tmp/scambio-key-check-6vg_30xc --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-6vg_30xc --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-6vg_30xc/pubring.kbx' created
 gpg: /tmp/scambio-key-check-6vg_30xc/trustdb.gpg: trustdb created
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
-+ gpgv --homedir /tmp/scambio-verify-key-3bqwhtm4 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-3bqwhtm4 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
 gpgv: Signature made Thu Oct  8 18:01:11 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
 .venv/bin/python tools/release.py apt-repo
 + git status --porcelain
 + git tag --list v1.0.1
-+ gpg --homedir /tmp/scambio-key-check-ws2nvfv7 --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-ws2nvfv7 --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-ws2nvfv7/pubring.kbx' created
 gpg: /tmp/scambio-key-check-ws2nvfv7/trustdb.gpg: trustdb created
-+ gpgv --homedir /tmp/scambio-verify-key-71pj2szu --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/.local/share/scambio-release/archive/1.0.0/manifest.json.asc /home/vax/.local/share/scambio-release/archive/1.0.0/manifest.json
++ gpgv --homedir /tmp/scambio-verify-key-71pj2szu --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/archive/1.0.0/manifest.json.asc ~/.local/share/scambio-release/archive/1.0.0/manifest.json
 gpgv: Signature made Thu Oct  8 02:35:45 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
-+ gpgv --homedir /tmp/scambio-verify-key-q584u8_2 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/.local/share/scambio-release/archive/1.0.0/scambio_1.0.0_all.deb.asc /home/vax/.local/share/scambio-release/archive/1.0.0/scambio_1.0.0_all.deb
++ gpgv --homedir /tmp/scambio-verify-key-q584u8_2 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/archive/1.0.0/scambio_1.0.0_all.deb.asc ~/.local/share/scambio-release/archive/1.0.0/scambio_1.0.0_all.deb
 gpgv: Signature made Thu Oct  8 02:33:00 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
-+ gpgv --homedir /tmp/scambio-verify-key-2yltfg43 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
++ gpgv --homedir /tmp/scambio-verify-key-2yltfg43 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb
 gpgv: Signature made Thu Oct  8 18:01:11 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
 + apt-ftparchive packages pool
 + apt-ftparchive -o APT::FTPArchive::Release::MD5=false -o APT::FTPArchive::Release::SHA1=false -o APT::FTPArchive::Release::SHA512=false -o APT::FTPArchive::Release::Acquire-By-Hash=yes -o APT::FTPArchive::Release::Codename=stable -o APT::FTPArchive::Release::Suite=stable -o APT::FTPArchive::Release::Architectures=all -o APT::FTPArchive::Release::Components=main release dists/stable
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/InRelease --clearsign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release
-+ gpgv --homedir /tmp/scambio-verify-key-ztui03z2 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/InRelease
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/InRelease --clearsign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release
++ gpgv --homedir /tmp/scambio-verify-key-ztui03z2 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/InRelease
 gpgv: Signature made Thu Oct  8 18:01:11 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release.gpg --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release
-+ gpgv --homedir /tmp/scambio-verify-key-xmetolw7 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release.gpg --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release
++ gpgv --homedir /tmp/scambio-verify-key-xmetolw7 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/site/apt/dists/stable/Release
 gpgv: Signature made Thu Oct  8 18:01:11 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
@@ -123,31 +123,31 @@ gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
 + git tag --list v1.0.1
 + git status --porcelain
 + git tag --list v1.0.1
-+ gpg --homedir /tmp/scambio-key-check-1jg7c42y --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-1jg7c42y --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-1jg7c42y/pubring.kbx' created
 gpg: /tmp/scambio-key-check-1jg7c42y/trustdb.gpg: trustdb created
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
-+ gpgv --homedir /tmp/scambio-verify-key-06098td3 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
++ gpgv --homedir /tmp/scambio-verify-key-06098td3 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz
 gpgv: Signature made Thu Oct  8 18:01:11 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
-+ gpg --homedir /tmp/scambio-key-check-1h6a43vf --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-1h6a43vf --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-1h6a43vf/pubring.kbx' created
 gpg: /tmp/scambio-key-check-1h6a43vf/trustdb.gpg: trustdb created
-+ gpg --homedir /home/vax/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc --detach-sign /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
-+ gpgv --homedir /tmp/scambio-verify-key-9nrkacu2 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
++ gpg --homedir ~/.local/share/scambio-release/gnupg --batch --yes --local-user 4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --armor --output ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc --detach-sign ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
++ gpgv --homedir /tmp/scambio-verify-key-9nrkacu2 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS.asc ~/development/scambio/dist/candidates/linux-1-0-1-rc1/SHA256SUMS
 gpgv: Signature made Thu Oct  8 18:01:11 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
-+ gpg --homedir /tmp/scambio-key-check-2k7pxv_g --batch --with-colons --show-keys /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg
++ gpg --homedir /tmp/scambio-key-check-2k7pxv_g --batch --with-colons --show-keys ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg
 gpg: keybox '/tmp/scambio-key-check-2k7pxv_g/pubring.kbx' created
 gpg: /tmp/scambio-key-check-2k7pxv_g/trustdb.gpg: trustdb created
-+ gpgv --homedir /tmp/scambio-verify-key-ry4_lf7d --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/.local/share/scambio-release/archive/1.0.0/manifest.json.asc /home/vax/.local/share/scambio-release/archive/1.0.0/manifest.json
++ gpgv --homedir /tmp/scambio-verify-key-ry4_lf7d --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/archive/1.0.0/manifest.json.asc ~/.local/share/scambio-release/archive/1.0.0/manifest.json
 gpgv: Signature made Thu Oct  8 02:35:45 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
 + git show -s --format=%ct HEAD
-+ flatpak-builder --show-manifest /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/app.scambio.Scambio.yml
++ flatpak-builder --show-manifest ~/development/scambio/dist/candidates/linux-1-0-1-rc1/app.scambio.Scambio.yml
 {
   "id" : "app.scambio.Scambio",
   "branch" : "stable",
@@ -161,7 +161,7 @@ gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
       "buildsystem" : "simple",
       "sources" : [
         {
-          "path" : "/home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz",
+          "path" : "~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio-1.0.1.tar.gz",
           "sha256" : "13e7f95979e10fa9ed5e59a697e6936ddf259119d1934b50883f34d13f2f5859",
           "type" : "archive"
         }
@@ -186,12 +186,12 @@ gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"
     "--talk-name=org.freedesktop.ScreenSaver"
   ]
 }
-+ flatpak-builder --user --force-clean --disable-download --override-source-date-epoch=1791475154 --repo=/home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-repo --gpg-sign=4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --gpg-homedir=/home/vax/.local/share/scambio-release/gnupg --default-branch=stable /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-build /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/app.scambio.Scambio.yml
-Emptying app dir '/home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-build'
++ flatpak-builder --user --force-clean --disable-download --override-source-date-epoch=1791475154 --repo=~/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-repo --gpg-sign=4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --gpg-homedir=~/.local/share/scambio-release/gnupg --default-branch=stable ~/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-build ~/development/scambio/dist/candidates/linux-1-0-1-rc1/app.scambio.Scambio.yml
+Emptying app dir '~/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-build'
 Starting build of app.scambio.Scambio
 Cache miss, checking out last cache hit
 ========================================================================
-Building module scambio in /home/vax/development/scambio/.flatpak-builder/build/scambio-1
+Building module scambio in ~/development/scambio/.flatpak-builder/build/scambio-1
 ========================================================================
 Running: make install PREFIX=/app
 blueprint-compiler compile design/ui/settings-window.blp --output build/ui/settings-window.ui
@@ -218,7 +218,7 @@ Committing stage build-scambio to cache
 Cleaning up
 Running appstreamcli compose
 Only accepting components: app.scambio.Scambio, app.scambio.Scambio.desktop
-Processing directory: /home/vax/development/scambio/.flatpak-builder/rofiles/rofiles-xz4w8Q/files
+Processing directory: ~/development/scambio/.flatpak-builder/rofiles/rofiles-xz4w8Q/files
 Composing metadata...
 Success!
 Committing stage cleanup to cache
@@ -245,7 +245,7 @@ Content Total: 117
 Content Written: 1
 Content Bytes Written: 1273 (1.3 kB)
 Pruning cache
-+ flatpak build-update-repo --generate-static-deltas --prune --gpg-sign=4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --gpg-homedir=/home/vax/.local/share/scambio-release/gnupg /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-repo
++ flatpak build-update-repo --generate-static-deltas --prune --gpg-sign=4C23A6729A5750DDFC8745E305499CD6ECB01DE7! --gpg-homedir=~/.local/share/scambio-release/gnupg ~/development/scambio/dist/candidates/linux-1-0-1-rc1/flatpak-repo
 Updating appstream branch
 Generating static deltas
 Generating delta: appstream2/x86_64 (88ae51980e)
@@ -263,7 +263,7 @@ Deleted 6 objects, 2.5 kB freed
 .venv/bin/python tools/release.py flatpak-site
 + git status --porcelain
 + git tag --list v1.0.1
-+ gpgv --homedir /tmp/scambio-verify-key-dxv8ube9 --keyring /home/vax/development/scambio/packaging/keys/scambio-archive-keyring.gpg /home/vax/.local/share/scambio-release/archive/1.0.0/manifest.json.asc /home/vax/.local/share/scambio-release/archive/1.0.0/manifest.json
++ gpgv --homedir /tmp/scambio-verify-key-dxv8ube9 --keyring ~/development/scambio/packaging/keys/scambio-archive-keyring.gpg ~/.local/share/scambio-release/archive/1.0.0/manifest.json.asc ~/.local/share/scambio-release/archive/1.0.0/manifest.json
 gpgv: Signature made Thu Oct  8 02:35:45 2026 CEST
 gpgv:                using EDDSA key 4C23A6729A5750DDFC8745E305499CD6ECB01DE7
 gpgv: Good signature from "Scambio Release Signing Key <release@scambio.app>"

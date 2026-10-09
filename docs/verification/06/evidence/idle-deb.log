@@ -1,5 +1,5 @@
-+ dpkg-deb --extract /home/vax/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb /tmp/scambio-artifact-measure-s4tbcozc/extracted
-+ /home/vax/development/scambio/.venv/bin/python -m venv --system-site-packages /tmp/scambio-artifact-measure-s4tbcozc/venv
++ dpkg-deb --extract ~/development/scambio/dist/candidates/linux-1-0-1-rc1/scambio_1.0.1_all.deb /tmp/scambio-artifact-measure-s4tbcozc/extracted
++ ~/development/scambio/.venv/bin/python -m venv --system-site-packages /tmp/scambio-artifact-measure-s4tbcozc/venv
 + /tmp/scambio-artifact-measure-s4tbcozc/venv/bin/python -I -c import sysconfig;print(sysconfig.get_path('purelib'))
 Cannot load state; using defaults: [Errno 2] No such file or directory: 'state.json'
 Cannot acquire sleep inhibitor: g-dbus-error-quark: GDBus.Error:org.freedesktop.DBus.Error.Name…

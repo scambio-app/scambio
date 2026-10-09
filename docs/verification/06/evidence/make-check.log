@@ -13,7 +13,7 @@ Success: no issues found in 32 source files
 .venv/bin/pytest
 ============================= test session starts ==============================
 platform linux -- Python 3.14.4, pytest-9.1.1, pluggy-1.6.0
-rootdir: /home/vax/development/scambio
+rootdir: ~/development/scambio
 configfile: pyproject.toml
 testpaths: tests
 plugins: typeguard-4.4.4
@@ -82,6 +82,6 @@ tests/test_ui_service.py: 60 warnings
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 ================ 848 passed, 1056 warnings in 104.94s (0:01:44) ================
-[graphify hook] launching background rebuild (log: /home/vax/.cache/graphify-rebuild.log)
+[graphify hook] launching background rebuild (log: ~/.cache/graphify-rebuild.log)
 [main 9c6a85d] Use a file URI when verifying local Flatpak upgrades
  2 files changed, 7 insertions(+), 1 deletion(-)
