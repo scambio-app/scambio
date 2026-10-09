@@ -945,3 +945,10 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      anteprima su URL di preview del Worker (`preview_urls = true`, `workers_dev` resta spento).
      Contatori aggregati, email, Turnstile e disiscrizione nel Worker: spec
      `scambio-site/docs/specs/01-worker-lancio.md` a Codex, in due fasi (contatori prima).
+209. GM — **Pubblicazione anticipata al 9 ottobre** (richiesta di GM prima di presentare Scambio a terzi):
+     scambio.app è in produzione con la pagina di lancio, l'email di conferma, la disiscrizione e i
+     contatori, e su GitHub c'è il marchio Deviatoio v3. Aggiorna la 202: Turnstile gira solo in modo
+     invisibile e, se non verifica, la pagina mostra il pulsante «Conferma l'iscrizione», che conferma
+     senza token con un limite di frequenza (su iPhone la verifica non si completava). Gli asset di
+     rilascio del sito restano quelli della 1.0.0. La candidata 1.0.1 non è pubblicata finché non
+     viene ricostruita con la nuova icona.
