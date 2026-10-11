@@ -967,3 +967,16 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      rebase locale e controllo del padre del commit. Nessuna promozione o pubblicazione.
      Nel trasferimento dal worktree si copiano soltanto artefatti e repository, escludendo
      `flatpak-build/`: è una directory di lavoro con `var/run` collegato al `/run` dell'host.
+
+## 2026-10-11 — Vettori condivisi policy v1, verifica preliminare (Codex)
+
+217. Codex — **Nessuna normalizzazione implicita dei contesti vietati da M01.**
+     Il README di `docs/specs/M01-vectors/` §5.3 punto 5 vieta `pending="release"`
+     con `pending_reason=""`. Diciannove casi richiesti dei test Linux usano
+     questa combinazione, incluso `test_rules[C4]`. Esportarli tali e quali,
+     ometterli o inventare il motivo nell'esportatore non soddisfa simultaneamente
+     i requisiti ricevuti. La generazione si arresta al controllo degli input;
+     policy, fixture e riferimento M01 restano invariati. Occorre un chiarimento
+     dell'orchestratore sulle fixture da adeguare o sui casi da includere prima
+     di produrre il corpus. Evidenza e conteggi in
+     `docs/verification/vettori-v1/report.md`.

@@ -1,0 +1,33 @@
+{
+  "format": "scambio-policy-vectors",
+  "version": 1,
+  "source": {"repo": "scambio-linux", "commit": "9f8189d", "generator": "Claude: step() di Linux eseguito con uno script usa e getta (M01 §5.5)", "generated_at": "2026-10-08T19:28:00+02:00"},
+  "defaults": {
+    "config": {"grab_delay_ms": 500, "release_idle_seconds": 120, "connect_timeout_seconds": 10, "sink_timeout_seconds": 5, "sleep_release_timeout_seconds": 4, "unblock_silence_seconds": 10, "resume_delay_ms": 0},
+    "context": {"state": "unavailable", "priority": false, "audio_active": false, "device_connected": false, "sink_ready": false, "locked": false, "sleeping": false, "blocked_until_silence": false, "pending": "none", "pending_reason": "", "origin": "external", "routed": false, "reason": "availability", "last_error": "", "held": false}
+  },
+  "vectors": [
+    {
+      "id": "rule.c7.external-sink-timeout",
+      "rules": ["C7", "INGRESSO"],
+      "origin": "tests/test_policy.py::test_rules[C7]",
+      "clock": "none",
+      "initial": {"context": {"state": "connecting", "origin": "external", "device_connected": true}},
+      "steps": [
+        {
+          "event": {"type": "TimerFired", "timer": "SINK"},
+          "expect": {
+            "actions": [
+              {"type": "CancelTimer", "timer": "CONNECT"},
+              {"type": "CancelTimer", "timer": "SINK"},
+              {"type": "StartTimer", "timer": "IDLE", "ms": 120000},
+              {"type": "EmitTransition", "from": "connecting", "to": "on_pc", "reason": "sink_timeout"},
+              {"type": "EmitError", "code": "sink_timeout"}
+            ],
+            "changes": {"state": "on_pc", "reason": "sink_timeout", "last_error": "sink_timeout"}
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scambio.app/schemas/policy-vectors-1.json",
+  "title": "Scambio — vettori della macchina a stati, versione 1 (con estensione Mac)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "source", "defaults", "vectors"],
+  "properties": {
+    "format": {"const": "scambio-policy-vectors"},
+    "version": {"const": 1},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "commit", "generator", "generated_at"],
+      "properties": {
+        "repo": {"type": "string"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+        "generator": {"type": "string"},
+        "generated_at": {"type": "string"},
+        "seed": {"type": "integer"},
+        "license": {"type": "string"},
+        "coverage": {"type": "object"}
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["config", "context"],
+      "properties": {
+        "config": {"allOf": [{"$ref": "#/$defs/config"}, {"required": ["grab_delay_ms", "release_idle_seconds", "connect_timeout_seconds", "sink_timeout_seconds", "sleep_release_timeout_seconds", "unblock_silence_seconds", "resume_delay_ms"]}]},
+        "context": {"allOf": [{"$ref": "#/$defs/context"}, {"required": ["state", "priority", "audio_active", "device_connected", "sink_ready", "locked", "sleeping", "blocked_until_silence", "pending", "pending_reason", "origin", "routed", "reason", "last_error", "held"]}]}
+      }
+    },
+    "vectors": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/vector"}},
+    "platform": {"enum": ["shared", "mac"]}
+  },
+  "$defs": {
+    "state": {"enum": ["released", "connecting", "on_pc", "releasing", "unavailable"]},
+    "timer": {"enum": ["GRAB_DELAY", "IDLE", "CONNECT", "SINK", "RELEASE", "SLEEP", "UNBLOCK", "RESUME"]},
+    "reason": {"enum": ["audio_started", "idle_timeout", "locked", "sleep", "switch", "priority", "external_connect", "external_disconnect", "connect_failed", "connect_timeout", "sink_timeout", "sink_lost", "disconnect_failed", "availability"]},
+    "error": {"enum": ["connect_failed", "connect_timeout", "sink_timeout", "sink_lost", "disconnect_failed", "device_unavailable", "device_not_configured", "config_invalid", "audio_backend_down"]},
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "grab_delay_ms": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "release_idle_seconds": {"type": "integer", "minimum": 10, "maximum": 3600},
+        "connect_timeout_seconds": {"type": "integer", "minimum": 2, "maximum": 60},
+        "sink_timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 30},
+        "sleep_release_timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 10},
+        "unblock_silence_seconds": {"type": "integer", "minimum": 1, "maximum": 120},
+        "resume_delay_ms": {"type": "integer", "minimum": 0, "maximum": 10000}
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {"$ref": "#/$defs/state"},
+        "priority": {"type": "boolean"},
+        "audio_active": {"type": "boolean"},
+        "device_connected": {"type": "boolean"},
+        "sink_ready": {"type": "boolean"},
+        "locked": {"type": "boolean"},
+        "sleeping": {"type": "boolean"},
+        "blocked_until_silence": {"type": "boolean"},
+        "pending": {"enum": ["none", "grab", "release"]},
+        "pending_reason": {"enum": ["", "switch", "priority", "locked", "sleep"]},
+        "origin": {"enum": ["self", "external"]},
+        "routed": {"type": "boolean"},
+        "reason": {"$ref": "#/$defs/reason"},
+        "last_error": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/error"}]},
+        "held": {"type": "boolean"},
+        "automations": {"type": "boolean"}
+      }
+    },
+    "event": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["type", "value"], "properties": {"type": {"enum": ["AudioActive", "DeviceConnected", "Locked", "Sleep", "SetPriority", "Availability", "AudioBackend", "SetAutomations"]}, "value": {"type": "boolean"}}},
+        {"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"enum": ["DeviceSinkAppeared", "DeviceSinkGone"]}}},
+        {"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"const": "Switch"}, "source": {"enum": ["menu", "shortcut"]}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "result"], "properties": {"type": {"const": "ConnectResult"}, "result": {"enum": ["ok", "already_connected", "in_progress", "failed"]}, "detail": {"type": "string"}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "result"], "properties": {"type": {"const": "DisconnectResult"}, "result": {"enum": ["ok", "failed"]}, "detail": {"type": "string"}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "timer"], "properties": {"type": {"const": "TimerFired"}, "timer": {"$ref": "#/$defs/timer"}}}
+      ]
+    },
+    "action": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"enum": ["Connect", "Disconnect", "RouteToDevice", "RestoreRouting", "ReleaseSleepInhibitor", "ResumePlayers", "ForgetPlayers"]}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "timer", "ms"], "properties": {"type": {"const": "StartTimer"}, "timer": {"$ref": "#/$defs/timer"}, "ms": {"type": "integer", "minimum": 0}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "timer"], "properties": {"type": {"const": "CancelTimer"}, "timer": {"$ref": "#/$defs/timer"}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "value"], "properties": {"type": {"const": "SavePriority"}, "value": {"type": "boolean"}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "code"], "properties": {"type": {"const": "EmitError"}, "code": {"$ref": "#/$defs/error"}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "from", "to", "reason"], "properties": {"type": {"const": "EmitTransition"}, "from": {"$ref": "#/$defs/state"}, "to": {"$ref": "#/$defs/state"}, "reason": {"$ref": "#/$defs/reason"}}},
+        {"type": "object", "additionalProperties": false, "required": ["type", "kind"], "properties": {"type": {"const": "PausePlayers"}, "kind": {"enum": ["grab", "release"]}}}
+      ]
+    },
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "clock", "steps"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+        "rules": {"type": "array", "items": {"type": "string"}},
+        "origin": {"type": "string"},
+        "note": {"type": "string"},
+        "clock": {"enum": ["none", "virtual"]},
+        "config": {"$ref": "#/$defs/config"},
+        "initial": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "context": {"$ref": "#/$defs/context"},
+            "timers": {"type": "object", "propertyNames": {"$ref": "#/$defs/timer"}, "additionalProperties": {"type": "integer", "minimum": 0}}
+          }
+        },
+        "steps": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/step"}}
+      },
+      "if": {"properties": {"clock": {"const": "virtual"}}},
+      "then": {"properties": {"steps": {"items": {"required": ["t_ms"]}}}}
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "expect"],
+      "properties": {
+        "t_ms": {"type": "integer", "minimum": 0},
+        "event": {"$ref": "#/$defs/event"},
+        "expect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actions", "changes"],
+          "properties": {
+            "actions": {"type": "array", "items": {"$ref": "#/$defs/action"}},
+            "changes": {"$ref": "#/$defs/context"}
+          }
+        }
+      }
+    }
+  }
+}

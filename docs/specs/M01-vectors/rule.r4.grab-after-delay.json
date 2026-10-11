@@ -1,0 +1,32 @@
+{
+  "format": "scambio-policy-vectors",
+  "version": 1,
+  "source": {"repo": "scambio-linux", "commit": "9f8189d", "generator": "Claude: step() di Linux eseguito con uno script usa e getta (M01 §5.5)", "generated_at": "2026-10-08T19:28:00+02:00"},
+  "defaults": {
+    "config": {"grab_delay_ms": 500, "release_idle_seconds": 120, "connect_timeout_seconds": 10, "sink_timeout_seconds": 5, "sleep_release_timeout_seconds": 4, "unblock_silence_seconds": 10, "resume_delay_ms": 0},
+    "context": {"state": "unavailable", "priority": false, "audio_active": false, "device_connected": false, "sink_ready": false, "locked": false, "sleeping": false, "blocked_until_silence": false, "pending": "none", "pending_reason": "", "origin": "external", "routed": false, "reason": "availability", "last_error": "", "held": false}
+  },
+  "vectors": [
+    {
+      "id": "rule.r4.grab-after-delay",
+      "rules": ["R4", "PRESA"],
+      "origin": "tests/test_policy.py::test_rules[R4]",
+      "clock": "none",
+      "initial": {"context": {"state": "released", "audio_active": true, "last_error": "sink_timeout"}},
+      "steps": [
+        {
+          "event": {"type": "TimerFired", "timer": "GRAB_DELAY"},
+          "expect": {
+            "actions": [
+              {"type": "PausePlayers", "kind": "grab"},
+              {"type": "Connect"},
+              {"type": "StartTimer", "timer": "CONNECT", "ms": 10000},
+              {"type": "EmitTransition", "from": "released", "to": "connecting", "reason": "audio_started"}
+            ],
+            "changes": {"state": "connecting", "origin": "self", "reason": "audio_started", "last_error": "", "held": true}
+          }
+        }
+      ]
+    }
+  ]
+}

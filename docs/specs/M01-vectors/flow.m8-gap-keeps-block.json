@@ -1,0 +1,97 @@
+{
+  "format": "scambio-policy-vectors",
+  "version": 1,
+  "source": {"repo": "scambio-linux", "commit": "9f8189d", "generator": "Claude: step() di Linux eseguito con uno script usa e getta (M01 §5.5)", "generated_at": "2026-10-08T19:28:00+02:00"},
+  "defaults": {
+    "config": {"grab_delay_ms": 500, "release_idle_seconds": 120, "connect_timeout_seconds": 10, "sink_timeout_seconds": 5, "sleep_release_timeout_seconds": 4, "unblock_silence_seconds": 10, "resume_delay_ms": 0},
+    "context": {"state": "unavailable", "priority": false, "audio_active": false, "device_connected": false, "sink_ready": false, "locked": false, "sleeping": false, "blocked_until_silence": false, "pending": "none", "pending_reason": "", "origin": "external", "routed": false, "reason": "availability", "last_error": "", "held": false}
+  },
+  "vectors": [
+    {
+      "id": "flow.m8-gap-keeps-block",
+      "rules": ["O8", "G1", "R2", "G1b", "R1", "R4"],
+      "origin": "tests/test_policy.py::test_m8_stream_gap_keeps_block_until_continuous_silence + tests/test_service_unblock.py::test_m8_gap_and_continuous_silence (tempi)",
+      "clock": "virtual",
+      "initial": {
+        "context": {"state": "on_pc", "audio_active": true, "device_connected": true, "sink_ready": true, "routed": true}
+      },
+      "steps": [
+        {
+          "t_ms": 0,
+          "event": {"type": "DeviceConnected", "value": false},
+          "expect": {
+            "actions": [
+              {"type": "CancelTimer", "timer": "IDLE"},
+              {"type": "CancelTimer", "timer": "SINK"},
+              {"type": "CancelTimer", "timer": "RESUME"},
+              {"type": "RestoreRouting"},
+              {"type": "PausePlayers", "kind": "release"},
+              {"type": "ForgetPlayers"},
+              {"type": "EmitTransition", "from": "on_pc", "to": "released", "reason": "external_disconnect"}
+            ],
+            "changes": {"state": "released", "device_connected": false, "blocked_until_silence": true, "routed": false, "reason": "external_disconnect"}
+          }
+        },
+        {
+          "t_ms": 50,
+          "event": {"type": "AudioActive", "value": false},
+          "expect": {
+            "actions": [
+              {"type": "StartTimer", "timer": "UNBLOCK", "ms": 10000},
+              {"type": "CancelTimer", "timer": "GRAB_DELAY"}
+            ],
+            "changes": {"audio_active": false}
+          }
+        },
+        {
+          "t_ms": 2050,
+          "event": {"type": "AudioActive", "value": true},
+          "expect": {
+            "actions": [{"type": "CancelTimer", "timer": "UNBLOCK"}],
+            "changes": {"audio_active": true}
+          }
+        },
+        {
+          "t_ms": 4000,
+          "event": {"type": "AudioActive", "value": false},
+          "expect": {
+            "actions": [
+              {"type": "StartTimer", "timer": "UNBLOCK", "ms": 10000},
+              {"type": "CancelTimer", "timer": "GRAB_DELAY"}
+            ],
+            "changes": {"audio_active": false}
+          }
+        },
+        {
+          "t_ms": 14000,
+          "event": {"type": "TimerFired", "timer": "UNBLOCK"},
+          "expect": {"actions": [], "changes": {"blocked_until_silence": false}}
+        },
+        {
+          "t_ms": 20000,
+          "event": {"type": "AudioActive", "value": true},
+          "expect": {
+            "actions": [
+              {"type": "CancelTimer", "timer": "UNBLOCK"},
+              {"type": "StartTimer", "timer": "GRAB_DELAY", "ms": 500}
+            ],
+            "changes": {"audio_active": true}
+          }
+        },
+        {
+          "t_ms": 20500,
+          "event": {"type": "TimerFired", "timer": "GRAB_DELAY"},
+          "expect": {
+            "actions": [
+              {"type": "PausePlayers", "kind": "grab"},
+              {"type": "Connect"},
+              {"type": "StartTimer", "timer": "CONNECT", "ms": 10000},
+              {"type": "EmitTransition", "from": "released", "to": "connecting", "reason": "audio_started"}
+            ],
+            "changes": {"state": "connecting", "origin": "self", "reason": "audio_started", "held": true}
+          }
+        }
+      ]
+    }
+  ]
+}
