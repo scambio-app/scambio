@@ -1,5 +1,6 @@
 PYTHON ?= /usr/bin/python3
 VENV = .venv/bin
+export PYTHONPATH := $(CURDIR)/src:$(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
 PREFIX ?= /usr/local
 DESTDIR ?= /
 SYSTEMD_USER_UNIT ?= 0
@@ -55,3 +56,9 @@ verify:
 .PHONY: stage-site
 stage-site:
 	$(VENV)/python tools/verify_release.py --stage-site
+
+.PHONY: policy-vectors policy-fingerprints
+policy-vectors:
+	$(VENV)/python tools/export_policy_vectors.py
+policy-fingerprints:
+	$(VENV)/pytest tests/test_policy_vectors.py -m policy_fingerprints -s

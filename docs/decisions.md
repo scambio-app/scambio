@@ -970,13 +970,42 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
 
 ## 2026-10-11 — Vettori condivisi policy v1, verifica preliminare (Codex)
 
-217. Codex — **Nessuna normalizzazione implicita dei contesti vietati da M01.**
-     Il README di `docs/specs/M01-vectors/` §5.3 punto 5 vieta `pending="release"`
-     con `pending_reason=""`. Diciannove casi richiesti dei test Linux usano
-     questa combinazione, incluso `test_rules[C4]`. Esportarli tali e quali,
-     ometterli o inventare il motivo nell'esportatore non soddisfa simultaneamente
-     i requisiti ricevuti. La generazione si arresta al controllo degli input;
-     policy, fixture e riferimento M01 restano invariati. Occorre un chiarimento
-     dell'orchestratore sulle fixture da adeguare o sui casi da includere prima
-     di produrre il corpus. Evidenza e conteggi in
+217. Codex — **Espansione esplicita dei 19 contesti incompleti, autorizzata
+     dall'orchestratore l'11 ottobre dopo lo stop iniziale (`c98cd4b`).**
+     `pending="release"` con `pending_reason=""` resta vietato da M01 §5.3.5.
+     I test Linux e `src/` restano invariati: l'esportatore produce quattro vettori
+     per ciascuno dei 19 casi, con motivo `switch`, `priority`, `locked`, `sleep`.
+     Ogni attesa viene calcolata da `step()` sul contesto così completato; ID con
+     suffisso `.reason-<motivo>` e `origin` con la nota
+     ` (pending_reason espanso: <motivo>)`. Nessuna correzione nascosta nel codec
+     o nel replay, che rifiutano ancora il contesto incompleto. L'esplorazione T
+     completa dai due default trova zero contesti incompleti: sono irraggiungibili,
+     dunque la regola M01 resta valida. I 19 casi e i 76 ID sono elencati nel report
      `docs/verification/vettori-v1/report.md`.
+218. Codex — **Corpus riproducibile dalla sorgente Linux identificata, senza gi.**
+     Si eseguono copie isolate dei due moduli di test, senza conftest né modifiche
+     ai moduli di pytest, raccogliendo tutte le chiamate esplicite a `step()` salvo
+     l'esaustivo. Gli eventi/azioni passano dal codec condiviso; i flussi virtuali
+     hanno tempi illustrativi dichiarati e vengono controllati prima della scrittura.
+     `source.commit` è `git rev-parse HEAD` (o `--source-commit` esplicito); policy,
+     configurazione e test devono coincidere byte per byte con quel commit.
+     `generated_at` usa la data del commit sorgente per riproducibilità, non l'ora
+     corrente. I test riusano il commit registrato, mai l'HEAD del giorno.
+     `VECTOR_LICENSE` è l'unica costante della licenza provvisoria
+     `GPL-3.0-or-later`: la decisione finale resta a GM. Dieci file JSON non compressi
+     contengono 200 passeggiate ciascuno, 60 passi, seme 121217 e contatori di copertura.
+     La stringa libera `source.generator` contiene anche le dichiarazioni SPDX,
+     entro le prime cinque righe: il test di packaging esistente richiede un header
+     per ogni file sotto `tests/`, e lo schema JSON non consente commenti o campi
+     ulteriori. `source.license` resta il solo identificatore di licenza richiesto.
+219. Codex — **Validazione M01 e separazione del controllo esaustivo.**
+     Nessuna dipendenza nuova: un interprete dei soli costrutti usati dallo schema
+     locale verifica la struttura, rifiutando costrutti sconosciuti; un controllo
+     semantico applica §5.3 e l'orologio condiviso. Il replay confronta valori JSON
+     e azioni ordinate sul codice Linux; la rigenerazione verifica anche i byte.
+     `make check` rigenera tutte le passeggiate e rigioca corpus e quattro semi.
+     Solo U/T, circa 50 secondi aggiuntivi, hanno il marker `policy_fingerprints`
+     e il gate dedicato `make policy-fingerprints`; entrambi obbligatori per questa
+     consegna, senza skip. Make/pytest danno precedenza al checkout per evitare
+     l'omonimo pacchetto installato in `/usr/lib`; gli strumenti rifiutano un core
+     importato da fuori checkout. Nessun cambiamento all'installazione di sistema.

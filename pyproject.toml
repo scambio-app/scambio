@@ -44,4 +44,6 @@ strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+pythonpath = ["src", "."]
+addopts = "-ra -m 'not policy_fingerprints'"
+markers = ["policy_fingerprints: full normative U/T exploration (make policy-fingerprints)"]
