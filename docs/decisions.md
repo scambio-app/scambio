@@ -1013,4 +1013,8 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      **GPL-3.0-or-later**, come il codice Linux; scartata CC0. Fermich riusa i vettori nell'app Mac
      chiusa grazie al CLA; un concorrente non riceve gratis la specifica completa del comportamento.
      Rende definitiva la licenza provvisoria della dec. 217 e autorizza il push dei vettori su GitHub.
+175. GM — **Lancio spostato a lunedì 19 ottobre 2026** (GM impegnato con Kuchl). Vale il calendario della
+     dec. 184 traslato di una settimana; restano le condizioni: 1.0.1 pubblicata dopo la prova reale di
+     GM e chiave primaria di firma fuori da casa (168a). Contatto con Morrolinux: nessuna risposta per
+     ora, GM riprova da un altro canale.
 
