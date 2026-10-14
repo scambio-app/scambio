@@ -1017,4 +1017,10 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      dec. 184 traslato di una settimana; restano le condizioni: 1.0.1 pubblicata dopo la prova reale di
      GM e chiave primaria di firma fuori da casa (168a). Contatto con Morrolinux: nessuna risposta per
      ora, GM riprova da un altro canale.
+176. GM — **Linux 1.0.1 pubblicata il 2026-10-14** senza la prova audio con gli occhiali: GM la ritiene
+     superflua perché il ritardo di 2000 ms di `meta_glasses` è già misurato (M11) e il riconoscimento
+     automatico è stato verificato dal vivo su casa (`DeviceProfile` = `meta_glasses`, origine `auto`, dal
+     nome reale «Oakley Meta 002Z»). Candidata `linux-1-0-1-rc2` sigillata in `archive/1.0.1`; tag
+     `v1.0.1` firmato con la sottochiave su `60d2d42`; release GitHub con .deb, tarball, firme,
+     SHA256SUMS e keyring; sito pubblicato (Worker `8fd39113`): download, apt e Flatpak serviti a 1.0.1.
 
