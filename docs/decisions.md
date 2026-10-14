@@ -1009,3 +1009,8 @@ Materiale operativo (brief del sito, scalette, calendario, bilanci) nel repo del
      consegna, senza skip. Make/pytest danno precedenza al checkout per evitare
      l'omonimo pacchetto installato in `/usr/lib`; gli strumenti rifiutano un core
      importato da fuori checkout. Nessun cambiamento all'installazione di sistema.
+174. GM — **Licenza dei vettori di test condivisi** (`tests/vectors/`, `docs/specs/M01-vectors/`):
+     **GPL-3.0-or-later**, come il codice Linux; scartata CC0. Fermich riusa i vettori nell'app Mac
+     chiusa grazie al CLA; un concorrente non riceve gratis la specifica completa del comportamento.
+     Rende definitiva la licenza provvisoria della dec. 217 e autorizza il push dei vettori su GitHub.
+
